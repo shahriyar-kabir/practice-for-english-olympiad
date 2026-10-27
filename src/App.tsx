@@ -214,29 +214,28 @@ export default function App() {
             </div>
             <div className="board-instruction"><MousePointer2 size={13} /> {completed ? 'A whole puzzle of little victories!' : dragWord ? 'Drop your word onto the highlighted squares' : 'Choose a clue. Drag a word. Watch it fit!'} </div>
           </div>
-          <div className="word-bank"><div className="word-bank-heading"><h3><span className="bank-icon"><GripVertical size={15} /></span> Your word bank</h3><span>{puzzle.wordBank.length - state.solved.length} to discover</span></div><p>Drag a word to the grid, or tap it to fill the selected clue.</p>{!completed && <div className="bank-active-clue"><strong>{selected.number} {selected.direction}:</strong> {selected.clue}</div>}<div className="word-tiles">
+          <section className="wiz-all-clues" aria-label="Across and down crossword clues">
+            <div className="wiz-clue-heading"><h3>All puzzle clues</h3><p>Both directions are shown. Select any clue to highlight its word.</p></div>
+            <div className="wiz-clue-columns">{(['across', 'down'] as const).map(direction => <div className="wiz-clue-set" key={direction}>
+              <h4>{direction === 'across' ? '→ Across' : '↓ Down'}</h4>
+              {puzzle.entries.filter(entry => entry.direction === direction).map(entry => <button key={entry.id}
+                className={'wiz-all-clue ' + (selected.id === entry.id ? 'wiz-all-clue-active ' : '') + (state.solved.includes(entry.id) ? 'wiz-all-clue-solved' : '')}
+                onClick={() => chooseEntry(entry)} aria-pressed={entry.id === selected.id}>
+                <b>{entry.number}</b><span>{entry.clue}<small>{entry.answer.length} letters</small></span>
+                {state.solved.includes(entry.id) && <Check size={15}/>}
+              </button>)}
+            </div>)}</div>
+          </section>
+          <div className="puzzle-footer"><button className="text-button" onClick={() => setDialog('reset')}><RotateCcw size={14} /> Start over</button><button className="hint-button" onClick={giveHint} disabled={completed}><Lightbulb size={16} /> A little hint</button></div>
+        </section>
+
+        <aside className="wiz-word-sidebar" aria-label="Word bank">          <div className="word-bank"><div className="word-bank-heading"><h3><span className="bank-icon"><GripVertical size={15} /></span> Your word bank</h3><span>{puzzle.wordBank.length - state.solved.length} to discover</span></div><p>Drag a word to the grid, or tap it to fill the selected clue.</p>{!completed && <div className="bank-active-clue"><strong>{selected.number} {selected.direction}:</strong> {selected.clue}</div>}<div className="word-tiles">
             {puzzle.wordBank.map(word => {
               const used = puzzle.entries.some(entry => entry.answer === word && state.solved.includes(entry.id));
               return <button key={word} draggable={!used} disabled={used} className={`word-tile ${used ? 'word-used' : ''} ${shake === word ? 'shake' : ''} ${dragWord === word ? 'is-dragging' : ''}`} onClick={() => placeWord(word)} onDragStart={event => { event.dataTransfer.setData('text/plain', word); event.dataTransfer.effectAllowed = 'copy'; setDragWord(word); }} onDragEnd={() => { setDragWord(null); setDragOver(false); }} aria-label={used ? `${word}, found` : `Place ${word}`}><span>{used ? <Check size={13} /> : <GripVertical size={12} />}</span>{word}</button>;
             })}
           </div></div>
-          <div className="puzzle-footer"><button className="text-button" onClick={() => setDialog('reset')}><RotateCcw size={14} /> Start over</button><button className="hint-button" onClick={giveHint} disabled={completed}><Lightbulb size={16} /> A little hint</button></div>
-        </section>
-
-        <aside className="clue-column" aria-label="Puzzle clues">
-          <section className="clues-card"><div className="clues-header"><h2>Let’s find some words</h2><span className="pencil-doodle" aria-hidden="true">✎</span></div><p className="clues-intro">A clue is a little nudge in the right direction.</p><div className="clue-tabs" role="tablist" aria-label="Clue direction" onKeyDown={event => {
-              if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-              event.preventDefault();
-              const direction = event.key === 'Home' ? 'across' : event.key === 'End' ? 'down' : clueTab === 'across' ? 'down' : 'across';
-              setClueTab(direction);
-              document.getElementById(`tab-${direction}`)?.focus();
-            }}><button role="tab" tabIndex={clueTab === 'across' ? 0 : -1} aria-selected={clueTab === 'across'} className={clueTab === 'across' ? 'active' : ''} onClick={() => setClueTab('across')} id="tab-across" aria-controls="clue-list"><ArrowRight size={15} /> Across <span>{puzzle.entries.filter(entry => entry.direction === 'across').length}</span></button><button role="tab" tabIndex={clueTab === 'down' ? 0 : -1} aria-selected={clueTab === 'down'} className={clueTab === 'down' ? 'active' : ''} onClick={() => setClueTab('down')} id="tab-down" aria-controls="clue-list"><ArrowDown size={15} /> Down <span>{puzzle.entries.filter(entry => entry.direction === 'down').length}</span></button></div>
-            <div className="clue-list" id="clue-list" role="tabpanel" aria-labelledby={`tab-${clueTab}`}>{puzzle.entries.filter(entry => entry.direction === clueTab).map(entry => <button key={entry.id} className={`clue ${entry.id === selected.id ? 'clue-selected' : ''} ${state.solved.includes(entry.id) ? 'clue-solved' : ''}`} onClick={() => chooseEntry(entry)} aria-pressed={entry.id === selected.id} data-clue={entry.id}><span className="clue-number">{state.solved.includes(entry.id) ? <Check size={14} /> : entry.number}</span><span className="clue-copy"><span>{entry.clue}</span><small>{state.solved.includes(entry.id) ? 'Nice find!' : `${entry.answer.length} letters`}</small></span>{entry.id === selected.id && <ChevronRight size={15} className="clue-chevron" />}</button>)}</div>
-            <div className="clues-footnote"><MousePointer2 size={13} /> Tap any clue to light up its squares.</div>
-          </section>
-          <section className="encouragement-card"><div className="encouragement-stars" aria-hidden="true">✦ <Star size={29} fill="currentColor" /> ✧</div><span className="section-label">GROW AT YOUR OWN PACE</span><h3>Curiosity is your<br />superpower.</h3><p>No timer. No rush.<br />Just you and your next discovery.</p><div className="encouragement-line" /></section>
-          <div className="saved-note"><Check size={13} /> {storageWarning ? 'Progress stays open for this visit' : 'Your progress is saved as you play'}</div>
-        </aside>
+<div className="wiz-word-tip"><Sparkles size={18}/> Choose a clue in the center and pick the matching word here.</div><div className="saved-note"><Check size={13}/> {storageWarning ? 'Progress saved for this visit' : 'Your progress is saved as you play'}</div></aside>
       </div>
       </>}
       <footer className="site-footer"><span><Sprout size={15} /> Wizpiko • Think. Play. Shine.</span><span>Olympiad learning for curious minds <span className="footer-dot">·</span> English practice available now</span><button onClick={() => setDialog('help')}>Grown-up guide <ArrowRight size={13} /></button></footer>
