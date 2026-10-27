@@ -44,7 +44,6 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney }: Props) 
   const [now, setNow] = useState(Date.now());
   const [selectedWord, setSelectedWord] = useState('');
   const category = categories.find(c => c.id === categoryId);
-  const levelRecord = categoryId && mode ? journey.records[recordKey(categoryId, mode)] || defaults() : defaults();
   const key = categoryId && mode && level ? categoryId + ':' + mode + ':' + level : '';
   const active = journey.session?.key === key ? journey.session : undefined;
   const questions = useMemo(() => categoryId && mode === 'mcq' && level ? makeQuestions(categoryId, level) : [], [categoryId, mode, level]);
