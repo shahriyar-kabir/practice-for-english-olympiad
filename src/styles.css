@@ -674,3 +674,21 @@ body { background:#f8fbff; }
 @media(max-width:1180px){.workspace{grid-template-columns:175px minmax(0,1fr) 205px;gap:12px;}.wiz-clue-columns{gap:9px;}.wiz-word-sidebar .word-bank{padding:13px;}.ej-cross-layout{grid-template-columns:minmax(0,1fr) 230px;}}
 @media(max-width:900px){.workspace{grid-template-columns:190px minmax(0,1fr);}.wiz-word-sidebar{grid-column:2;position:static;}.wiz-word-sidebar .word-tiles{flex-direction:row;}.ej-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.wiz-footer-top{grid-template-columns:1fr 1fr;gap:15px;}.wiz-footer-top p{order:3;grid-column:1/-1;max-width:none;}.ej-cross-layout{grid-template-columns:1fr;}.ej-word-bank{position:static;}.ej-mode-grid{grid-template-columns:1fr;}}
 @media(max-width:680px){.workspace{display:flex;flex-direction:column;}.workspace .adventures,.workspace .puzzle-card,.workspace .wiz-word-sidebar{width:100%;}.wiz-word-sidebar{position:static;}.wiz-clue-columns,.ej-all-clues{grid-template-columns:1fr;}.wiz-classic-heading{padding:16px;}.wiz-classic-heading h1{font-size:24px;}.wiz-classic-heading img{width:70px;height:70px;}.wiz-footer-top{grid-template-columns:1fr;}.wiz-footer-top p{grid-column:auto;order:0;}.wiz-footer-top nav{justify-content:flex-start;}.wiz-footer-bottom{flex-direction:column;align-items:flex-start;}.ej-category-grid{grid-template-columns:1fr;}.ej-category{min-height:275px;}.ej-answer-grid{grid-template-columns:1fr;}.ej-mcq-panel{padding:20px 15px;}.ej-play-top{padding:17px;}.ej-play-top h1{font-size:21px;}.ej-timer{padding:10px;}.ej-timer strong{font-size:19px;}.ej-generated-grid{grid-template-columns:repeat(var(--cols),27px);grid-template-rows:repeat(var(--rows),27px);}.ej-grid-cell{font-size:12px;}.ej-crossword-scroll{justify-content:flex-start;}.ej-mode-card{padding:20px;}.wiz-account-button{padding:8px 11px;}.main-nav .nav-link{font-size:11px;gap:4px;}.wiz-site-footer{margin-top:28px;}}
+
+
+/* Progress overview includes classic accomplishments and new game XP */
+.progress-stats{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.progress-stats>div{padding:12px 5px;}
+.progress-stats>div:nth-child(odd){border-right:1px solid #dce6f2;}
+.progress-stats>div:nth-child(-n+2){border-bottom:1px solid #dce6f2;}
+@media(max-width:720px){
+  .main-nav .nav-link:nth-child(3){display:none;}
+  .header-inner{gap:8px;}
+  .header-actions{gap:7px;}
+  .wiz-brand-name small{font-size:7px;}
+  .ej-result h1{font-size:29px;}
+}
+@media(max-width:390px){
+  .main-nav .nav-link:first-child{display:none;}
+  .wiz-brand-name{font-size:18px;}
+}
