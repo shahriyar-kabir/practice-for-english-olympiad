@@ -8,7 +8,6 @@ const subjects = [
   { name: 'Chemistry', label: 'Elements & experiments', icon: FlaskConical, color: 'pink', live: false },
   { name: 'Informatics', label: 'Coding & clever algorithms', icon: Code2, color: 'cyan', live: false },
   { name: 'Artificial Intelligence', label: 'Explore the future', icon: Brain, color: 'lavender', live: false },
-  { name: 'More Olympiads', label: 'New adventures ahead', icon: Trophy, color: 'yellow', live: false },
 ] as const;
 
 export function WizpikoPortal({ onPractice, solvedTotal, completedTotal }: {
@@ -43,13 +42,13 @@ export function WizpikoPortal({ onPractice, solvedTotal, completedTotal }: {
 
     <section className="wiz-showcase" aria-label="Wizpiko at a glance">
       <div><span className="wiz-showcase-icon">🧩</span><strong>10</strong><span>Playable English crosswords</span></div>
-      <div><span className="wiz-showcase-icon">🏅</span><strong>{completedTotal}</strong><span>Adventures completed here</span></div>
-      <div><span className="wiz-showcase-icon">✨</span><strong>{solvedTotal}</strong><span>Words found in this browser</span></div>
+      <div><span className="wiz-showcase-icon">🏅</span><strong>{completedTotal}</strong><span>Crosswords completed</span></div>
+      <div><span className="wiz-showcase-icon">✨</span><strong>{solvedTotal}</strong><span>Words discovered</span></div>
     </section>
 
     <section className="wiz-subjects" id="wiz-subjects" aria-labelledby="wiz-subject-heading">
       <div className="wiz-section-header">
-        <div><span className="wiz-kicker">A UNIVERSE OF POSSIBILITIES</span><h2 id="wiz-subject-heading">Find your next <em>spark.</em></h2><p>Start with English today. More subject adventures are being prepared.</p></div>
+        <div><span className="wiz-kicker">A UNIVERSE OF POSSIBILITIES</span><h2 id="wiz-subject-heading">Find your next <em>spark.</em></h2><p>Explore subjects made for curious minds. English is ready to play, with more adventures in development.</p></div>
         <span className="wiz-heading-sticker">Think • Play • Shine</span>
       </div>
       <div className="wiz-subject-grid">
@@ -63,9 +62,5 @@ export function WizpikoPortal({ onPractice, solvedTotal, completedTotal }: {
       </div>
     </section>
 
-    <section id="wiz-english" className="wiz-practice-intro">
-      <div><span className="wiz-kicker">READY TO PLAY?</span><h2>English Olympiad <span>practice zone</span></h2><p>Choose an adventure, read a clue and fit the right word into the crossword. All 10 beginner puzzles are playable below.</p></div>
-      <div className="wiz-practice-label"><span>🎯</span><strong>Beginner level</strong><small>English • Crosswords</small></div>
-    </section>
   </>;
 }
