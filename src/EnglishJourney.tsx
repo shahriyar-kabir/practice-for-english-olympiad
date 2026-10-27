@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { ArrowLeft, ArrowRight, Check, ChevronRight, Clock3, Crown, Lightbulb, LockKeyhole, RotateCcw, Sparkles, Star, Trophy } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, ChevronRight, Clock3, Lightbulb, LockKeyhole, Star, Trophy } from 'lucide-react';
 import { categories, makeCrossword, makeQuestions } from './englishContent';
 import type { CategoryId, GeneratedCrossword } from './englishContent';
 
