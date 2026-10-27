@@ -4,11 +4,13 @@ A cheerful crossword playground for children preparing for the English Olympiad.
 
 ## Open the website
 
-**[Play WordSprout](https://shahriyar-kabir.github.io/practice-for-english-olympiad/)**
+**Website after Pages activation: [Play WordSprout](https://shahriyar-kabir.github.io/practice-for-english-olympiad/)**
 
-The app is hosted on GitHub Pages and stays available independently of the Codex coding workspace. Each child's progress is saved locally in their browser.
+The app is configured for GitHub Pages, which keeps the website available independently of the Codex coding workspace. Each child's progress is saved locally in their browser.
 
-Changes pushed to `main` are tested, built, and published automatically by `.github/workflows/deploy-pages.yml`. In the repository's **Settings → Pages**, the deployment source is **GitHub Actions**. The repository's **Actions** tab shows deployment status and allows rerunning the workflow. No hosting account or custom domain is required.
+Activate hosting once in [Settings → Pages](https://github.com/shahriyar-kabir/practice-for-english-olympiad/settings/pages): under **Build and deployment**, choose **GitHub Actions** as the **Source**. Then open [Actions](https://github.com/shahriyar-kabir/practice-for-english-olympiad/actions/workflows/deploy-pages.yml), select **Deploy WordSprout to GitHub Pages**, and choose **Run workflow** on `main`. Wait for the build and deploy jobs to turn green before opening the website. If the workflow was already running before activation, rerun it.
+
+After activation, changes pushed to `main` are tested, built, and published automatically by `.github/workflows/deploy-pages.yml`. No hosting account or custom domain is required. The connected coding integration cannot activate Pages itself because it lacks the GitHub Pages administration permission; activation must be performed in GitHub's settings by the repository owner.
 
 ## Run locally
 
