@@ -155,7 +155,7 @@ export default function App() {
     <header className="site-header">
       <div className="header-inner">
         <button className="brand" onClick={goHome} aria-label="Wizpiko home">
-          <img src="/wizpiko-icon.webp" alt="" className="wiz-brand-icon" /><span className="wiz-brand-name">Wizpiko<small>THINK. PLAY. SHINE.</small></span>
+          <img src="/wizpiko-icon.webp" alt="" className="wiz-brand-icon" onError={event => { event.currentTarget.src = '/favicon.svg'; }} /><span className="wiz-brand-name">Wizpiko<small>THINK. PLAY. SHINE.</small></span>
         </button>
         <nav aria-label="Main navigation" className="main-nav">
           <button className="nav-link active" onClick={goPractice}><BookOpen size={17} /> Play & learn</button>
