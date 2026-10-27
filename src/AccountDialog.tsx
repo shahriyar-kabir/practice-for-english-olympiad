@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { ArrowRight, Cloud, Mail, ShieldCheck, X } from 'lucide-react';
 
 type Props = {
@@ -15,7 +16,7 @@ export function AccountDialog({ onClose, configured, email, status, sendLink, go
   const [consent, setConsent] = useState(false);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState(status);
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!consent) { setMessage('Please confirm you have permission to create or manage this account.'); return; }
     setPending(true);
