@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { JourneyProgress } from './EnglishJourney';
-import { JOURNEY_STORAGE, saveJourney } from './EnglishJourney';
+import { saveJourney } from './EnglishJourney';
 import type { Progress } from './game';
-import { STORAGE_KEY, saveProgress } from './game';
+import { saveProgress } from './game';
 
 type Session = { access_token: string; refresh_token: string; expires_at: number };
 type User = { id: string; email?: string };
@@ -156,6 +156,8 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
       void fetch(URL + '/auth/v1/logout', { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + current.access_token } }).catch(() => {});
     }
     saveSession(null); restored.current = false; setSession(null);
+    try { localStorage.removeItem('wordsprout-progress-v1'); localStorage.removeItem('wizpiko-english-journey-v1'); } catch { /* private browsing */ }
+    restoreRef.current({ legacy: {}, journey: { records: {} } });
     setAuth({ user: null, loading: false, configured, status: 'Signed out. You can continue as a guest.' });
   }
   return { auth, sendLink, google, signOut };
