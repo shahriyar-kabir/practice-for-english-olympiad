@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, DragEvent, ReactNode } from 'react';
-import { ArrowDown, ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCheck, ChevronRight, CircleHelp, GripVertical, Leaf, Lightbulb, MousePointer2, RotateCcw, Sparkles, Sprout, Star, Trophy, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCheck, ChevronRight, CircleHelp, GripVertical, Leaf, Lightbulb, MousePointer2, RotateCcw, Sparkles, Star, Trophy, Volume2, VolumeX, X } from 'lucide-react';
 import { puzzles } from './data/puzzles';
 import type { Entry } from './data/puzzles';
 import { buildCells, cellAt, entryContains, initialProgress, readProgress, saveProgress } from './game';
 import type { Progress } from './game';
-import { Mascot } from './components/Mascot';
+import { EnglishJourney, readJourney, saveJourney } from './EnglishJourney';
+import type { JourneyProgress } from './EnglishJourney';
+import { useWizpikoAccount } from './cloudAccount';
+import { AccountDialog } from './AccountDialog';
 import { WizpikoPortal } from './WizpikoPortal';
 
 type Notice = { text: string; kind: 'success' | 'try' | 'hint' };
-type Dialog = 'help' | 'progress' | 'reset' | 'complete' | null;
+type Dialog = 'help' | 'progress' | 'reset' | 'complete' | 'about' | 'privacy' | null;
 
 function Modal({ children, title, onClose }: { children: ReactNode; title: string; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -47,9 +50,14 @@ const totalWords = puzzles.reduce((sum, puzzle) => sum + puzzle.entries.length, 
 
 export default function App() {
   const [progress, setProgress] = useState<Progress>(readProgress);
-  const [view, setView] = useState<'home' | 'practice'>('home');
-  function goPractice() { setView('practice'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  function goHome() { setView('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  const [journey, setJourney] = useState<JourneyProgress>(readJourney);
+  const [view, setView] = useState<'home' | 'categories' | 'classic'>('home');
+  const [accountOpen, setAccountOpen] = useState(false);
+  function goPractice() { setView('categories'); setDialog(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  function goHome() { setView('home'); setDialog(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  function goClassic() { setView('classic'); setDialog(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  const account = useWizpikoAccount({ legacy: progress, journey }, restored => { setProgress(restored.legacy); setJourney(restored.journey); });
+  useEffect(() => { saveJourney(journey); }, [journey]);
   const [puzzleIndex, setPuzzleIndex] = useState(0);
   const puzzle = puzzles[puzzleIndex];
   const state = progress[puzzle.id] ?? initialProgress();
@@ -62,7 +70,6 @@ export default function App() {
   const [dragOver, setDragOver] = useState(false);
   const [shake, setShake] = useState<string | null>(null);
   const [storageWarning, setStorageWarning] = useState(false);
-  const [clueTab, setClueTab] = useState<'across' | 'down'>(selected.direction);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cells = buildCells(puzzle, state);
   const completed = state.solved.length === puzzle.entries.length;
@@ -83,12 +90,11 @@ export default function App() {
     const next = puzzles[index];
     const nextEntry = next.entries.find(entry => !progress[next.id]?.solved.includes(entry.id)) ?? next.entries[0];
     setSelectedId(nextEntry.id);
-    setClueTab(nextEntry.direction);
     setNotice(null); setDragWord(null); setShake(null); setDialog(null);
   }
 
   function chooseEntry(entry: Entry) {
-    setSelectedId(entry.id); setClueTab(entry.direction);
+    setSelectedId(entry.id);
   }
 
   function placeWord(word: string, entry = selected) {
@@ -144,7 +150,7 @@ export default function App() {
   }
 
   const badges = [
-    { name: 'First find', emoji: '🌱', unlocked: solvedTotal > 0, detail: 'Find your very first word' },
+    { name: 'First find', emoji: '🤖', unlocked: solvedTotal > 0, detail: 'Find your very first word' },
     { name: 'Puzzle pal', emoji: '🧩', unlocked: completedTotal > 0, detail: 'Finish one whole puzzle' },
     { name: 'Word explorer', emoji: '🧭', unlocked: solvedTotal >= 20, detail: 'Find 20 different words' },
     { name: 'Super explorer', emoji: '🌟', unlocked: completedTotal >= 3, detail: 'Finish 3 adventures' },
@@ -158,23 +164,20 @@ export default function App() {
           <img src="/wizpiko-icon.webp" alt="" className="wiz-brand-icon" onError={event => { event.currentTarget.src = '/favicon.svg'; }} /><span className="wiz-brand-name">Wizpiko<small>THINK. PLAY. SHINE.</small></span>
         </button>
         <nav aria-label="Main navigation" className="main-nav">
-          <button className="nav-link active" onClick={goPractice}><BookOpen size={17} /> Play & learn</button>
+          <button className={'nav-link ' + (view === 'home' ? 'active' : '')} onClick={goHome}><Star size={17}/> Home</button>
+          <button className={'nav-link ' + (view !== 'home' ? 'active' : '')} onClick={goPractice}><BookOpen size={17} /> English practice</button>
           <button className="nav-link" onClick={() => setDialog('progress')}><Award size={18} /> My progress</button>
         </nav>
         <div className="header-actions">
           <button className="icon-button sound-button" aria-label={sound ? 'Turn sound off' : 'Turn sound on'} aria-pressed={sound} onClick={() => { setSound(!sound); if (!sound) playChime(); }}>{sound ? <Volume2 size={20} /> : <VolumeX size={20} />}</button>
-          <span className="header-divider" />
-          <button className="explorer-profile" onClick={() => setDialog('progress')}><span className="profile-avatar">🌻</span><span>Hey, explorer!<small>Let’s grow together</small></span></button>
+          <button className="wiz-account-button" onClick={() => setAccountOpen(true)}>{account.auth.user ? 'My account' : 'Sign in'}</button>
         </div>
       </div>
     </header>
 
     <main className="page-wrap">
-      {view === 'home' ? <WizpikoPortal onPractice={goPractice} solvedTotal={solvedTotal} completedTotal={completedTotal} /> : <><div className="wiz-back-line"><button onClick={goHome}><ArrowLeft size={17}/> Back to all subjects</button><span>English Olympiad • Beginner Crosswords</span></div><section className="hero" aria-labelledby="page-heading">
-        <div className="hero-copy"><div className="eyebrow"><span className="tiny-sparkle">✦</span> A LITTLE CHALLENGE. A LOT OF FUN.</div><h1 id="page-heading">Let your word skills <span>grow.</span><svg className="heading-squiggle" viewBox="0 0 140 13" aria-hidden="true"><path d="M3 9Q65-2 137 6" /></svg></h1><p>Pick a puzzle, follow the clues, and find your next little victory.</p></div>
-        <div className="hero-art"><div className="mascot-message">You’ve got this!<svg viewBox="0 0 34 27" aria-hidden="true"><path d="M3 3Q29 2 22 22m-8-5 8 6 7-7" /></svg></div><Mascot /></div>
-      </section>
-
+      {view === 'home' ? <WizpikoPortal onPractice={goPractice} solvedTotal={solvedTotal} completedTotal={completedTotal} /> : view === 'categories' ? <EnglishJourney onHome={goHome} onLegacy={goClassic} journey={journey} onJourney={setJourney} /> : <><div className="wiz-back-line"><button onClick={goPractice}><ArrowLeft size={17}/> Back to English categories</button><span>English Olympiad • Original Beginner Crosswords</span></div><section className="wiz-classic-heading" aria-labelledby="page-heading"><div><span className="wiz-kicker">ENGLISH OLYMPIAD • ORIGINAL BEGINNER PUZZLES</span><h1 id="page-heading">Word adventures with <span>Wizpiko!</span></h1><p>Choose a clue, tap a word, and earn your stars. All original puzzles remain available.</p></div><img src="/wizpiko-icon.webp" alt="" /></section>
+      
       <div className="workspace">
         <aside className="adventures" id="adventures" aria-label="Choose a crossword adventure">
           <div className="section-label">YOUR ADVENTURES <span>10</span></div>
@@ -189,7 +192,7 @@ export default function App() {
         </aside>
 
         <section className="puzzle-card" aria-label={`${puzzle.title} crossword`} key={puzzle.id}>
-          <div className="puzzle-header"><div><div className="puzzle-kicker">CROSSWORD {String(puzzleIndex + 1).padStart(2, '0')} <span> / 10</span></div><h2><span aria-hidden="true">{puzzle.emoji}</span> {puzzle.title}</h2></div><span className="level-badge"><Sprout size={13} /> Beginner</span></div>
+          <div className="puzzle-header"><div><div className="puzzle-kicker">CROSSWORD {String(puzzleIndex + 1).padStart(2, '0')} <span> / 10</span></div><h2><span aria-hidden="true">{puzzle.emoji}</span> {puzzle.title}</h2></div><span className="level-badge"><Star size={13} /> Beginner</span></div>
           <div className="puzzle-progress"><div className="progress-track" role="progressbar" aria-label="Words found" aria-valuenow={state.solved.length} aria-valuemin={0} aria-valuemax={puzzle.entries.length}><span style={{ width: `${state.solved.length / puzzle.entries.length * 100}%` }} /></div><span><strong>{state.solved.length}</strong> / {puzzle.entries.length} words</span><Star size={15} className={completed ? 'star-earned' : ''} /></div>
           <div className={`selected-clue ${completed ? 'all-found' : ''}`}>
             <span className="selected-clue-number">{completed ? <CheckCheck size={20} /> : selected.number}</span><div><span className="selected-clue-direction">{completed ? 'ADVENTURE COMPLETE' : `${selected.direction.toUpperCase()} ${selected.direction === 'across' ? '→' : '↓'}`}</span><p>{completed ? 'Every word found. Look at you grow!' : selected.clue}</p></div><span className="letter-count">{completed ? '★' : `${selected.answer.length} letters`}</span>
