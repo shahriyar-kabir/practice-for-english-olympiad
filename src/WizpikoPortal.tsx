@@ -35,7 +35,7 @@ export function WizpikoPortal({ onPractice, solvedTotal, completedTotal }: {
       <div className="wiz-hero-visual">
         <div className="wiz-visual-orb orb-one" />
         <div className="wiz-visual-orb orb-two" />
-        <img src="/wizpiko-logo.webp" alt="Wizpiko's friendly learning robot and colorful logo" className="wiz-hero-logo" />
+        <img src="/wizpiko-logo.webp" alt="Wizpiko's friendly learning robot and colorful logo" className="wiz-hero-logo" onError={event => { event.currentTarget.src = '/favicon.svg'; }} />
         <div className="wiz-float-card wiz-float-top">✦ A new idea!</div>
         <div className="wiz-float-card wiz-float-bottom">⭐ You can do it!</div>
       </div>
