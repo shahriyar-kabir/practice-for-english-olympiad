@@ -5,7 +5,8 @@ import { puzzles } from './data/puzzles';
 import type { Entry } from './data/puzzles';
 import { buildCells, cellAt, entryContains, initialProgress, readProgress, saveProgress } from './game';
 import type { Progress } from './game';
-import { Mascot, SproutLogo } from './components/Mascot';
+import { Mascot } from './components/Mascot';
+import { WizpikoPortal } from './WizpikoPortal';
 
 type Notice = { text: string; kind: 'success' | 'try' | 'hint' };
 type Dialog = 'help' | 'progress' | 'reset' | 'complete' | null;
@@ -46,6 +47,9 @@ const totalWords = puzzles.reduce((sum, puzzle) => sum + puzzle.entries.length, 
 
 export default function App() {
   const [progress, setProgress] = useState<Progress>(readProgress);
+  const [view, setView] = useState<'home' | 'practice'>('home');
+  function goPractice() { setView('practice'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  function goHome() { setView('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   const [puzzleIndex, setPuzzleIndex] = useState(0);
   const puzzle = puzzles[puzzleIndex];
   const state = progress[puzzle.id] ?? initialProgress();
@@ -143,18 +147,18 @@ export default function App() {
     { name: 'First find', emoji: '🌱', unlocked: solvedTotal > 0, detail: 'Find your very first word' },
     { name: 'Puzzle pal', emoji: '🧩', unlocked: completedTotal > 0, detail: 'Finish one whole puzzle' },
     { name: 'Word explorer', emoji: '🧭', unlocked: solvedTotal >= 20, detail: 'Find 20 different words' },
-    { name: 'Super sprout', emoji: '🌟', unlocked: completedTotal >= 3, detail: 'Finish 3 adventures' },
+    { name: 'Super explorer', emoji: '🌟', unlocked: completedTotal >= 3, detail: 'Finish 3 adventures' },
     { name: 'Word champion', emoji: '🏆', unlocked: completedTotal === puzzles.length, detail: 'Finish all 10 adventures' },
   ];
 
   return <>
     <header className="site-header">
       <div className="header-inner">
-        <button className="brand" onClick={() => choosePuzzle(0)} aria-label="WordSprout home">
-          <SproutLogo /><span>word<span className="brand-sprout">sprout</span><small>LITTLE WORDS. BIG ADVENTURES.</small></span>
+        <button className="brand" onClick={goHome} aria-label="Wizpiko home">
+          <img src="/wizpiko-icon.webp" alt="" className="wiz-brand-icon" /><span className="wiz-brand-name">Wizpiko<small>THINK. PLAY. SHINE.</small></span>
         </button>
         <nav aria-label="Main navigation" className="main-nav">
-          <button className="nav-link active" onClick={() => { setDialog(null); document.getElementById('adventures')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }}><BookOpen size={17} /> Play & learn</button>
+          <button className="nav-link active" onClick={goPractice}><BookOpen size={17} /> Play & learn</button>
           <button className="nav-link" onClick={() => setDialog('progress')}><Award size={18} /> My progress</button>
         </nav>
         <div className="header-actions">
@@ -166,7 +170,7 @@ export default function App() {
     </header>
 
     <main className="page-wrap">
-      <section className="hero" aria-labelledby="page-heading">
+      {view === 'home' ? <WizpikoPortal onPractice={goPractice} solvedTotal={solvedTotal} completedTotal={completedTotal} /> : <><div className="wiz-back-line"><button onClick={goHome}><ArrowLeft size={17}/> Back to all subjects</button><span>English Olympiad • Beginner Crosswords</span></div><section className="hero" aria-labelledby="page-heading">
         <div className="hero-copy"><div className="eyebrow"><span className="tiny-sparkle">✦</span> A LITTLE CHALLENGE. A LOT OF FUN.</div><h1 id="page-heading">Let your word skills <span>grow.</span><svg className="heading-squiggle" viewBox="0 0 140 13" aria-hidden="true"><path d="M3 9Q65-2 137 6" /></svg></h1><p>Pick a puzzle, follow the clues, and find your next little victory.</p></div>
         <div className="hero-art"><div className="mascot-message">You’ve got this!<svg viewBox="0 0 34 27" aria-hidden="true"><path d="M3 3Q29 2 22 22m-8-5 8 6 7-7" /></svg></div><Mascot /></div>
       </section>
@@ -231,14 +235,15 @@ export default function App() {
           <div className="saved-note"><Check size={13} /> {storageWarning ? 'Progress stays open for this visit' : 'Your progress is saved as you play'}</div>
         </aside>
       </div>
-      <footer className="site-footer"><span><Sprout size={15} /> Made for curious little minds.</span><span>English Olympiad practice <span className="footer-dot">·</span> 10 puzzles, endless possibilities</span><button onClick={() => setDialog('help')}>Grown-up guide <ArrowRight size={13} /></button></footer>
+      </>}
+      <footer className="site-footer"><span><Sprout size={15} /> Wizpiko • Think. Play. Shine.</span><span>Olympiad learning for curious minds <span className="footer-dot">·</span> English practice available now</span><button onClick={() => setDialog('help')}>Grown-up guide <ArrowRight size={13} /></button></footer>
     </main>
 
     <div className={`notice ${notice ? 'notice-visible' : ''} ${notice?.kind ?? ''}`} role="status" aria-live="polite" aria-atomic="true">{notice && <>{notice.kind === 'success' ? <Sparkles size={20} /> : notice.kind === 'hint' ? <Lightbulb size={20} /> : <Leaf size={20} />}<span>{notice.text}</span><button aria-label="Dismiss message" onClick={() => setNotice(null)}><X size={16} /></button></>}</div>
 
-    {dialog === 'help' && <Modal title="How to play" onClose={() => setDialog(null)}><span className="modal-emoji">🌱</span><div className="eyebrow">READY, SET, GROW</div><h2>A little play goes a long way.</h2><p className="modal-subtitle">Your next word adventure is just three little steps away.</p><ol className="help-steps"><li><span>1</span><div><strong>Pick a clue</strong><p>Tap an Across or Down clue. Its squares will light up in the grid.</p></div></li><li><span>2</span><div><strong>Find your word</strong><p>Drag a word from the word bank onto the highlighted squares. On a phone, just tap the word!</p></div></li><li><span>3</span><div><strong>Watch it grow</strong><p>The right word turns green. If it doesn’t fit, try again. Need a nudge? Ask for a little hint.</p></div></li></ol><div className="grownup-note"><BookOpen size={20} /><p><strong>A note for grown-ups</strong>All 10 puzzles come from the supplied Beginner English Olympiad activity book. Progress stays in this browser. There are no accounts, ads, or timers.</p></div><button className="primary-button" onClick={() => setDialog(null)}>Let’s play <ArrowRight size={17} /></button></Modal>}
+    {dialog === 'help' && <Modal title="How to play" onClose={() => setDialog(null)}><span className="modal-emoji">🌱</span><div className="eyebrow">READY, SET, SHINE</div><h2>A little play goes a long way.</h2><p className="modal-subtitle">Your next word adventure is just three little steps away.</p><ol className="help-steps"><li><span>1</span><div><strong>Pick a clue</strong><p>Tap an Across or Down clue. Its squares will light up in the grid.</p></div></li><li><span>2</span><div><strong>Find your word</strong><p>Drag a word from the word bank onto the highlighted squares. On a phone, just tap the word!</p></div></li><li><span>3</span><div><strong>Watch it grow</strong><p>The right word turns green. If it doesn’t fit, try again. Need a nudge? Ask for a little hint.</p></div></li></ol><div className="grownup-note"><BookOpen size={20} /><p><strong>A note for grown-ups</strong>All 10 puzzles come from the supplied Beginner English Olympiad activity book. Progress stays in this browser. There are no accounts, ads, or timers.</p></div><button className="primary-button" onClick={() => setDialog(null)}>Let’s play <ArrowRight size={17} /></button></Modal>}
 
-    {dialog === 'progress' && <Modal title="My progress" onClose={() => setDialog(null)}><span className="modal-emoji">🌻</span><div className="eyebrow">LOOK AT YOU GROW</div><h2>Every little word counts.</h2><p className="modal-subtitle">An adventure is made of little victories. Here are yours.</p><div className="progress-stats"><div><strong>{solvedTotal}<small> / {totalWords}</small></strong><span>words discovered</span></div><div><strong>{completedTotal}<small> / 10</small></strong><span>adventures complete</span></div></div><h3 className="badges-title"><Award size={18} /> Your little milestones</h3><div className="badge-list">{badges.map(badge => <div className={`badge ${badge.unlocked ? 'badge-unlocked' : ''}`} key={badge.name}><span>{badge.emoji}</span><div><strong>{badge.name}</strong><small>{badge.detail}</small></div>{badge.unlocked && <Check size={17} />}</div>)}</div><p className="privacy-note">Saved on this device, in this browser. No account needed.</p><button className="primary-button" onClick={() => setDialog(null)}>Keep exploring <ArrowRight size={17} /></button></Modal>}
+    {dialog === 'progress' && <Modal title="My progress" onClose={() => setDialog(null)}><span className="modal-emoji">🌻</span><div className="eyebrow">LOOK AT YOU SHINE</div><h2>Every little word counts.</h2><p className="modal-subtitle">An adventure is made of little victories. Here are yours.</p><div className="progress-stats"><div><strong>{solvedTotal}<small> / {totalWords}</small></strong><span>words discovered</span></div><div><strong>{completedTotal}<small> / 10</small></strong><span>adventures complete</span></div></div><h3 className="badges-title"><Award size={18} /> Your little milestones</h3><div className="badge-list">{badges.map(badge => <div className={`badge ${badge.unlocked ? 'badge-unlocked' : ''}`} key={badge.name}><span>{badge.emoji}</span><div><strong>{badge.name}</strong><small>{badge.detail}</small></div>{badge.unlocked && <Check size={17} />}</div>)}</div><p className="privacy-note">Saved on this device, in this browser. No account needed.</p><button className="primary-button" onClick={() => setDialog(null)}>Keep exploring <ArrowRight size={17} /></button></Modal>}
 
     {dialog === 'reset' && <Modal title="Start this puzzle over?" onClose={() => setDialog(null)}><span className="modal-emoji">🍃</span><h2>A fresh little start?</h2><p className="modal-subtitle">This clears the words and hints in <strong>{puzzle.title}</strong>. Your other adventures will stay just as they are.</p><div className="modal-actions"><button className="secondary-button" onClick={() => setDialog(null)}><ArrowLeft size={16} /> Keep playing</button><button className="primary-button" onClick={() => { setProgress(current => ({ ...current, [puzzle.id]: initialProgress() })); chooseEntry(puzzle.entries[0]); setDialog(null); setNotice(null); }}>Start fresh <RotateCcw size={15} /></button></div></Modal>}
 
