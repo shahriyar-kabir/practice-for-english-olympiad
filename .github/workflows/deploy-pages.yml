@@ -30,6 +30,20 @@ jobs:
         run: npm ci
       - name: Test puzzles and game
         run: npm test
+      - name: Verify public Supabase build configuration
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [[ -z "$VITE_SUPABASE_URL" || -z "$VITE_SUPABASE_ANON_KEY" ]]; then
+            echo "::error::Supabase public project URL or publishable key is not configured in GitHub Actions repository variables."
+            exit 1
+          fi
+          if [[ "$VITE_SUPABASE_URL" != https://* ]]; then
+            echo "::error::Supabase project URL must start with https://"
+            exit 1
+          fi
+          echo "Supabase public build variables are present (values not displayed)."
       - name: Build website
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
