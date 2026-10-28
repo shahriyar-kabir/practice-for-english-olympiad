@@ -692,3 +692,9 @@ body { background:#f8fbff; }
   .main-nav .nav-link:first-child{display:none;}
   .wiz-brand-name{font-size:18px;}
 }
+
+/* One-time email code recovery when magic links are blocked by a mail client */
+.wa-code-panel { margin: 15px 0; background: #f3f7ff; border: 1px solid #dce7ff; border-radius: 13px; padding: 16px; text-align: left; }
+.wa-code-panel > strong { display: block; color: #284c8e; font-size: 13px; margin-bottom: 5px; }
+.wa-code-panel > p { color: #617ca3; font-size: 12px; line-height: 1.55; margin: 0 0 12px; }
+.wa-code-panel input[type=text] { padding: 12px; border-radius: 11px; border: 1px solid #cddcf3; color: #234274; font-size: 18px; letter-spacing: 3px; }
