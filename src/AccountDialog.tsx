@@ -1,70 +1,85 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { ArrowRight, Cloud, Mail, ShieldCheck, X } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, LockKeyhole, ShieldCheck, X } from 'lucide-react';
 
 type Props = {
   onClose: () => void;
   configured: boolean;
   email?: string;
   status: string;
-  sendLink: (email: string) => Promise<void>;
-  verifyEmailCode: (email: string, code: string) => Promise<void>;
-  google: () => void;
+  signUp: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
-export function AccountDialog({ onClose, configured, email, status, sendLink, verifyEmailCode, google, signOut }: Props) {
+
+export function AccountDialog({ onClose, configured, email, status, signUp, signIn, signOut }: Props) {
+  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [address, setAddress] = useState('');
-  const [consent, setConsent] = useState(false);
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [permission, setPermission] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState(status);
-  const [emailSent, setEmailSent] = useState(false);
-  const [code, setCode] = useState('');
+
   useEffect(() => { setMessage(status); }, [status]);
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!consent) { setMessage('Please confirm you have permission to create or manage this account.'); return; }
+    if (pending) return;
+    if (mode === 'register') {
+      if (!permission) { setMessage('An adult or guardian must create or supervise a test account.'); return; }
+      if (password.length < 8) { setMessage('Please use at least 8 password characters.'); return; }
+      if (confirm !== password) { setMessage('The two passwords do not match.'); return; }
+    }
     setPending(true);
-    try { await sendLink(address.trim()); setEmailSent(true); setMessage('Email sent. Use its one-time link, or enter the code if your email contains one.'); }
-    catch (error) { setMessage(error instanceof Error ? error.message : 'Sign-in could not be started.'); }
-    finally { setPending(false); }
+    setMessage(mode === 'register' ? 'Creating your account…' : 'Signing in…');
+    try {
+      if (mode === 'register') await signUp(address, password);
+      else await signIn(address, password);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Account request failed. Please try again.');
+    } finally {
+      setPending(false);
+    }
   }
-  async function submitCode(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    try { await verifyEmailCode(address.trim(), code.trim()); }
-    catch (error) { setMessage(error instanceof Error ? error.message : 'The sign-in code could not be verified.'); setPending(false); }
-  }
+
   return <div className="wa-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
-    <section role="dialog" aria-modal="true" aria-labelledby="wa-heading" className="wa-panel">
-      <button className="wa-close" aria-label="Close sign-in" onClick={onClose}><X size={22}/></button>
-      <img src="/wizpiko-icon.webp" alt="" className="wa-robot" />
+    <section className="wa-panel" role="dialog" aria-modal="true" aria-labelledby="wa-heading">
+      <button className="wa-close" aria-label="Close account window" onClick={onClose}><X size={22}/></button>
+      <img src="/wizpiko-icon.webp" className="wa-robot" alt="Wizpiko robot" />
       <span className="wiz-kicker">LEARN TOGETHER, GROW ANYWHERE</span>
-      <h2 id="wa-heading">{email ? 'My Wizpiko account' : 'Your adventure, saved!'}</h2>
-      <p className="wa-description">Pick up your puzzles, levels and rewards from another device with a secure Wizpiko account.</p>
+      <h2 id="wa-heading">{email ? 'My Wizpiko account' : mode === 'register' ? 'Create your Wizpiko account' : 'Welcome back!'}</h2>
+      <p className="wa-description">{email ? 'Your learning adventures belong to this account.' : 'Save your levels, crosswords and rewards so you can continue learning on another device.'}</p>
+
       {email ? <>
-        <div className="wa-signed"><ShieldCheck size={21}/><div><strong>{email}</strong><small>Signed in. Check the cloud save status below.</small></div></div>
-        <button className="wiz-btn-secondary wa-full" onClick={() => { void signOut().then(onClose); }}>Sign out <ArrowRight size={18}/></button>
+        <div className="wa-signed"><ShieldCheck size={21}/><div><strong>{email}</strong><small>Signed in. See the synchronization status below.</small></div></div>
+        <button className="wiz-btn-secondary wa-full" onClick={() => { void signOut().then(onClose); }}>Sign out <ArrowRight size={17}/></button>
       </> : configured ? <>
-        <form onSubmit={event => { void submit(event); }} className="wa-form">
+        <div className="wa-mode-switch" role="group" aria-label="Account action">
+          <button type="button" className={mode === 'login' ? 'wa-mode-active' : ''} onClick={() => { setMode('login'); setMessage(''); }}>Sign in</button>
+          <button type="button" className={mode === 'register' ? 'wa-mode-active' : ''} onClick={() => { setMode('register'); setMessage(''); }}>Sign up</button>
+        </div>
+        <form className="wa-form" onSubmit={event => { void submit(event); }}>
           <label htmlFor="wiz-email">Email address</label>
-          <input id="wiz-email" type="email" required autoComplete="email" placeholder="parent@example.com" value={address} onChange={event => setAddress(event.target.value)}/>
-          <label className="wa-consent"><input type="checkbox" checked={consent} onChange={event => setConsent(event.target.checked)} required/><span>I am a parent/guardian or have the necessary permission for this learner's account.</span></label>
-          <button type="submit" className="wiz-btn-primary wa-full" disabled={pending}><Mail size={18}/>{pending ? 'Sending…' : 'Email me a sign-in link'}</button>
+          <input id="wiz-email" type="email" autoComplete="email" value={address} required placeholder="parent@example.com" onChange={event => setAddress(event.target.value)} />
+          <label htmlFor="wiz-password">Password</label>
+          <div className="wa-password-wrap">
+            <input id="wiz-password" type={showPassword ? 'text' : 'password'} autoComplete={mode === 'register' ? 'new-password' : 'current-password'} value={password} required minLength={mode === 'register' ? 8 : undefined} placeholder="Your password" onChange={event => setPassword(event.target.value)} />
+            <button type="button" onClick={() => setShowPassword(x => !x)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={19}/> : <Eye size={19}/>}</button>
+          </div>
+          {mode === 'register' && <>
+            <label htmlFor="wiz-confirm">Confirm password</label>
+            <input id="wiz-confirm" type="password" value={confirm} required minLength={8} autoComplete="new-password" placeholder="Repeat password" onChange={event => setConfirm(event.target.value)} />
+            <label className="wa-consent"><input type="checkbox" checked={permission} required onChange={event => setPermission(event.target.checked)}/><span>I am an adult registering for testing, or a parent/guardian supervising this learner.</span></label>
+          </>}
+          <button className="wiz-btn-primary wa-full" disabled={pending} type="submit"><LockKeyhole size={18}/>{pending ? 'Please wait…' : mode === 'register' ? 'Create account' : 'Sign in'} <ArrowRight size={17}/></button>
         </form>
-        {emailSent && <div className="wa-code-panel">
-          <strong>Having trouble with the link?</strong>
-          <p>You can enter a one-time code if the sign-in email includes one. Your project administrator can enable codes in the Supabase Magic Link email template.</p>
-          <form onSubmit={event => { void submitCode(event); }} className="wa-form">
-            <label htmlFor="wiz-code">One-time email code</label>
-            <input id="wiz-code" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6,8}" minLength={6} maxLength={8} value={code} onChange={event => setCode(event.target.value.replace(/[^0-9]/g, ''))} placeholder="Code from your email" required />
-            <button className="wiz-btn-primary wa-full" type="submit" disabled={pending || code.length < 6}>Verify email code</button>
-          </form>
-        </div>}
-        <div className="wa-or">or</div>
-        <button className="wiz-btn-secondary wa-full" onClick={() => { if (!consent) { setMessage('Please confirm permission above before continuing.'); return; } google(); }}>Continue with Google</button>
-      </> : <div className="wa-not-ready"><Cloud size={24}/><strong>Account service setup is pending</strong><p>The site administrator needs to connect Supabase before sign-in can be activated. Guest practice remains available, with progress saved in this browser.</p></div>}
-      <p className="wa-status" role="status">{message}</p>
-      <p className="wa-privacy">Please avoid using a child's personal information without the required parent or guardian consent. We do not need students' addresses, birth dates or phone numbers for practice.</p>
+        {mode === 'login' && <p className="wa-helper">New to Wizpiko? <button onClick={() => { setMode('register'); setMessage(''); }}>Create an account</button></p>}
+        {mode === 'register' && <p className="wa-helper">Already registered? <button onClick={() => { setMode('login'); setMessage(''); }}>Sign in instead</button></p>}
+      </> : <div className="wa-not-ready"><LockKeyhole size={24}/><strong>Account setup is not connected to this build.</strong><p>Set the Supabase public URL and key in your hosting environment and redeploy.</p></div>}
+      {message && <p className="wa-status" role="status">{message}</p>}
+      <p className="wa-privacy">Email verification is disabled only for controlled testing. Do not use this account system for public child registrations until age-appropriate privacy, parental consent, recovery and account-security safeguards are in place.</p>
     </section>
   </div>;
 }
