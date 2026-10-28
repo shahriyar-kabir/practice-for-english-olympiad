@@ -168,7 +168,7 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney }: Props) 
         {categoryId === 'beginners' && game === 'crossword' && <button className="ej-classic" onClick={onLegacy}>Play the original 10 Beginner crosswords <ChevronRight size={16}/></button>}
       </div>;
     })}</div>
-    <p className="ej-smallprint">Progress is saved automatically in this browser. Play without an account; use this device to continue your adventure.</p>
+    <p className="ej-smallprint">Play as a guest or sign up to save your English games, XP and unlocked levels to your account across devices.</p>
   </section>;
 
   const current = questions[active?.index || 0];
