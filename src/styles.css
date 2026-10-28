@@ -698,3 +698,7 @@ body { background:#f8fbff; }
 .wa-code-panel > strong { display: block; color: #284c8e; font-size: 13px; margin-bottom: 5px; }
 .wa-code-panel > p { color: #617ca3; font-size: 12px; line-height: 1.55; margin: 0 0 12px; }
 .wa-code-panel input[type=text] { padding: 12px; border-radius: 11px; border: 1px solid #cddcf3; color: #234274; font-size: 18px; letter-spacing: 3px; }
+
+/* Guest-only release: no sign-in or server identity is required */
+.wiz-guest-badge{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:12px;background:#ebf3ff;color:#205bb4;font-size:12px;font-weight:900;border:1px solid #d6e5fa;white-space:nowrap}
+@media(max-width:580px){.wiz-guest-badge{font-size:10px;padding:7px}}
