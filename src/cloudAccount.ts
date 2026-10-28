@@ -92,6 +92,11 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
     async function bootstrap() {
       try {
         const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        const callbackError = params.get('error_description') || params.get('error');
+        if (callbackError) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          throw new Error(decodeURIComponent(callbackError.replace(/\+/g, ' ')));
+        }
         let next = fromStorage();
         const access = params.get('access_token'), refresh = params.get('refresh_token');
         if (access && refresh) {
@@ -105,16 +110,26 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
         if (!response.ok) throw new Error('Session expired.');
         const user = await response.json() as User;
         if (canceled) return;
-        const cloud = await remoteGet(next);
-        if (canceled) return;
-        const merged: Snapshot = { legacy: mergeLegacy(latest.current.legacy, cloud?.legacy || {}), journey: mergeJourney(latest.current.journey, cloud?.journey || { records: {} }) };
-        restoreRef.current(merged);
-        saveProgress(merged.legacy);
-        saveJourney(merged.journey);
-        restored.current = true;
+        // Authentication and cloud storage can fail independently. Keep a valid
+        // signed-in session even if the progress table or policy is misconfigured.
         setSession(next);
-        setAuth({ user, loading: false, configured: true, status: 'Cloud progress connected.' });
-        await remotePut(next, user.id, merged);
+        setAuth({ user, loading: false, configured: true, status: 'Signed in. Loading cloud progress…' });
+        try {
+          const cloud = await remoteGet(next);
+          if (canceled) return;
+          const merged: Snapshot = { legacy: mergeLegacy(latest.current.legacy, cloud?.legacy || {}), journey: mergeJourney(latest.current.journey, cloud?.journey || { records: {} }) };
+          restoreRef.current(merged);
+          saveProgress(merged.legacy);
+          saveJourney(merged.journey);
+          restored.current = true;
+          setAuth({ user, loading: false, configured: true, status: 'Cloud progress connected.' });
+          try { await remotePut(next, user.id, merged); }
+          catch (cloudError) {
+            if (!canceled) setAuth({ user, loading: false, configured: true, status: cloudError instanceof Error ? cloudError.message : 'Cloud save failed.' });
+          }
+        } catch (cloudError) {
+          if (!canceled) setAuth({ user, loading: false, configured: true, status: cloudError instanceof Error ? cloudError.message : 'Cloud progress unavailable.' });
+        }
       } catch (error) {
         if (canceled) return;
         saveSession(null); restored.current = false;
@@ -147,6 +162,19 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
     await authRequest('otp?redirect_to=' + encodeURIComponent(window.location.origin + '/'), { email, create_user: true });
     setAuth(previous => ({ ...previous, status: 'Check your inbox for a secure sign-in link.' }));
   }
+  async function verifyEmailCode(email: string, code: string) {
+    if (!configured) throw new Error('The account service is not configured.');
+    const result = await authRequest('verify', { email: email.trim(), token: code.trim(), type: 'email' });
+    if (!result.access_token || !result.refresh_token) {
+      throw new Error('The code was not accepted. Request a fresh sign-in email.');
+    }
+    saveSession({
+      access_token: result.access_token,
+      refresh_token: result.refresh_token,
+      expires_at: Date.now() + (result.expires_in || 3600) * 1000,
+    });
+    window.location.assign(window.location.origin + '/');
+  }
   function google() {
     if (!configured) throw new Error('Google sign-in is not configured yet.');
     const redirect = encodeURIComponent(window.location.origin + '/');
@@ -162,5 +190,5 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
     restoreRef.current({ legacy: {}, journey: { records: {} } });
     setAuth({ user: null, loading: false, configured, status: 'Signed out. You can continue as a guest.' });
   }
-  return { auth, sendLink, google, signOut };
+  return { auth, sendLink, verifyEmailCode, google, signOut };
 }
