@@ -155,30 +155,31 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
     return () => window.clearTimeout(id);
   }, [snapshot.legacy, snapshot.journey, auth.user?.id, session?.access_token]);
 
-  async function sendLink(email: string) {
-    if (!configured) throw new Error('An administrator must connect the Supabase account service first.');
-    // Supabase Auth reads redirect_to from the request URL, not the OTP JSON body.
-    // This lets separate Netlify previews return to their own approved origins.
-    await authRequest('otp?redirect_to=' + encodeURIComponent(window.location.origin + '/'), { email, create_user: true });
-    setAuth(previous => ({ ...previous, status: 'Check your inbox for a secure sign-in link.' }));
-  }
-  async function verifyEmailCode(email: string, code: string) {
-    if (!configured) throw new Error('The account service is not configured.');
-    const result = await authRequest('verify', { email: email.trim(), token: code.trim(), type: 'email' });
-    if (!result.access_token || !result.refresh_token) {
-      throw new Error('The code was not accepted. Request a fresh sign-in email.');
+
+  function acceptCredentials(response: { access_token?: string; refresh_token?: string; expires_in?: number }) {
+    if (!response.access_token || !response.refresh_token) {
+      throw new Error('No session was created. For password-only testing, turn off Confirm Email in Supabase Authentication → Sign In / Providers → Email.');
     }
     saveSession({
-      access_token: result.access_token,
-      refresh_token: result.refresh_token,
-      expires_at: Date.now() + (result.expires_in || 3600) * 1000,
+      access_token: response.access_token,
+      refresh_token: response.refresh_token,
+      expires_at: Date.now() + (response.expires_in || 3600) * 1000,
     });
+    // A fresh page load verifies the session and safely merges guest progress.
     window.location.assign(window.location.origin + '/');
   }
-  function google() {
-    if (!configured) throw new Error('Google sign-in is not configured yet.');
-    const redirect = encodeURIComponent(window.location.origin + '/');
-    window.location.assign(URL + '/auth/v1/authorize?provider=google&redirect_to=' + redirect);
+
+  async function signUp(email: string, password: string) {
+    if (!configured) throw new Error('Supabase account settings are missing from this build.');
+    if (password.length < 8) throw new Error('Use a password of at least 8 characters.');
+    const response = await authRequest('signup', { email: email.trim().toLowerCase(), password });
+    acceptCredentials(response);
+  }
+
+  async function signIn(email: string, password: string) {
+    if (!configured) throw new Error('Supabase account settings are missing from this build.');
+    const response = await authRequest('token?grant_type=password', { email: email.trim().toLowerCase(), password });
+    acceptCredentials(response);
   }
   async function signOut() {
     const current = session;
@@ -190,5 +191,5 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
     restoreRef.current({ legacy: {}, journey: { records: {} } });
     setAuth({ user: null, loading: false, configured, status: 'Signed out. You can continue as a guest.' });
   }
-  return { auth, sendLink, verifyEmailCode, google, signOut };
+  return { auth, signUp, signIn, signOut };
 }
