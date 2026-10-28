@@ -1,29 +1,19 @@
-# Wizpiko — setup and launch checklist
+# Wizpiko guest-only preview
 
-## Implemented in the redesign branch
-- Homepage and branding, multi-subject navigation, mobile-ready English game screens.
-- Seven age categories with crossword and 50-question MCQ challenges, countdowns, XP, unlockable levels, checkpoints and feedback.
-- Beginner original ten crosswords retained; redesigned word bank and both Across/Down clue columns visible.
-- Progress and achievements redesigned; optional account panel.
-- Email magic-link and Google authentication, backed by Supabase if configured.
+The current release deliberately skips student authentication and cloud accounts. No Supabase project, custom SMTP provider, or Google OAuth setup is required to play English games.
 
-## Important content limits
-The crosswords rotate and recombine words from age-specific curated vocabulary banks. MCQs vary questions and answers using finite curated source material. Levels have no fixed cap, but unique questions are NOT unlimited. Sustained Olympiad-standard content requires more reviewed banks, curriculum mapping, and testing. Do not promise nonrepeating infinite content.
+Learning progress is stored in browser localStorage; pupils can resume on the same device and browser, but not across devices. Clearing browser data or browsing privately may remove progress. Do not claim cross-device account sync is active.
 
-## Activate cloud accounts (administrator)
-1. Create a Supabase project.
-2. Run supabase/student_progress.sql in its SQL Editor to enable authenticated user-owned records with RLS.
-3. In Authentication > URL Configuration, set Site URL https://wizpiko.com and add the same URL with trailing slash to redirect allowlist. Add www variant if used.
-4. Enable Email magic-link sign-in and configure reliable email delivery. Google login requires configuring Google provider and authorized OAuth callback in Supabase.
-5. GitHub > Settings > Secrets and variables > Actions > Variables:
-   VITE_SUPABASE_URL = HTTPS Supabase project URL
-   VITE_SUPABASE_ANON_KEY = PUBLIC anon/publishable key, never the service_role secret.
-6. GitHub Pages workflow passes those values into the npm build. Redeploy to activate.
+The original account and Supabase integration source remains in the repository for future work, but is not loaded or required in guest mode. Authentication would require separate security, privacy, consent, retention and deletion reviews before enabling it for children.
 
-Public browser keys are visible by design. RLS policies are essential, along with rate limiting and anti-abuse measures.
+## Preview and launch
 
-## Global children's platform: do before activating public accounts
-The current permission checkbox is NOT verified parental consent. Before launching accounts to children, obtain jurisdiction-specific legal review, publish a complete privacy policy and terms, design an appropriate parent/guardian verification process and data deletion procedure, minimize learner data, and test provider/age restrictions. Guest play is available meanwhile.
+1. On Netlify, deploy the feature branch `feature/wizpiko-complete-learning-hub` and verify page navigation, responsive design, the 7 English difficulties, timed crosswords, MCQs, rewards, and resume-on-reload.
+2. Test on desktop and mobile with a new/empty browser profile. Verify timers, crossing letter consistency, achievement counts and saved progress across refreshes.
+3. The game's vocabulary banks are finite and remixed across levels; they do **not** guarantee infinite unique questions.
+4. Complete a visual/editorial QA pass; review age suitability and content; publish a public privacy notice and contact information.
+5. Once approved, merge the draft PR #2 into main; GitHub Pages will then deploy to wizpiko.com.
 
-## Validate and publish
-Run npm ci, npm test, and npm run build. Verify responsive layouts, game completion, 50-MCQ question flow, resume and login across devices. The live wizpiko.com website is not updated until the feature pull request is merged into main.
+## Future: optional accounts
+
+An unused prototype exists in `src/cloudAccount.ts`, `src/AccountDialog.tsx` and `supabase/student_progress.sql`. Reactivating it requires a deliberately reviewed implementation, not just environment variables.
