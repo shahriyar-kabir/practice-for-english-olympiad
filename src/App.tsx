@@ -250,7 +250,7 @@ export default function App() {
         </div><div className="wiz-footer-bottom"><span>© {new Date().getFullYear()} Wizpiko. Think. Play. Shine.</span><span>Kindergarten • Primary • Secondary • Beyond</span></div></footer>
     </main>
 
-    {accountOpen && <AccountDialog onClose={() => setAccountOpen(false)} configured={account.auth.configured} email={account.auth.user?.email} status={account.auth.status} sendLink={account.sendLink} google={account.google} signOut={account.signOut} />}
+    {accountOpen && <AccountDialog onClose={() => setAccountOpen(false)} configured={account.auth.configured} email={account.auth.user?.email} status={account.auth.status} sendLink={account.sendLink} verifyEmailCode={account.verifyEmailCode} google={account.google} signOut={account.signOut} />}
 
     <div className={`notice ${notice ? 'notice-visible' : ''} ${notice?.kind ?? ''}`} role="status" aria-live="polite" aria-atomic="true">{notice && <>{notice.kind === 'success' ? <Sparkles size={20} /> : notice.kind === 'hint' ? <Lightbulb size={20} /> : <Leaf size={20} />}<span>{notice.text}</span><button aria-label="Dismiss message" onClick={() => setNotice(null)}><X size={16} /></button></>}</div>
 
