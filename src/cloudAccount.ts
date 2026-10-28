@@ -142,7 +142,9 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
 
   async function sendLink(email: string) {
     if (!configured) throw new Error('An administrator must connect the Supabase account service first.');
-    await authRequest('otp', { email, create_user: true, email_redirect_to: window.location.origin + '/' });
+    // Supabase Auth reads redirect_to from the request URL, not the OTP JSON body.
+    // This lets separate Netlify previews return to their own approved origins.
+    await authRequest('otp?redirect_to=' + encodeURIComponent(window.location.origin + '/'), { email, create_user: true });
     setAuth(previous => ({ ...previous, status: 'Check your inbox for a secure sign-in link.' }));
   }
   function google() {
