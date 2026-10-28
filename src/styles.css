@@ -702,3 +702,15 @@ body { background:#f8fbff; }
 /* Guest-only release: no sign-in or server identity is required */
 .wiz-guest-badge{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:12px;background:#ebf3ff;color:#205bb4;font-size:12px;font-weight:900;border:1px solid #d6e5fa;white-space:nowrap}
 @media(max-width:580px){.wiz-guest-badge{font-size:10px;padding:7px}}
+
+/* Simple email/password account form */
+.wa-mode-switch{display:flex;gap:7px;border-radius:12px;background:#edf3ff;padding:5px;margin:0 0 18px}
+.wa-mode-switch button{border-radius:9px;flex:1;padding:11px 10px;color:#5474a6;font-weight:900;font-size:14px}
+.wa-mode-switch .wa-mode-active{background:white;color:#1b5eca;box-shadow:0 2px 9px #1b4d9220}
+.wa-password-wrap{position:relative;display:flex;align-items:center}
+.wa-password-wrap input{width:100%;padding:12px 43px 12px 12px;border:1px solid #cddcf3;border-radius:11px;font-size:14px;color:#234274}
+.wa-password-wrap button{position:absolute;right:12px;color:#627ba5;display:grid;place-items:center}
+.wa-form>input[type=password]{padding:12px;border-radius:11px;border:1px solid #cddcf3;color:#234274;font-size:14px}
+.wa-helper{color:#657b9a;font-size:13px;margin:17px 0 2px}
+.wa-helper button{color:#1f62db;font-weight:900;text-decoration:underline;text-underline-offset:3px}
+.wa-mode-switch button:focus-visible,.wa-password-wrap button:focus-visible,.wa-helper button:focus-visible{outline:3px solid #8d95e9;outline-offset:2px}
