@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, DragEvent, ReactNode } from 'react';
-import { ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCheck, ChevronRight, CircleHelp, GripVertical, Leaf, Lightbulb, MousePointer2, RotateCcw, Sparkles, Star, Trophy, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCheck, ChevronRight, CircleHelp, GripVertical, Leaf, Lightbulb, MousePointer2, RotateCcw, Sparkles, Star, Trophy, X } from 'lucide-react';
 import { puzzles } from './data/puzzles';
 import type { Entry } from './data/puzzles';
 import { buildCells, cellAt, entryContains, initialProgress, readProgress, saveProgress } from './game';
@@ -80,7 +80,7 @@ export default function App() {
   const selected = puzzle.entries.find(entry => entry.id === selectedId) ?? puzzle.entries[0];
   const [notice, setNotice] = useState<Notice | null>(null);
   const [dialog, setDialog] = useState<Dialog>(null);
-  const [sound, setSound] = useState(false);
+  const sound = account.auth.profile?.preferences?.sound ?? false;
   const [dragWord, setDragWord] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [shake, setShake] = useState<string | null>(null);
