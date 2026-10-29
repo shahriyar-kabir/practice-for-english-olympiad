@@ -207,7 +207,7 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
     const issue = validateSignup(displayName, birthDate, email, password);
     if (issue) throw new Error(issue);
     const age = ageFromBirthdate(birthDate)!;
-    if (age < 10 && (!/^\\S+@\\S+\\.\\S+$/.test(guardianEmail.trim()) || guardianEmail.trim().toLowerCase() === email.trim().toLowerCase())) {
+    if (age < 10 && (!/^\S+@\S+\.\S+$/.test(guardianEmail.trim()) || guardianEmail.trim().toLowerCase() === email.trim().toLowerCase())) {
       throw new Error('For children under 10, enter a different, valid parent/guardian email.');
     }
     const response = await authRequest('signup', {
