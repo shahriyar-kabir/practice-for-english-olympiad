@@ -1,24 +1,33 @@
-# Wizpiko — simple email/password accounts (preview only)
+# Wizpiko — preview release and Supabase setup (October 2026)
 
-## Sign-up and sign-in
-- Users may practise as guests.
-- Students or guardians may choose **Sign up** with email address, password, and password confirmation, then **Sign in** with the same credentials.
-- Passwords are handled by **Supabase Authentication**; the Wizpiko app does not keep passwords in progress tables.
-- Cloud progress is stored in `public.student_progress` with Row Level Security (see `supabase/student_progress.sql`). Sign out removes cached user progress on that device.
-- Magic links, OTPs, Google OAuth, and custom SMTP are **not required for this controlled preview**.
+## What this branch includes
+- Clean public homepage and responsive original-brand logo, original robot mascot, eight subjects; English Practice active and all other subjects marked Coming soon
+- Signed-in homepage; avatar dropdown; separate Profile, Progress, Achievements, Learning Streak, Learning Preferences, Guardian Settings and Help views
+- Daily streak increases when a learner completes an activity, not just on login; achievements never disappear if a streak breaks
+- Email/password sign-in modal, age-aware signup (nickname, DOB, learner email, password, confirmation), email confirmation flow, password recovery and guardian email approval for accounts under 10
+- Original 10 beginner English crosswords and seven English practice categories preserved; actual question banks remain finite
 
-## Configure Supabase
-1. Set up `public.student_progress` and its RLS policies from `supabase/student_progress.sql`.
-2. In **Authentication → Sign In / Providers → Email**, enable Email provider and allow new user sign-ups.
-3. **For adult-only testing**, disable **Confirm Email**. This allows Supabase to return a logged-in session immediately after registration.
-4. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to the public Supabase URL and public publishable/anon key in both Netlify and GitHub Actions build environments; rebuild the preview to apply.
-5. Open the Netlify preview → Sign in / Sign up → Sign up → register a new adult test account → verify that My account appears. Check the progress table, complete an activity, then sign into a second browser.
+## Deployment sequence — important
+1. Keep the draft PR open until the workflow build and human QA pass. Do not merge into main as an unreviewed public child-registration rollout.
+2. First run `supabase/student_progress.sql` in the Supabase SQL Editor (if not already applied). Then run `supabase/learner_accounts.sql`. Inspect the existing test accounts and their progress before changes. The trigger creates a protected learner profile for **new** Supabase Auth users. Existing adult test accounts need a deliberate migration of nickname/DOB; do not invent their age or their consent.
+3. In Supabase Authentication → Email provider, enable **Confirm Email** before public registration. Configure a custom SMTP/email service with a verified sending domain and working confirmation/reset email templates; Supabase's default email service is rate-limited and may not send to public users.
+4. Set your production **Site URL** to `https://wizpiko.com` and configure authorized redirect URLs for the production site and explicitly used preview domain(s), including `https://phenomenal-sunshine-6e69fa.netlify.app`. Confirm both signup verification and password-reset URLs return to the intended environment.
+5. Create a Resend account and verify the sending domain for guardian email. Deploy the Edge Function from `supabase/functions/guardian-consent/index.ts`. `supabase/config.toml` disables platform JWT verification on that one function because guardian links are one-time tokens; its `request` operation independently checks a valid learner JWT.
+6. Set the Edge Function secrets `RESEND_API_KEY`, `GUARDIAN_FROM_EMAIL`, `APP_ORIGIN` (production domain), plus the Supabase URL/service-role secret provided by Supabase. **Never** place the service-role key or Resend secret in GitHub public variables, Netlify browser variables, or `VITE_` environment variables.
+7. Keep `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (public/publishable values only) in your Netlify and GitHub Actions build configuration. Rebuild whenever changing them.
+8. Test a confirmed adult account sign-up, login, forgotten-password recovery, progress sync across two browsers, and cross-account isolation. Then test an under-10 signup: guardian email appears, child cloud progress remains blocked, verification email is sent after first confirmed sign-in, unverified accounts remain pending, one-time approval link must be clicked by guardian, approved learner can sign in again. Test expired token, reused token, wrong email, and resend rate limits.
+9. Attach official Facebook and Instagram URLs to the footer only after providing verified Wizpiko page URLs; current social icons are intentionally not linked to made-up profiles.
 
-## IMPORTANT: NOT READY FOR PUBLIC CHILD ACCOUNTS
-With Confirm Email disabled, a person can register an email address they do not own. No verified password reset or account recovery is available without a configured email-delivery provider. Do **not** use this setup for publicly accessible student registration as is. Before enabling for children, restore email verification, configure reliable email delivery and recovery, add appropriate parental-consent checks and account deletion, review privacy requirements, and test anti-abuse limits. The registration checkbox is not verified parental consent.
+## Child safety and consent: not production-ready by email verification alone
+Guardian email ownership alone is not necessarily verifiable parental consent under COPPA or other laws; the required mechanism and age threshold depend on the markets and personal data collected. **Do not enable unrestricted public child registration** until reviewed legal consent, verified adult authorization where required, retention/deletion rights, published Terms and Privacy Policy, appropriate anti-abuse controls, and support contact are implemented. This code enforces the requested under-10 guardian email gate but should not be represented as full legal compliance.
 
-## Content and release
-- Seven English age levels, timed crosswords and 50-question MCQ practice, XP, progress and achievements.
-- Existing 10 original Beginner crosswords remain available.
-- Crossword and question banks are finite and remixed—not indefinitely unique.
-- All work remains on the draft development PR; confirm build, responsive UI and live sign-in/progress tests before merging to main.
+A deliberate policy exception lets pre-existing test accounts *without* learner_profiles continue cloud sync. The `learner_accounts.sql` RLS policy blocks new pending learners but includes that legacy exception. Remove it after migrating old accounts and before public launch.
+
+Account email confirmation and password recovery require external Supabase dashboard configuration and delivery. Code pushed to GitHub cannot automatically turn on these external services, deploy the function, or configure their secrets.
+
+## Release verification
+- Run `npm ci && npm test && npm run build`.
+- Review the latest GitHub Actions run on PR #2.
+- Confirm Netlify has deployed this development branch before previewing it.
+- Inspect mobile layouts, account modal, avatar menu, all learner views, category/games and footer.
+- Merge PR #2 into main **only after separate release approval**.
