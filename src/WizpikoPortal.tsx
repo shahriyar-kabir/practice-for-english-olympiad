@@ -16,11 +16,13 @@ function Feature({ children, title, description }: { children: ReactNode; title:
   return <div className="wz-feature"><span className="wz-feature-icon">{children}</span><span><strong>{title}</strong><small>{description}</small></span></div>;
 }
 
-export function WizpikoPortal({ onPractice, onComingSoon, signedIn, nickname, onProgress, onStreak, streak, solvedTotal, completedTotal }: {
+export function WizpikoPortal({ onPractice, onComingSoon, signedIn, nickname, avatar, learnerAge, onProgress, onStreak, streak, solvedTotal, completedTotal }: {
   onPractice: () => void;
   onComingSoon: (subject: string) => void;
   signedIn: boolean;
   nickname?: string;
+  avatar?: 'girl'|'boy'|'robot'|'panda'|'cat';
+  learnerAge?: number | null;
   onProgress: () => void;
   onStreak: () => void;
   streak: number;
@@ -43,6 +45,7 @@ export function WizpikoPortal({ onPractice, onComingSoon, signedIn, nickname, on
         </>}
       </div>
       <div className="wz-hero-picture">
+        {signedIn && avatar && avatar !== 'robot' && <div className="wz-personal-avatar" aria-label="Your selected learner companion"><span>{avatar==='girl'?(learnerAge!==null&&learnerAge!==undefined&&learnerAge>=13?'👩‍🎓':'👧'):avatar==='boy'?(learnerAge!==null&&learnerAge!==undefined&&learnerAge>=13?'👨‍🎓':'👦'):avatar==='panda'?'🐼':'🐱'}</span><small>Your avatar</small></div>}
         <img src="/wizpiko-logo.webp" alt="The original Wizpiko learning robot, featuring its blue W emblem and colorful logo" />
       </div>
     </section>
