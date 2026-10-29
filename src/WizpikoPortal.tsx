@@ -16,7 +16,7 @@ function Feature({ children, title, description }: { children: ReactNode; title:
   return <div className="wz-feature"><span className="wz-feature-icon">{children}</span><span><strong>{title}</strong><small>{description}</small></span></div>;
 }
 
-export function WizpikoPortal({ onPractice, onComingSoon, signedIn, nickname, avatar, learnerAge, onProgress, onStreak, streak, solvedTotal, completedTotal }: {
+export function WizpikoPortal({ onPractice, onComingSoon, signedIn, nickname, avatar, learnerAge, onProgress, onStreak, onAchievements, xp, streak, solvedTotal, completedTotal }: {
   onPractice: () => void;
   onComingSoon: (subject: string) => void;
   signedIn: boolean;
@@ -25,6 +25,8 @@ export function WizpikoPortal({ onPractice, onComingSoon, signedIn, nickname, av
   learnerAge?: number | null;
   onProgress: () => void;
   onStreak: () => void;
+  onAchievements: () => void;
+  xp: number;
   streak: number;
   solvedTotal: number;
   completedTotal: number;
@@ -69,6 +71,18 @@ export function WizpikoPortal({ onPractice, onComingSoon, signedIn, nickname, av
       <div className="wz-mini-panel"><h2>Continue Your Learning</h2><p>Pick up where you left off.</p><div className="wz-mini-inner"><BookOpen size={32}/><span><b>English Practice</b><small>{solvedTotal} words discovered · {completedTotal} crosswords finished</small></span><button onClick={onPractice}>Continue <ArrowRight size={15}/></button></div></div>
       <div className="wz-mini-panel"><h2>Your Progress</h2><p>Every small step matters.</p><div className="wz-mini-inner"><Trophy size={32}/><span><b>Keep shining!</b><small>Explore your progress and unlock more levels.</small></span><button onClick={onProgress}>View <ArrowRight size={15}/></button></div></div>
     </section>}
+    {signedIn && <div className="wz-dashboard-extras">
+      <section className="wz-mini-panel"><div className="wz-panel-header"><div><h2>Recommended for You</h2><p>{learnerAge !== null && learnerAge !== undefined && learnerAge <= 8 ? 'Little challenges to build big confidence.' : 'Pick an English challenge and keep growing.'}</p></div><button onClick={onPractice}>Explore <ArrowRight size={15}/></button></div>
+        <div className="wz-recommendations">
+          <button onClick={onPractice}><span>🧩</span><strong>Crossword Quest</strong><small>Words & vocabulary</small></button>
+          <button onClick={onPractice}><span>🧠</span><strong>MCQ Challenge</strong><small>Questions & explanations</small></button>
+          <button onClick={onPractice}><span>📖</span><strong>Beginner Puzzles</strong><small>Learn at your pace</small></button>
+        </div>
+      </section>
+      <section className="wz-mini-panel"><div className="wz-panel-header"><div><h2>Your Achievements</h2><p>Celebrate little victories!</p></div><button onClick={onAchievements}>View All <ArrowRight size={15}/></button></div>
+        <div className="wz-achievement-preview"><div><span>⭐</span><strong>First Word</strong><small>{solvedTotal>0?'Earned!':'Keep exploring'}</small></div><div><span>📘</span><strong>Crossword</strong><small>{completedTotal>0?'Earned!':'Keep practising'}</small></div><div><span>🔥</span><strong>{streak} Days</strong><small>Learning streak</small></div><div><span>🏆</span><strong>{xp} XP</strong><small>Points earned</small></div></div>
+      </section>
+    </div>}
     <section className="wz-learning-stages">
       <div><span className="wz-stages-icon"><Layers3 size={33}/></span><h2>Learning for Every Stage</h2><p>From kindergarten to higher secondary, explore age-appropriate learning experiences.</p><button onClick={onPractice}>Explore Learning Levels <ArrowRight size={16}/></button></div>
       <div className="wz-stages-chart" aria-label="Learning stages: KG, Primary, Middle, Secondary, Higher Secondary">
