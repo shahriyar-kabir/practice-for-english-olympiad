@@ -89,3 +89,15 @@ create policy "update own progress" on public.student_progress for update to aut
 -- After migrating all original test accounts, remove the 'not exists' legacy exception.
 -- Before inviting real children, obtain qualified privacy/legal review for all
 -- target markets; guardian email ownership alone may be insufficient consent.
+
+-- Anonymous registration readiness probe. Discloses only whether the protected
+-- profile trigger is installed; never exposes learner rows or emails.
+create or replace function public.wizpiko_registration_ready()
+returns boolean language sql stable security definer set search_path = ''
+as $$
+  select exists(select 1 from pg_catalog.pg_class where oid='public.learner_profiles'::regclass)
+    and exists(select 1 from pg_catalog.pg_trigger
+      where tgname='on_wizpiko_auth_created' and not tgisinternal);
+$$;
+revoke all on function public.wizpiko_registration_ready() from public;
+grant execute on function public.wizpiko_registration_ready() to anon, authenticated;
