@@ -90,7 +90,7 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney }: Props) 
       bestScore: Math.max(previous.bestScore, score),
       xp: previous.xp + xp,
     };
-    onJourney({ ...journey, activityDates: recordActivity(journey.activityDates), session: undefined, records: { ...journey.records, [recordKey(categoryId, mode)]: record } });
+    onJourney({ ...journey, activityDates: doneCount > 0 ? recordActivity(journey.activityDates) : journey.activityDates, session: undefined, records: { ...journey.records, [recordKey(categoryId, mode)]: record } });
     setFinished({ score, passed, xp, timedOut });
   }
   useEffect(() => {
