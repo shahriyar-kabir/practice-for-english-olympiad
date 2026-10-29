@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { ArrowLeft, ArrowRight, Check, ChevronRight, Clock3, Lightbulb, LockKeyhole, Star, Trophy } from 'lucide-react';
 import { categories, makeCrossword, makeQuestions } from './englishContent';
 import type { CategoryId, GeneratedCrossword } from './englishContent';
+import { recordActivity } from './learnerData';
 
 export type GameMode = 'crossword' | 'mcq';
 export type LevelRecord = { unlocked: number; completed: number; bestScore: number; xp: number };
@@ -11,7 +12,7 @@ export type GameSession = {
   answers: Record<number, string>; solved: string[];
   hints: Record<string, number[]>; startedAt: number;
 };
-export type JourneyProgress = { records: Record<string, LevelRecord>; session?: GameSession };
+export type JourneyProgress = { records: Record<string, LevelRecord>; session?: GameSession; activityDates?: string[] };
 export const JOURNEY_STORAGE = 'wizpiko-english-journey-v1';
 export const emptyJourney = (): JourneyProgress => ({ records: {} });
 export function readJourney(): JourneyProgress {
@@ -89,7 +90,7 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney }: Props) 
       bestScore: Math.max(previous.bestScore, score),
       xp: previous.xp + xp,
     };
-    onJourney({ ...journey, session: undefined, records: { ...journey.records, [recordKey(categoryId, mode)]: record } });
+    onJourney({ ...journey, activityDates: recordActivity(journey.activityDates), session: undefined, records: { ...journey.records, [recordKey(categoryId, mode)]: record } });
     setFinished({ score, passed, xp, timedOut });
   }
   useEffect(() => {
@@ -127,7 +128,7 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney }: Props) 
     setSelectedWord(next?.id || '');
   }
   if (!categoryId) return <section className="ej-page">
-    <div className="ej-topbar"><button onClick={onHome}><ArrowLeft size={17} /> All subjects</button><span>English Olympiad</span></div>
+    <div className="ej-topbar"><button onClick={onHome}><ArrowLeft size={17} /> All subjects</button><span>English Practice</span></div>
     <div className="ej-intro"><span className="wiz-kicker">CHOOSE YOUR ADVENTURE</span><h1>Every age. Every stage. <span>A new challenge!</span></h1><p>Pick your category, solve crosswords, master 50-question MCQ challenges, earn XP and unlock more levels. Practice at your own pace.</p></div>
     <div className="ej-category-grid">{categories.map((cat, i) => {
       const rec = journey.records[recordKey(cat.id, 'mcq')] || defaults();
