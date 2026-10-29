@@ -118,3 +118,5 @@ html{scroll-behavior:smooth}body{background:#f6fbff;color:#122757}
 .wz-header-logo img{height:71px}
 @media(max-width:780px){.wz-header-logo img{height:56px}}
 @media(max-width:500px){.wz-header-logo img{height:51px}}
+
+.wz-hero-picture{position:relative}.wz-personal-avatar{position:absolute;bottom:3%;left:4%;z-index:2;background:#ffffffed;border:2px solid #e7d9ff;box-shadow:0 8px 22px #3f59a022;border-radius:20px;padding:7px 11px;display:flex;flex-direction:column;text-align:center;transform:rotate(-6deg)}.wz-personal-avatar span{font-size:54px}.wz-personal-avatar small{font-size:11px;color:#7361aa;font-weight:900}@media(max-width:700px){.wz-personal-avatar span{font-size:35px}}
