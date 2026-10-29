@@ -8,12 +8,12 @@ export type LearnerProfile = {
 };
 export function ageFromBirthdate(date: string): number | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
-  const birth = new Date(date + 'T12:00:00');
+  const birth = new Date(date + 'T00:00:00Z');
   if (Number.isNaN(birth.getTime()) || birth.toISOString().slice(0, 10) !== date) return null;
   const now = new Date();
-  if (birth.getTime() > now.getTime()) return null;
-  let age = now.getFullYear() - birth.getFullYear();
-  if (now.getMonth() < birth.getMonth() || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())) age--;
+  if (date > dayKey(now)) return null;
+  let age = now.getFullYear() - birth.getUTCFullYear();
+  if (now.getMonth() < birth.getUTCMonth() || (now.getMonth() === birth.getUTCMonth() && now.getDate() < birth.getUTCDate())) age--;
   return age >= 0 && age <= 120 ? age : null;
 }
 export function ageLabel(age: number | null): string {
