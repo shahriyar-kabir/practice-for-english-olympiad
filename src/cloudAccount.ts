@@ -204,6 +204,12 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
 
   async function signUp(email: string, password: string, displayName: string, birthDate: string, guardianEmail: string): Promise<string> {
     if (!configured) throw new Error('Supabase account settings are missing from this build.');
+    // Fail closed if the protected profile trigger has not been installed.
+    const readyResponse = await fetch(URL + '/rest/v1/rpc/wizpiko_registration_ready', {
+      method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: '{}',
+    });
+    const registrationReady = readyResponse.ok && await readyResponse.json().catch(() => false) === true;
+    if (!registrationReady) throw new Error('New registrations are paused until Wizpiko finishes the Supabase learner-account setup.');
     const issue = validateSignup(displayName, birthDate, email, password);
     if (issue) throw new Error(issue);
     const age = ageFromBirthdate(birthDate)!;
