@@ -138,6 +138,12 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
         const pending = profile?.consent_status === 'pending';
         if (pending) {
           setAuth({ user, profile, loading: false, configured: true, recovery, status: 'Parent/guardian approval is required before this learner account can be used.' });
+          try {
+            await guardianRequest(next); // Automatic request after verified learner sign-in.
+            if (!canceled) setAuth({ user, profile, loading: false, configured: true, recovery, status: 'Guardian verification link sent. Check the parent/guardian email inbox.' });
+          } catch (error) {
+            if (!canceled) setAuth({ user, profile, loading: false, configured: true, recovery, status: error instanceof Error ? error.message : 'Guardian email delivery is not configured.' });
+          }
           return;
         }
         setAuth({ user, profile, loading: false, configured: true, recovery, status: 'Signed in. Loading cloud progress…' });
