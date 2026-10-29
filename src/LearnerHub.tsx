@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { JourneyProgress } from './EnglishJourney';
 import type { LearnerProfile } from './learnerData';
 import { ageFromBirthdate, ageLabel, dayKey, learningStreak } from './learnerData';
-import { Award, ArrowLeft, BookOpen, CalendarDays, CheckCircle2, Flame, Gamepad2, HelpCircle, Lock, Settings2, Shield, Star, TrendingUp, UserRound, LogOut } from 'lucide-react';
+import { Award, ArrowLeft, Flame, Gamepad2, HelpCircle, Lock, Settings2, Shield, Star, TrendingUp, UserRound, LogOut } from 'lucide-react';
 
 export type LearnerPage = 'profile' | 'progress' | 'achievements' | 'streak' | 'preferences' | 'parent' | 'help';
 export const learnerMenu: { id: LearnerPage; label: string; icon: typeof UserRound }[] = [
