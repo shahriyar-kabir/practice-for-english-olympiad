@@ -113,3 +113,8 @@ html{scroll-behavior:smooth}body{background:#f6fbff;color:#122757}
 .wa-wordmark{width:190px;height:63px;max-height:63px;object-fit:cover;object-position:center bottom}
 @media(max-width:780px){.wz-header-logo img{width:158px;height:49px}}
 @media(max-width:500px){.wz-header-logo img{width:141px;height:45px}}
+
+/* Keep every letter and the tagline of the official wordmark visible. */
+.wz-header-logo img{height:71px}
+@media(max-width:780px){.wz-header-logo img{height:56px}}
+@media(max-width:500px){.wz-header-logo img{height:51px}}
