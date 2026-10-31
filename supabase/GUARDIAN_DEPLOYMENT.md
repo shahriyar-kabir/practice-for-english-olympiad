@@ -8,7 +8,52 @@ The new preview currently requires Netlify access (HTTP 401); its deployed
 guardian route could not be validated from this environment.
 The Supabase function, database migration and secrets remain undeployed.
 
-## Inspected source and live-access status
+## Deployment continuation — 1 November 2026 (Asia/Dhaka)
+
+The configured `SUPABASE_ACCESS_TOKEN` authenticated successfully to the Management
+API for `fjmyfcpzfrkozplylygd`; the project reported `ACTIVE_HEALTHY` in
+`ap-south-1`. Credential values were not printed or committed.
+
+Administrative read-only inspection confirmed the baseline columns, constraints,
+indexes, protected Auth trigger, registration-readiness RPC, and progress policies.
+All three application tables have RLS enabled. Token-table access is limited to
+postgres/service_role; authenticated profile updates are limited to display_name,
+avatar and preferences. Live student_progress table grants are broader than the
+baseline (including anon), but its row policies remain authenticated and
+owner-specific. The migration's removal of the missing-profile exception remains
+appropriate. Aggregate-only checks found zero Auth users and zero progress rows
+without profiles; no learner rows or PII were exported. No
+`supabase_migrations` schema existed, and no guardian lifecycle RPCs were installed.
+
+The reviewed migration was submitted with a same-transaction record for only
+`20261031000000`; it failed on the first ALTER TABLE with PostgreSQL `25006`:
+`cannot execute ALTER TABLE in a read-only transaction`. A subsequent read verified
+that neither guardian_rejected_at nor the migration-history schema was created.
+No baseline migration was marked applied and no migration changes committed.
+The token therefore supports inspection but does not currently permit this SQL
+migration. Do not attempt to override its read-only restriction.
+
+Auth configuration inspection returned HTTP 403, explicitly missing
+`auth_config_read`. Function and secret inventories were empty. The guardian
+function was not deployed because its required schema is still absent. No Auth
+settings, secrets, hosting access, or production frontend were changed. Live
+preflight still returns 404; the PR preview returns 401 and wizpiko.com returns
+200. The guardian workflow is not deployed or validated end to end.
+
+Local revalidation passed: npm ci, all 191 Vitest tests, the disposable PGlite
+SQL/RLS integration suite, and the TypeScript/Vite production build. Deno checking
+and the optional Docker concurrency suite were not rerun in this continuation.
+These local results do not establish live email delivery or end-to-end consent.
+
+To resume: configure a Supabase administrative token with database write and
+Auth configuration access, securely configure RESEND_API_KEY and a verified
+GUARDIAN_FROM_EMAIL, and identify the intended accessible updated APP_ORIGIN.
+Reinspect live schema and history before retrying the migration; then follow the
+configuration, deployment and controlled-inbox validation steps below. Preserve
+learner email confirmation, explicit guardian decisions, capability protections
+and RLS throughout.
+
+## Inspected source and live-access status (prior session)
 
 The signup implementation is on `feature/wizpiko-complete-learning-hub`, inspected
 at `ded562b2aec2c486e1e31d1eed998032b7cc5fea`. The prepared main checkout contains
