@@ -4,6 +4,8 @@ Source: [draft PR #3](https://github.com/shahriyar-kabir/practice-for-english-ol
 targeting the learning-hub branch. GitHub Actions passed. Netlify automatically
 published the updated frontend at
 <https://deploy-preview-3--phenomenal-sunshine-6e69fa.netlify.app>.
+The new preview currently requires Netlify access (HTTP 401); its deployed
+guardian route could not be validated from this environment.
 The Supabase function, database migration and secrets remain undeployed.
 
 ## Inspected source and live-access status
