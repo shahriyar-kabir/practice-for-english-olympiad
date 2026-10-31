@@ -182,6 +182,7 @@ export function createGuardianHandler(config: Config, backend: Backend): (reques
       if (!sent) return fail('email_delivery_failed', 502, 'Guardian email could not be sent. Please wait 10 minutes and try again.');
       return json({ ok: true, message: 'Guardian email sent.', expires_at: reservation.expires_at });
     } catch (error) {
+      if (error instanceof Error && error.message === 'email_confirmation_disabled') return fail('email_confirmation_disabled', 503, 'Guardian verification is paused until learner email confirmation is enabled. Please contact Wizpiko support.');
       if (error instanceof Error && ['too_large', 'bad_body', 'unsupported_media_type'].includes(error.message)) return fail(error.message, error.message === 'too_large' ? 413 : error.message === 'unsupported_media_type' ? 415 : 400, 'Send a valid, small JSON request or guardian approval form.');
       if (error instanceof SyntaxError) return fail('invalid_json', 400, 'The request contains invalid JSON.');
       // Never log bearer tokens, guardian addresses, bodies or provider responses.

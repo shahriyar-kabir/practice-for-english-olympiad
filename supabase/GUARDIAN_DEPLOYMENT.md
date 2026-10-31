@@ -10,12 +10,31 @@ previous function, build workflow, and setup instructions before changing code.
 
 The supplied live signup URL is
 `https://6ae3d7c7cdebb41f49d7cfe4--phenomenal-sunshine-6e69fa.netlify.app/`.
-It returns HTTP 401 with Netlify edge-access protection to this environment.
+It initially returned HTTP 401 with Netlify edge-access protection. A later recheck
+succeeded, and the deployed bundle `assets/index-BUZdhftq.js` confirmed the exact
+request contract and project **`fjmyfcpzfrkozplylygd`**, at
+`https://fjmyfcpzfrkozplylygd.supabase.co`.
+
+The live OPTIONS request reproduced HTTP **404**, with
+`{"code":"NOT_FOUND","message":"Requested function was not found"}`.
+The anonymous registration-readiness RPC returns true. Public Auth settings report
+`disable_signup:false` and **`mailer_autoconfirm:true`**, so actual learner email
+ownership is not currently verified. Confirm Email must be enabled before the
+repaired function will send guardian requests. Existing automatically confirmed
+test accounts need deliberate review/reverification; changing the setting does
+not retroactively verify their inboxes.
+
+The live anonymous OpenAPI request returns 401; protected learner/approval table
+requests return permission errors. Full columns, constraints, grants, policies,
+triggers and migration history require project-owner inspection. A zero-row
+anonymous progress request succeeds, so the deployed grants may differ from the
+checked-in baseline; no learner rows were requested. The migration must be checked
+against the actual administrative schema before deployment.
+
 `https://wizpiko.com` serves the older frontend without Supabase/signup code.
-GitHub repository build-variable reads return HTTP 403. No Supabase project ref,
-administrative credentials, or Resend key is configured here. Consequently the
-live schema, reported OPTIONS 404, real email delivery, and full production signup
-flow could not be independently validated, and nothing was deployed.
+GitHub repository build-variable reads return HTTP 403. No Supabase administrative
+credentials or Resend key is configured here. Consequently no migration, function,
+secret or frontend was deployed, and live email/signup completion remains untested.
 
 ## Contract and behavior
 
@@ -27,7 +46,8 @@ failures include `error`, `code`, and a non-sensitive `request_id`.
 
 OPTIONS returns 204 for configured exact origins without requiring credentials.
 The request action calls Supabase Auth to verify the session and requires a
-confirmed non-anonymous email. Only that user's protected pending profile can
+confirmed non-anonymous email and checks that project email auto-confirmation is
+disabled. Otherwise it pauses sends with a meaningful 503 error. Only that user's protected pending profile can
 request an email; the browser cannot specify another learner, recipient, consent
 status, or redirect. The function uses server-side Resend credentials only.
 
@@ -98,7 +118,7 @@ baseline files are not CLI migration history: do not blindly run `supabase db pu
 or mark existing migrations applied without reviewing the remote history.
 
 1. Grant secure Supabase administration access (`SUPABASE_ACCESS_TOKEN` for CLI
-   deployment and project-owner SQL access) and identify the exact project ref.
+   deployment and project-owner SQL access) to project `fjmyfcpzfrkozplylygd`.
 2. Apply the reviewed migration to that project through the SQL Editor or your
    established migration workflow. Record the migration in that workflow.
 3. Set hosted Edge Function secrets using an ignored, permission-restricted file
@@ -116,9 +136,9 @@ or mark existing migrations applied without reviewing the remote history.
 4. After confirming the project, deploy from the repository root:
 
    ```sh
-   supabase secrets set --env-file /path/to/ignored/guardian.env --project-ref YOUR_CONFIRMED_REF
-   supabase functions deploy guardian-consent --project-ref YOUR_CONFIRMED_REF
-   supabase functions list --project-ref YOUR_CONFIRMED_REF
+   supabase secrets set --env-file /path/to/ignored/guardian.env --project-ref fjmyfcpzfrkozplylygd
+   supabase functions deploy guardian-consent --project-ref fjmyfcpzfrkozplylygd
+   supabase functions list --project-ref fjmyfcpzfrkozplylygd
    ```
 
    `config.toml` sets `verify_jwt=false` only for this function so OPTIONS and

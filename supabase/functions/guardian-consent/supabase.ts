@@ -14,6 +14,16 @@ export function createSupabaseBackend(config: Config, fetcher: typeof fetch = fe
       if (!response.ok) throw new Error('auth_unavailable');
       const user = await response.json();
       if (!user.id || !user.email_confirmed_at || user.is_anonymous) return null;
+      // An auto-confirmed timestamp does not prove control of the learner inbox.
+      // Fail closed if the project's email verification policy is disabled or
+      // cannot be determined. New guardian sends require actual email verification.
+      const settingsResponse = await fetcher(base + '/auth/v1/settings', {
+        headers: { apikey: config.serviceRoleKey },
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!settingsResponse.ok) throw new Error('auth_unavailable');
+      const settings = await settingsResponse.json();
+      if (settings.mailer_autoconfirm !== false) throw new Error('email_confirmation_disabled');
       return { id: user.id };
     },
     async rpc(name, args) {

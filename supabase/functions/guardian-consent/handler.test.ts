@@ -89,6 +89,14 @@ describe('guardian-consent browser and authentication boundary', () => {
     expect(authenticate).toHaveBeenCalledWith('learner-session');
     expect(rpc).not.toHaveBeenCalled(); expect(fetcher).not.toHaveBeenCalled();
   });
+  it('pauses guardian requests when Supabase email confirmation is disabled', async () => {
+    const { handler, authenticate, rpc, fetcher } = setup();
+    authenticate.mockRejectedValue(new Error('email_confirmation_disabled'));
+    const response = await handler(sendRequest());
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ code: 'email_confirmation_disabled', error: expect.any(String) });
+    expect(rpc).not.toHaveBeenCalled(); expect(fetcher).not.toHaveBeenCalled();
+  });
   it.each([
     { learner_id: 'someone-else' }, { guardian_email: 'attacker@example.com' },
     { consent_status: 'verified' }, { redirect_url: 'https://evil.example' },
@@ -350,10 +358,33 @@ describe('server Supabase adapter', () => {
     const adapter = createSupabaseBackend(config, fetcher);
     expect(await adapter.authenticate('forged-or-unconfirmed-jwt')).toBeNull();
     expect(fetcher).toHaveBeenCalledWith(config.supabaseUrl + '/auth/v1/user', expect.objectContaining({ headers: { apikey: config.serviceRoleKey, Authorization: 'Bearer forged-or-unconfirmed-jwt' } }));
+    expect(fetcher).toHaveBeenCalledOnce();
   });
   it('uses the verified Auth user ID instead of decoding claims locally', async () => {
-    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ id: 'auth-verified-user', email_confirmed_at: '2026-10-31' }));
+    const fetcher = vi.fn<typeof fetch>().mockImplementation(async url => Response.json(String(url).endsWith('/auth/v1/settings')
+      ? { mailer_autoconfirm: false }
+      : { id: 'auth-verified-user', email_confirmed_at: '2026-10-31' }));
     expect(await createSupabaseBackend(config, fetcher).authenticate('opaque-session')).toEqual({ id: 'auth-verified-user' });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fetcher).toHaveBeenCalledWith(config.supabaseUrl + '/auth/v1/settings', expect.any(Object));
+  });
+  it.each([true, undefined])('rejects auto-confirmed or unknown email policy %s even if the user has confirmed_at', async autoconfirm => {
+    const fetcher = vi.fn<typeof fetch>().mockImplementation(async url => Response.json(String(url).endsWith('/auth/v1/settings')
+      ? { mailer_autoconfirm: autoconfirm }
+      : { id: 'auth-verified-user', email_confirmed_at: '2026-10-31' }));
+    const adapter = createSupabaseBackend(config, fetcher);
+    await expect(adapter.authenticate('opaque-session')).rejects.toThrow('email_confirmation_disabled');
+    expect(fetcher.mock.calls.every(([url]) => !String(url).includes('/rest/'))).toBe(true);
+  });
+  it.each([true, undefined])('does not reserve or send when the live adapter observes autoconfirm %s', async autoconfirm => {
+    const fetcher = vi.fn<typeof fetch>().mockImplementation(async url => Response.json(String(url).endsWith('/auth/v1/settings')
+      ? { mailer_autoconfirm: autoconfirm }
+      : { id: 'auth-verified-user', email_confirmed_at: '2026-10-31' }));
+    const response = await createGuardianHandler(config, createSupabaseBackend(config, fetcher))(sendRequest());
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ code: 'email_confirmation_disabled' });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(fetcher.mock.calls.every(([url]) => String(url).startsWith(config.supabaseUrl + '/auth/v1/'))).toBe(true);
   });
   it('uses service credentials only on server RPC requests', async () => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ ok: true }));
