@@ -62,20 +62,29 @@ async function validSession(input: Session): Promise<Session> {
   saveSession(next);
   return next;
 }
-async function profileGet(session: Session, userId: string): Promise<LearnerProfile | null> {
+export async function profileGet(session: Session, userId: string): Promise<LearnerProfile> {
   const response = await fetch(URL + '/rest/v1/learner_profiles?user_id=eq.' + encodeURIComponent(userId) + '&select=display_name,birth_date,avatar,guardian_email,consent_status,preferences', {
     headers: { apikey: KEY, Authorization: 'Bearer ' + session.access_token },
   });
-  if (!response.ok) return null; // Existing preview accounts can still work without a profile.
-  const rows = await response.json() as LearnerProfile[];
-  return rows[0] || null;
+  if (!response.ok) throw new Error('Your learner profile could not be loaded. Please try again or contact support.');
+  const rows: unknown = await response.json();
+  if (!Array.isArray(rows) || rows.length !== 1 || !rows[0] ||
+      !['active', 'pending', 'verified'].includes(rows[0].consent_status)) {
+    throw new Error('This account is missing a valid protected learner profile. Please contact support.');
+  }
+  return rows[0] as LearnerProfile;
 }
-async function guardianRequest(session: Session): Promise<void> {
-  const response = await fetch(URL + '/functions/v1/guardian-consent', {
-    method: 'POST',
-    headers: { apikey: KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'request' }),
-  });
+export async function guardianRequest(session: Session): Promise<void> {
+  let response: Response;
+  try {
+    response = await fetch(URL + '/functions/v1/guardian-consent', {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'request' }),
+    });
+  } catch {
+    throw new Error('Guardian verification could not connect. Please try again or contact support.');
+  }
   const body = await response.json().catch(() => ({})) as { error?: string };
   if (!response.ok) throw new Error(body.error || 'Unable to send guardian verification. Please contact support.');
 }
@@ -130,11 +139,11 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
         if (!response.ok) throw new Error('Session expired.');
         const user = await response.json() as User;
         if (canceled) return;
-        // Authentication and cloud storage can fail independently. Keep a valid
-        // signed-in session even if the progress table or policy is misconfigured.
-        setSession(next);
+        // A protected profile is required before deciding whether consent is
+        // complete. A missing profile or database error must never unlock learning.
         const profile = await profileGet(next, user.id);
         if (canceled) return;
+        setSession(next);
         const pending = profile?.consent_status === 'pending';
         if (pending) {
           setAuth({ user, profile, loading: false, configured: true, recovery, status: 'Parent/guardian approval is required before this learner account can be used.' });
@@ -174,7 +183,8 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
   }, []);
 
   useEffect(() => {
-    if (!auth.user || !session || !restored.current || auth.profile?.consent_status === 'pending') return;
+    if (!auth.user || !session || !restored.current || !auth.profile ||
+        !['active', 'verified'].includes(auth.profile.consent_status)) return;
     const id = window.setTimeout(async () => {
       try {
         const next = await validSession(session);
@@ -191,7 +201,7 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
 
   function acceptCredentials(response: { access_token?: string; refresh_token?: string; expires_in?: number }) {
     if (!response.access_token || !response.refresh_token) {
-      throw new Error('No session was created. For password-only testing, turn off Confirm Email in Supabase Authentication → Sign In / Providers → Email.');
+      throw new Error('No session was created. Confirm your account email, then sign in again.');
     }
     saveSession({
       access_token: response.access_token,

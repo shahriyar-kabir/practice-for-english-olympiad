@@ -4,3 +4,8 @@ dist/
 .DS_Store
 playwright-report/
 test-results/
+work/
+.env
+.env.*
+!.env.example
+supabase/.temp/

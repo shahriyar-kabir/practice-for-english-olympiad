@@ -5,7 +5,7 @@ on:
     branches: [main]
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [main, feature/wizpiko-complete-learning-hub]
 
 permissions:
   contents: read
@@ -30,6 +30,14 @@ jobs:
         run: npm ci
       - name: Test puzzles and game
         run: npm test
+      - name: Test guardian consent database and RLS
+        run: npm run test:guardian-db
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check guardian Edge Function
+        run: deno check supabase/functions/guardian-consent/index.ts
       - name: Verify Supabase public configuration
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
