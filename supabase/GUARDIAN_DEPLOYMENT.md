@@ -1,5 +1,11 @@
 # Guardian consent repair
 
+Source: [draft PR #3](https://github.com/shahriyar-kabir/practice-for-english-olympiad/pull/3),
+targeting the learning-hub branch. GitHub Actions passed. Netlify automatically
+published the updated frontend at
+<https://deploy-preview-3--phenomenal-sunshine-6e69fa.netlify.app>.
+The Supabase function, database migration and secrets remain undeployed.
+
 ## Inspected source and live-access status
 
 The signup implementation is on `feature/wizpiko-complete-learning-hub`, inspected
@@ -34,7 +40,8 @@ against the actual administrative schema before deployment.
 `https://wizpiko.com` serves the older frontend without Supabase/signup code.
 GitHub repository build-variable reads return HTTP 403. No Supabase administrative
 credentials or Resend key is configured here. Consequently no migration, function,
-secret or frontend was deployed, and live email/signup completion remains untested.
+secret or production frontend was deployed. The draft PR's automatic Netlify
+preview contains the new frontend; live email/signup completion remains untested.
 
 ## Contract and behavior
 
@@ -166,6 +173,11 @@ npm run test:guardian-concurrency # optional: local Docker, isolated PostgreSQL 
 npm run build
 deno check supabase/functions/guardian-consent/index.ts
 ```
+
+Completed: **191 Vitest tests**, SQL/RLS tests, independent PostgreSQL concurrency
+tests, production build, Deno typecheck, and browser scenarios for pending,
+missing-profile, verified, approval, rejection, expired and reused links. No real
+signup or email was submitted during live frontend inspection.
 
 SQL tests run the real PostgreSQL engine in a discarded PGlite database with only
 Supabase Auth schema/roles stubbed. They cover delivery, resend rotation, expiry,
