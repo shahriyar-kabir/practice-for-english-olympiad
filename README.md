@@ -1,4 +1,4 @@
-# WordSprout 🌱
+# Wizpiko 🌱
 
 A cheerful crossword playground for children preparing for the English Olympiad. Built with React, TypeScript, and Vite. No backend, accounts, or API keys are required.
 
@@ -29,6 +29,14 @@ npm run preview
 ```
 
 Deploy the generated `dist/` directory to any static web host. Assets, fonts, and artwork are bundled locally; the app does not use external APIs. Relative asset paths support GitHub Pages project URLs as well as a host's root URL.
+
+## Deploy to Netlify
+
+`netlify.toml` configures Node.js 24, the `npm run build` build command, and the `dist/` publish directory. Connect this repository to the intended existing Netlify project, or deploy the built `dist/` directory to that project.
+
+For automated deployment from the coding environment, attach `NETLIFY_AUTH_TOKEN` through its secure HTTP secret settings, with `api.netlify.com` as the allowed domain. Set `NETLIFY_SITE_ID` to the intended Netlify Project ID in the coding environment's variables. These are deployment settings, not frontend application variables; keep the token in the secure settings.
+
+The current release has no guardian sign-in and does not require guardian credentials or a guardian inbox for deployment. It is a static frontend with no signup or email delivery backend. Email testing is a separate future task; deploying this release does not require test inbox settings.
 
 ## Play
 
