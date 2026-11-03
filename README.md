@@ -1,16 +1,22 @@
 # Wizpiko 🌱
 
-A cheerful crossword playground for children preparing for the English Olympiad. Built with React, TypeScript, and Vite. No backend, accounts, or API keys are required.
+A cheerful learning hub with English practice, ten original crosswords, learner profiles, achievements, activity streaks and cloud progress. Built with React, TypeScript and Vite. Guests can play without an account; cloud accounts use Supabase.
 
 ## Open the website
 
 **Website after Pages activation: [Play WordSprout](https://shahriyar-kabir.github.io/practice-for-english-olympiad/)**
 
-The app is configured for GitHub Pages, which keeps the website available independently of the Codex coding workspace. Each child's progress is saved locally in their browser.
+The app is configured for GitHub Pages, which keeps the website available independently of the coding workspace. Guest progress is saved locally; signed-in progress can sync to the configured Supabase project.
 
 Activate hosting once in [Settings → Pages](https://github.com/shahriyar-kabir/practice-for-english-olympiad/settings/pages): under **Build and deployment**, choose **GitHub Actions** as the **Source**. Then open [Actions](https://github.com/shahriyar-kabir/practice-for-english-olympiad/actions/workflows/deploy-pages.yml), select **Deploy WordSprout to GitHub Pages**, and choose **Run workflow** on `main`. Wait for the build and deploy jobs to turn green before opening the website. If the workflow was already running before activation, rerun it.
 
-After activation, changes pushed to `main` are tested, built, and published automatically by `.github/workflows/deploy-pages.yml`. No hosting account or custom domain is required. The connected coding integration cannot activate Pages itself because it lacks the GitHub Pages administration permission; activation must be performed in GitHub's settings by the repository owner.
+After activation, changes pushed to `main` are tested, built, and published automatically by `.github/workflows/deploy-pages.yml`. No hosting account or custom domain is required. Pages is already active for this repository.
+
+## Release and accounts
+
+This release removes guardian email collection and approval gating while preserving the complete learning hub. See [WIZPIKO_SETUP.md](WIZPIKO_SETUP.md) for the required database upgrade, account configuration and checks. New registrations require the release migration; existing profile and progress data are retained.
+
+`netlify.toml` preserves the existing Node 24 / `dist/` deployment configuration for Netlify. Keep deployment tokens in secure host settings.
 
 ## Run locally
 
@@ -28,15 +34,7 @@ npm run build
 npm run preview
 ```
 
-Deploy the generated `dist/` directory to any static web host. Assets, fonts, and artwork are bundled locally; the app does not use external APIs. Relative asset paths support GitHub Pages project URLs as well as a host's root URL.
-
-## Deploy to Netlify
-
-`netlify.toml` configures Node.js 24, the `npm run build` build command, and the `dist/` publish directory. Connect this repository to the intended existing Netlify project, or deploy the built `dist/` directory to that project.
-
-For automated deployment from the coding environment, attach `NETLIFY_AUTH_TOKEN` through its secure HTTP secret settings, with `api.netlify.com` as the allowed domain. Set `NETLIFY_SITE_ID` to the intended Netlify Project ID in the coding environment's variables. These are deployment settings, not frontend application variables; keep the token in the secure settings.
-
-The current release has no guardian sign-in and does not require guardian credentials or a guardian inbox for deployment. It is a static frontend with no signup or email delivery backend. Email testing is a separate future task; deploying this release does not require test inbox settings.
+Deploy the generated `dist/` directory to any static web host. Assets, fonts, and artwork are bundled locally. Guest learning works locally; account operations use Supabase. Relative asset paths support GitHub Pages project URLs as well as a host's root URL.
 
 ## Play
 

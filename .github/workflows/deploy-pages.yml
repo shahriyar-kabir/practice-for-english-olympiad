@@ -1,11 +1,11 @@
-name: Deploy WordSprout to GitHub Pages
+name: Test and deploy Wizpiko to GitHub Pages
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [main, feature/wizpiko-complete-learning-hub]
 
 permissions:
   contents: read
@@ -30,7 +30,30 @@ jobs:
         run: npm ci
       - name: Test puzzles and game
         run: npm test
+      - name: Test guardian consent database and RLS
+        run: npm run test:guardian-db
+      - name: Test account release migration and data isolation
+        run: npm run test:accounts
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check guardian Edge Function
+        run: deno check supabase/functions/guardian-consent/index.ts
+      - name: Verify Supabase public configuration
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [[ -z "$VITE_SUPABASE_URL" || -z "$VITE_SUPABASE_ANON_KEY" ]]; then
+            echo "::error::Missing public Supabase URL or key in Actions repository variables."
+            exit 1
+          fi
+          echo "Supabase build configuration available (values hidden)."
       - name: Build website
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
       - name: Configure Pages
         uses: actions/configure-pages@v5
