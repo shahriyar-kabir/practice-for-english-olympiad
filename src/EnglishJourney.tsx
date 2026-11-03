@@ -31,14 +31,24 @@ export function formatTime(seconds: number): string {
 }
 const recordKey = (id: CategoryId, mode: GameMode) => id + ':' + mode;
 const defaults = (): LevelRecord => ({ unlocked: 1, completed: 0, bestScore: 0, xp: 0 });
+const categoryDescriptions: Record<CategoryId, string> = {
+  beginners: 'Start with the basics',
+  kids: 'Everyday vocabulary',
+  'small-starts': 'Reading foundations',
+  juniors: 'Language & comprehension',
+  'high-flyers': 'Critical reading',
+  trailblazers: 'Advanced language',
+  seniors: 'Academic English',
+};
 type Props = {
   onHome: () => void;
   onLegacy: () => void;
   journey: JourneyProgress;
   onJourney: (value: JourneyProgress) => void;
+  initialCategory?: CategoryId | null;
 };
-export function EnglishJourney({ onHome, onLegacy, journey, onJourney }: Props) {
-  const [categoryId, setCategoryId] = useState<CategoryId | null>(null);
+export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCategory = null }: Props) {
+  const [categoryId, setCategoryId] = useState<CategoryId | null>(initialCategory);
   const [mode, setMode] = useState<GameMode | null>(null);
   const [level, setLevel] = useState<number | null>(null);
   const [finished, setFinished] = useState<{ score: number; passed: boolean; xp: number; timedOut: boolean } | null>(null);
@@ -129,11 +139,11 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney }: Props) 
   }
   if (!categoryId) return <section className="ej-page">
     <div className="ej-topbar"><button onClick={onHome}><ArrowLeft size={17} /> All subjects</button><span>English Practice</span></div>
-    <div className="ej-intro"><span className="wiz-kicker">CHOOSE YOUR ADVENTURE</span><h1>Every age. Every stage. <span>A new challenge!</span></h1><p>Pick your category, solve crosswords, master 50-question MCQ challenges, earn XP and unlock more levels. Practice at your own pace.</p></div>
+    <div className="ej-intro"><span className="wiz-kicker">CHOOSE YOUR ADVENTURE</span><h1>Every age. Every stage. <span>A new challenge!</span></h1><p>Learners of all ages are welcome. Choose any starting point, solve crosswords, master 50-question MCQ challenges, earn XP and unlock more levels. Start with the basics at any age and move forward at your own pace.</p></div>
     <div className="ej-category-grid">{categories.map((cat, i) => {
       const rec = journey.records[recordKey(cat.id, 'mcq')] || defaults();
       return <button className="ej-category" key={cat.id} style={{ '--cat': cat.color } as CSSProperties} onClick={() => { setCategoryId(cat.id); setMode(null); setLevel(null); window.scrollTo(0, 0); }}>
-        <span className="ej-category-ordinal">{i + 1}</span><span className="ej-category-range">CAT {i + 1} · {cat.range}</span>
+        <span className="ej-category-ordinal">{i + 1}</span><span className="ej-category-range">CAT {i + 1} · {categoryDescriptions[cat.id]}</span>
         <strong>{cat.name}</strong><span className="ej-category-divider" />
         <span className="ej-category-meta"><span>CROSSWORD</span><span>5 minutes per level</span></span>
         <span className="ej-category-meta"><span>MCQS</span><span>50 questions · {cat.minutes} minutes</span></span>
@@ -147,7 +157,7 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney }: Props) 
   if (!mode || !level) return <section className="ej-page">
     <div className="ej-topbar"><button onClick={resetToCategories}><ArrowLeft size={17} /> Change category</button><span>English / {category?.name}</span></div>
     <div className="ej-level-hero" style={{ '--cat': category?.color || '#4d7dec' } as CSSProperties}>
-      <span className="wiz-kicker">{category?.range.toUpperCase()}</span>
+      <span className="wiz-kicker">{category ? categoryDescriptions[category.id].toUpperCase() : ''}</span>
       <h1>{category?.name} <span>Adventure Hub</span></h1>
       <p>Choose a game mode to practise vocabulary and comprehension. Complete a level with at least 70% to unlock the next adventure.</p>
     </div>

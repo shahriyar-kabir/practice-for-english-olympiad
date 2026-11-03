@@ -58,7 +58,7 @@ export function AccountDialog({ onClose, configured, email, profile, recovery, s
     <section className="wa-panel wa-new-panel" role="dialog" aria-modal="true" aria-label="Wizpiko account">
       <button type="button" className="wa-close" aria-label="Close account dialog" onClick={onClose}><X size={22}/></button>
       <div className="wa-form-side">
-        <img src="./wizpiko-logo.webp" className="wa-wordmark" alt="Wizpiko — Think. Play. Shine."/>
+        <img src="./wizpiko-wordmark.png" className="wa-wordmark" alt="Wizpiko — Think. Play. Shine."/>
         <h2>{email && !recovery ? 'My Wizpiko Account' : mode === 'register' ? 'Create your account' : mode === 'forgot' ? 'Forgot your password?' : mode === 'reset' ? 'Choose a new password' : 'Welcome back!'}</h2>
         <p className="wa-description">{email && !recovery ? 'Your learning adventure is saved to your account.' : mode === 'register' ? 'A few details help us recommend age-appropriate learning.' : mode === 'forgot' ? 'We will email you a password-reset link.' : 'Sign in and pick up where you left off.'}</p>
         {email && !recovery ? <>

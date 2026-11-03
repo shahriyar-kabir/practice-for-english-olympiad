@@ -1,5 +1,7 @@
-import { ArrowRight, Atom, BookOpen, BrainCircuit, Calculator, Code2, FlaskConical, Globe2, Gamepad2, ChartNoAxesColumnIncreasing, Star, Layers3, Sparkles, Trophy } from 'lucide-react';
+import { ArrowRight, Atom, BookOpen, BrainCircuit, Calculator, Code2, FlaskConical, Globe2, Gamepad2, ChartNoAxesColumnIncreasing, Star, Sparkles, Trophy } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { LearningStages } from './LearningStages';
+import type { LearningStageId } from './LearningStages';
 
 const subjects = [
   { name: 'English Practice', description: 'Read, play, practise and build language skills.', icon: BookOpen, color: 'english', live: true },
@@ -16,8 +18,9 @@ function Feature({ children, title, description }: { children: ReactNode; title:
   return <div className="wz-feature"><span className="wz-feature-icon">{children}</span><span><strong>{title}</strong><small>{description}</small></span></div>;
 }
 
-export function WizpikoPortal({ onPractice, onComingSoon, signedIn, nickname, avatar, learnerAge, onProgress, onStreak, onAchievements, xp, streak, solvedTotal, completedTotal }: {
+export function WizpikoPortal({ onPractice, onChooseStage, onComingSoon, signedIn, nickname, avatar, learnerAge, onProgress, onStreak, onAchievements, xp, streak, solvedTotal, completedTotal }: {
   onPractice: () => void;
+  onChooseStage: (id: LearningStageId) => void;
   onComingSoon: (subject: string) => void;
   signedIn: boolean;
   nickname?: string;
@@ -83,11 +86,6 @@ export function WizpikoPortal({ onPractice, onComingSoon, signedIn, nickname, av
         <div className="wz-achievement-preview"><div><span>⭐</span><strong>First Word</strong><small>{solvedTotal>0?'Earned!':'Keep exploring'}</small></div><div><span>📘</span><strong>Crossword</strong><small>{completedTotal>0?'Earned!':'Keep practising'}</small></div><div><span>🔥</span><strong>{streak} Days</strong><small>Learning streak</small></div><div><span>🏆</span><strong>{xp} XP</strong><small>Points earned</small></div></div>
       </section>
     </div>}
-    <section className="wz-learning-stages">
-      <div><span className="wz-stages-icon"><Layers3 size={33}/></span><h2>Learning for Every Stage</h2><p>From kindergarten to higher secondary, explore age-appropriate learning experiences.</p><button onClick={onPractice}>Explore Learning Levels <ArrowRight size={16}/></button></div>
-      <div className="wz-stages-chart" aria-label="Learning stages: KG, Primary, Middle, Secondary, Higher Secondary">
-        {['KG','Primary','Middle','Secondary','Higher Secondary'].map((name,i)=><span key={name} className={'wz-stage-'+i}>{name}</span>)}
-      </div>
-    </section>
+    <LearningStages onChooseStage={onChooseStage} onPractice={onPractice} />
   </>;
 }
