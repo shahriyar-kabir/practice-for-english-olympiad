@@ -34,12 +34,16 @@ jobs:
         run: npm run test:guardian-db
       - name: Test account release migration and data isolation
         run: npm run test:accounts
+      - name: Test public support database and rate limits
+        run: npm run test:public-support
       - name: Set up Deno
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
       - name: Check guardian Edge Function
         run: deno check supabase/functions/guardian-consent/index.ts
+      - name: Check public support Edge Function
+        run: deno check --config supabase/functions/public-support/deno.json --frozen supabase/functions/public-support/index.ts
       - name: Verify Supabase public configuration
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}

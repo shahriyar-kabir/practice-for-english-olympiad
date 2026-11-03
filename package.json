@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:guardian-db": "node scripts/test-guardian-db.mjs",
     "test:guardian-concurrency": "node scripts/test-guardian-concurrency.mjs",
-    "test:accounts": "node scripts/test-account-release.mjs"
+    "test:accounts": "node scripts/test-account-release.mjs",
+    "test:public-support": "node scripts/test-public-support.mjs"
   },
   "dependencies": {
     "@fontsource/fraunces": "^5.2.7",

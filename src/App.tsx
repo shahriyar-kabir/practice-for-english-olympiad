@@ -1,25 +1,56 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, DragEvent, ReactNode } from 'react';
-import { ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCheck, ChevronRight, CircleHelp, GripVertical, Leaf, Lightbulb, MousePointer2, RotateCcw, Sparkles, Star, Trophy, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCheck, ChevronRight, CircleHelp, GripVertical, Leaf, Lightbulb, MousePointer2, RotateCcw, Sparkles, Star, Trophy, LockKeyhole, X } from 'lucide-react';
 import { puzzles } from './data/puzzles';
 import type { Entry } from './data/puzzles';
 import { buildCells, cellAt, entryContains, initialProgress, readProgress, saveProgress } from './game';
 import type { Progress } from './game';
-import { EnglishJourney, readJourney, saveJourney } from './EnglishJourney';
-import type { JourneyProgress } from './EnglishJourney';
+import { readJourney, saveJourney } from './journey';
+import type { JourneyProgress } from './journey';
 import { useWizpikoAccount } from './cloudAccount';
-import { AccountDialog } from './AccountDialog';
+import SiteHeader from './SiteHeader';
+import SiteFooter from './SiteFooter';
+import type { InfoPageId } from './content/siteCopy';
+import type { AcademyLevel } from './learningTypes';
+import { lessonCatalog } from './academy/catalog';
+import { learningSummary, recordLearningCompletion } from './learningMetrics';
 import { WizpikoPortal } from './WizpikoPortal';
-import { learningStages } from './LearningStages';
 import type { LearningStageId } from './LearningStages';
 import type { CategoryId } from './englishContent';
-import { LearnerHub, learnerMenu } from './LearnerHub';
+
 import type { LearnerPage } from './LearnerHub';
-import { ageFromBirthdate, ageLabel, learningStreak, recordActivity } from './learnerData';
-import { ChevronDown, Search, Instagram, Facebook, LogOut } from 'lucide-react';
+import { ageFromBirthdate } from './learnerData';
+
+
+
+const EnglishAcademy = lazy(() => import('./academy/EnglishAcademy'));
+const EnglishJourney = lazy(() => import('./EnglishJourney').then(module => ({ default: module.EnglishJourney })));
+const LearnerHub = lazy(() => import('./LearnerHub').then(module => ({ default: module.LearnerHub })));
+const AccountDialog = lazy(() => import('./AccountDialog').then(module => ({ default: module.AccountDialog })));
+const InfoPages = lazy(() => import('./InfoPages'));
+const ContactPage = lazy(() => import('./ContactPage'));
+
+type Destination = { kind: 'english'; level?: AcademyLevel; lessonId?: string } | { kind: 'games' } | { kind: 'classic' } | { kind: 'hub'; page: LearnerPage } | { kind: 'coming'; subject: string };
+const publicPages: InfoPageId[] = ['help','account-guide','privacy','about','mission'];
+const readPublicPage = () => new URLSearchParams(window.location.search).get('page');
+const INTENT_KEY='wizpiko-return-to';
+function readIntent():Destination|null {
+ try {
+  const value=JSON.parse(sessionStorage.getItem(INTENT_KEY)||'null');
+  if(!value||typeof value!=='object')return null;
+  if(value.kind==='classic'||value.kind==='games')return {kind:value.kind};
+  if(value.kind==='hub'&&['profile','progress','achievements','streak','preferences','help'].includes(value.page))return {kind:'hub',page:value.page};
+  if(value.kind==='coming'&&typeof value.subject==='string')return {kind:'coming',subject:value.subject.slice(0,80)};
+  if(value.kind==='english')return {kind:'english',level:['starter','beginner','intermediate','advanced'].includes(value.level)?value.level:undefined,lessonId:typeof value.lessonId==='string'&&lessonCatalog.some(item=>item.id===value.lessonId)?value.lessonId:undefined};
+ }catch{ /* A fresh sign-in can proceed without a stored destination. */ }
+ return null;
+}
+function saveIntent(value:Destination|null){try{if(value)sessionStorage.setItem(INTENT_KEY,JSON.stringify(value));else sessionStorage.removeItem(INTENT_KEY);}catch{ /* Navigation still works within this visit. */ }}
+
+function PageLoading() { return <div className="wz-page-loading" role="status"><span aria-hidden="true">📖</span>Getting your learning space ready…</div>; }
 
 type Notice = { text: string; kind: 'success' | 'try' | 'hint' };
-type Dialog = 'help' | 'progress' | 'reset' | 'complete' | 'about' | 'privacy' | 'signout' | null;
+type Dialog = 'help' | 'progress' | 'reset' | 'complete' | 'signout' | null;
 
 function Modal({ children, title, onClose }: { children: ReactNode; title: string; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -59,28 +90,67 @@ export default function App() {
   const [progress, setProgress] = useState<Progress>(readProgress);
   const [journey, setJourney] = useState<JourneyProgress>(readJourney);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [view, setView] = useState<'home'|'categories'|'classic'|'hub'|'coming'>('home');
-  const [startingCategory, setStartingCategory] = useState<CategoryId | null>(null);
+  const [view, setView] = useState<'home'|'categories'|'games'|'classic'|'hub'|'coming'|'info'|'contact'>(() => readPublicPage()==='contact' ? 'contact' : publicPages.includes(readPublicPage() as InfoPageId) ? 'info' : 'home');
+  const [infoPage,setInfoPage] = useState<InfoPageId>(() => publicPages.includes(readPublicPage() as InfoPageId) ? readPublicPage() as InfoPageId : 'about');
+  const [startingCategory] = useState<CategoryId | null>(null);
+  const [academyLevel,setAcademyLevel] = useState<AcademyLevel>('starter');
+  const [academyLesson,setAcademyLesson] = useState<string | undefined>();
   const [hubPage,setHubPage]=useState<LearnerPage>('profile');
   const [comingSubject,setComingSubject]=useState('');
-  const [avatarOpen,setAvatarOpen]=useState(false);
-  const [searchOpen,setSearchOpen]=useState(false);
-  const [searchTerm,setSearchTerm]=useState('');
-  const avatarRef=useRef<HTMLDivElement>(null);
-  function goHub(page:LearnerPage){setAvatarOpen(false);setHubPage(page);setView('hub');setDialog(null);window.scrollTo(0,0);}
-  function goComing(name:string){setComingSubject(name);setView('coming');window.scrollTo(0,0);}
-  useEffect(()=>{const cb=(e:MouseEvent)=>{if(avatarRef.current&&!avatarRef.current.contains(e.target as Node))setAvatarOpen(false);};document.addEventListener('mousedown',cb);return()=>document.removeEventListener('mousedown',cb);},[]);
-  function doSearch(){if(!searchTerm.trim())return;if(/english|crossword|quiz|mcq|word/i.test(searchTerm))goPractice();else goComing(searchTerm.trim());setSearchOpen(false);}
-  function goPractice() { setStartingCategory(null); setView('categories'); setDialog(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  function goLearningStage(id: LearningStageId) {
-    setStartingCategory(learningStages.find(stage => stage.id === id)?.recommendedCategory ?? null);
-    setView('categories'); setDialog(null); window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-  function goHome() { setView('home'); setDialog(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  function goClassic() { setView('classic'); setDialog(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  const [pendingDestination,setPendingDestination]=useState<Destination | null>(readIntent);
   const account = useWizpikoAccount({ legacy: progress, journey }, restored => { setProgress(restored.legacy); setJourney(restored.journey); });
-  useEffect(() => { saveJourney(journey); }, [journey]);
-  useEffect(() => { if(account.auth.recovery)setAccountOpen(true); }, [account.auth.recovery]);
+
+  function changeURL(page?:string) {
+    const next=window.location.pathname+(page?'?page='+encodeURIComponent(page):'');
+    if(window.location.pathname+window.location.search!==next)window.history.pushState(null,'',next);
+  }
+  function openInfo(page:InfoPageId) { setInfoPage(page);setView('info');setDialog(null);changeURL(page);window.scrollTo(0,0); }
+  function openContact() { setView('contact');setDialog(null);changeURL('contact');window.scrollTo(0,0); }
+  function goHome() {setView('home');setDialog(null);changeURL();window.scrollTo(0,0);}
+  function goSubjects() {goHome();window.requestAnimationFrame(()=>document.getElementById('wiz-subjects')?.scrollIntoView({behavior:'smooth',block:'start'}));}
+  function applyDestination(destination:Destination) {
+    setDialog(null);changeURL();
+    if(destination.kind==='english'){setAcademyLevel(destination.level||account.auth.profile?.preferences?.learning_level||'starter');setAcademyLesson(destination.lessonId);setView('categories');}
+    else if(destination.kind==='hub'){setHubPage(destination.page);setView('hub');}
+    else if(destination.kind==='coming'){setComingSubject(destination.subject);setView('coming');}
+    else setView(destination.kind);
+    window.scrollTo(0,0);
+  }
+  function requestDestination(destination:Destination) {
+    if(account.auth.user)applyDestination(destination);
+    else {saveIntent(destination);setPendingDestination(destination);if(!account.auth.loading)setAccountOpen(true);}
+  }
+  function goPractice(){requestDestination({kind:'english'});}
+  function goPracticeGames(){requestDestination({kind:'games'});}
+  function goClassic(){requestDestination({kind:'classic'});}
+  function goHub(page:LearnerPage){requestDestination({kind:'hub',page});}
+  function goComing(subject:string){requestDestination({kind:'coming',subject});}
+  function goLesson(lessonId:string){const lesson=lessonCatalog.find(item=>item.id===lessonId);requestDestination({kind:'english',lessonId,level:lesson?.level});}
+  function goLearningStage(id:LearningStageId) {
+    const levels:Record<LearningStageId,AcademyLevel>={'early-years':'starter',primary:'beginner','middle-school':'intermediate',secondary:'intermediate','college-university':'advanced','lifelong-learners':'starter'};
+    requestDestination({kind:'english',level:levels[id]});
+  }
+  function search(query:string) {
+    if(/contact|suggestion/i.test(query))openContact();
+    else if(/privacy|safety/i.test(query))openInfo('privacy');
+    else if(/help|support/i.test(query))openInfo('help');
+    else if(/crossword|quiz|mcq|game/i.test(query))goPracticeGames();
+    else if(/english|word|read|spell|gramm|listen|writ|lesson/i.test(query))goPractice();
+    else goComing(query.slice(0,80));
+  }
+  useEffect(()=>{
+    if(account.auth.loading||!pendingDestination)return;
+    if(account.auth.user){applyDestination(pendingDestination);saveIntent(null);setPendingDestination(null);setAccountOpen(false);}
+    else setAccountOpen(true);
+  },[account.auth.user?.id,account.auth.loading,pendingDestination]);
+  useEffect(()=>{saveJourney(journey);},[journey]);
+  useEffect(()=>{if(account.auth.recovery||account.auth.status==='Email confirmed. Sign in with your password.')setAccountOpen(true);},[account.auth.recovery,account.auth.status]);
+  useEffect(()=>{
+    const reduced=account.auth.profile?.preferences?.reduced_motion||account.auth.profile?.preferences?.animation===false;
+    document.documentElement.classList.toggle('wz-reduced-motion',Boolean(reduced));
+    return()=>document.documentElement.classList.remove('wz-reduced-motion');
+  },[account.auth.profile?.preferences?.reduced_motion,account.auth.profile?.preferences?.animation]);
+  useEffect(()=>{const navigate=()=>{const page=readPublicPage();if(page==='contact')setView('contact');else if(publicPages.includes(page as InfoPageId)){setInfoPage(page as InfoPageId);setView('info');}else setView('home');};window.addEventListener('popstate',navigate);return()=>window.removeEventListener('popstate',navigate);},[]);
   const [puzzleIndex, setPuzzleIndex] = useState(0);
   const puzzle = puzzles[puzzleIndex];
   const state = progress[puzzle.id] ?? initialProgress();
@@ -99,7 +169,8 @@ export default function App() {
   const solvedTotal = puzzles.reduce((sum, item) => sum + (progress[item.id]?.solved.length ?? 0), 0);
   const completedTotal = puzzles.filter(item => progress[item.id]?.solved.length === item.entries.length).length;
   const academyRecords = Object.values(journey.records);
-  const academyXP = academyRecords.reduce((sum, item) => sum + item.xp, 0);
+  const learningStats = learningSummary(journey,new Date(),{solvedTotal,completedTotal});
+  const academyXP = learningStats.xp;
   const unlockedLevels = academyRecords.reduce((sum, item) => sum + Math.max(0, item.unlocked - 1), 0);
 
   useEffect(() => { setStorageWarning(!saveProgress(progress)); }, [progress]);
@@ -138,7 +209,7 @@ export default function App() {
     const finished = solved.length === puzzle.entries.length;
     if (sound) playChime(finished);
     announce(`${word.charAt(0) + word.slice(1).toLowerCase()} is right! A little word, a big win.`, 'success');
-    if (finished) {setDialog('complete');setJourney(previous=>({...previous,activityDates:recordActivity(previous.activityDates)}));}
+    if (finished) {setDialog('complete');const completedAt=new Date().toISOString();setJourney(previous=>recordLearningCompletion(previous,{id:`classic:${puzzle.id}:${completedAt}`,title:puzzle.title,kind:'classic',completedAt,xp:0,correct:puzzle.entries.length,total:puzzle.entries.length}));}
     else {
       const next = puzzle.entries.find(candidate => !solved.includes(candidate.id))!;
       chooseEntry(next);
@@ -186,15 +257,11 @@ export default function App() {
   ];
 
   return <>
-    <header className="site-header wz-site-header"><div className="header-inner wz-header-inner">
-      <button className="wz-header-logo" onClick={goHome} aria-label="Wizpiko home"><img src="./wizpiko-wordmark.png" alt="Wizpiko — Think. Play. Shine."/></button>
-      <nav className="wz-header-nav" aria-label="Main navigation"><button className={view==='home'?'active':''} onClick={goHome}>Home</button><button onClick={()=>setDialog('about')}>About Us</button>{account.auth.user&&<button className={view==='hub'?'active':''} onClick={()=>goHub('progress')}>My Learning</button>}</nav>
-      <div className="wz-header-right"><form className={'wz-search '+(searchOpen?'open':'')} onSubmit={e=>{e.preventDefault();doSearch();}}>{searchOpen&&<input autoFocus aria-label="Search subjects" placeholder="Search subjects…" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)}/>}<button aria-label="Search" type={searchOpen?'submit':'button'} onClick={()=>{if(!searchOpen)setSearchOpen(true);}}><Search size={20}/></button></form>
-      {account.auth.user?<div className="wz-avatar-wrap" ref={avatarRef}><button className="wz-avatar-button" onClick={()=>setAvatarOpen(!avatarOpen)} aria-expanded={avatarOpen} aria-haspopup="menu"><span className="wz-avatar-pic">{({girl:'👧',boy:'👦',robot:'🤖',panda:'🐼',cat:'🐱'} as const)[account.auth.profile?.avatar||'robot']}</span><span>{account.auth.profile?.display_name||'Learner'}</span><ChevronDown size={15}/></button>
-        {avatarOpen&&<div className="wz-avatar-menu" role="menu"><div className="wz-menu-person"><span className="wz-avatar-pic">{({girl:'👧',boy:'👦',robot:'🤖',panda:'🐼',cat:'🐱'} as const)[account.auth.profile?.avatar||'robot']}</span><div><strong>{account.auth.profile?.display_name||'Learner'}</strong><small>{ageLabel(ageFromBirthdate(account.auth.profile?.birth_date||''))}</small></div></div>{learnerMenu.map(({id,label,icon:Icon})=><button key={id} role="menuitem" onClick={()=>goHub(id)}><Icon size={17}/>{label}{id==='streak'&&<span className="wz-menu-flame">🔥 {learningStreak(journey.activityDates).current}</span>}</button>)}<button role="menuitem" className="wz-menu-signout" onClick={()=>{setAvatarOpen(false);setDialog('signout');}}><LogOut size={17}/> Sign Out</button></div>}
-      </div>:<button className="wz-signin-button" onClick={()=>setAccountOpen(true)}>Sign In</button>}</div></div></header>
+    <SiteHeader signedIn={!!account.auth.user} loading={account.auth.loading} profile={account.auth.profile} isHome={view==='home'} streak={learningStats.streak.current} onHome={goHome} onSubjects={goSubjects} onGames={goPracticeGames} onInfo={openInfo} onContact={openContact} onSignIn={()=>setAccountOpen(true)} onHub={goHub} onSignOut={()=>setDialog('signout')} onSearch={search}/>
     <main className="page-wrap">
-      {view==='home'?<WizpikoPortal onPractice={goPractice} onChooseStage={goLearningStage} onComingSoon={goComing} signedIn={!!account.auth.user} nickname={account.auth.profile?.display_name} avatar={account.auth.profile?.avatar} learnerAge={ageFromBirthdate(account.auth.profile?.birth_date||'')} onProgress={()=>goHub('progress')} onStreak={()=>goHub('streak')} onAchievements={()=>goHub('achievements')} xp={academyXP} streak={learningStreak(journey.activityDates).current} solvedTotal={solvedTotal} completedTotal={completedTotal}/>:view==='hub'&&account.auth.user?<LearnerHub page={hubPage} profile={account.auth.profile} email={account.auth.user.email||''} journey={journey} solvedTotal={solvedTotal} completedTotal={completedTotal} totalWords={totalWords} onPage={goHub} onHome={goHome} onPractice={goPractice} onSignOut={()=>setDialog('signout')} onSaveProfile={account.updateProfile}/>:view==='coming'?<section className="wz-coming-page"><Sparkles size={42}/><h1>{comingSubject}</h1><p>Something wonderful is coming soon! For now, enjoy English Practice.</p><button className="wz-action-button" onClick={goPractice}>Explore English Practice <ArrowRight size={17}/></button><button className="wz-secondary-link" onClick={goHome}>Back home</button></section>:view==='categories'?<EnglishJourney key={startingCategory ?? 'all'} initialCategory={startingCategory} onHome={goHome} onLegacy={goClassic} journey={journey} onJourney={setJourney}/>:<><div className="wiz-back-line"><button onClick={goPractice}><ArrowLeft size={17}/> Back to English categories</button><span>English Practice • Original Beginner Crosswords</span></div><section className="wiz-classic-heading" aria-labelledby="page-heading"><div><span className="wiz-kicker">ENGLISH PRACTICE • ORIGINAL BEGINNER PUZZLES</span><h1 id="page-heading">Word adventures with <span>Wizpiko!</span></h1><p>Choose a clue, tap a word, and earn your stars. All original puzzles remain available.</p></div><img src="./wizpiko-icon.webp" alt="" /></section>
+      <Suspense fallback={<PageLoading/>}>
+      {view==='info'?<InfoPages page={infoPage} onNavigate={openInfo} onHome={goHome} onContact={openContact} onSignIn={()=>setAccountOpen(true)}/>:view==='contact'?<ContactPage onHome={goHome} onPrivacy={()=>openInfo('privacy')}/>:view!=='home'&&!account.auth.user?<section className="wz-login-gate"><LockKeyhole size={35}/><h1>Your learning space is waiting</h1><p>Sign in to open lessons, activities and your saved progress.</p><button className="wz-action-button" onClick={()=>setAccountOpen(true)}>Sign In</button><button className="wz-secondary-link" onClick={goHome}>Back to Home</button></section>:view==='home'?<WizpikoPortal onPractice={goPractice} onChooseStage={goLearningStage} onComingSoon={goComing} signedIn={!!account.auth.user} nickname={account.auth.profile?.display_name} avatar={account.auth.profile?.avatar} learnerAge={ageFromBirthdate(account.auth.profile?.birth_date||'')} onProgress={()=>goHub('progress')} onStreak={()=>goHub('streak')} onAchievements={()=>goHub('achievements')} xp={academyXP} streak={learningStats.streak.current} solvedTotal={solvedTotal} completedTotal={completedTotal} journey={journey} preferences={account.auth.profile?.preferences} onLesson={goLesson} onClassic={goClassic} onGames={goPracticeGames}/>:view==='hub'&&account.auth.user?<LearnerHub page={hubPage} profile={account.auth.profile} email={account.auth.user.email||''} journey={journey} solvedTotal={solvedTotal} completedTotal={completedTotal} totalWords={totalWords} onPage={goHub} onHome={goHome} onPractice={goPractice} onSignOut={()=>setDialog('signout')} onSaveProfile={account.updateProfile} onContact={openContact} onLesson={goLesson} onClassic={goClassic}/>:view==='coming'?<section className="wz-coming-page"><Sparkles size={42}/><h1>{comingSubject}</h1><p>Something wonderful is coming soon! For now, enjoy English Practice.</p><button className="wz-action-button" onClick={goPractice}>Explore English Practice <ArrowRight size={17}/></button><button className="wz-secondary-link" onClick={goHome}>Back home</button></section>:view==='categories'?<EnglishAcademy key={academyLesson||academyLevel} initialLevel={academyLevel} initialLessonId={academyLesson} journey={journey} onJourney={setJourney} onHome={goHome} onClassic={goClassic} onPracticeGames={goPracticeGames}/>:view==='games'?<EnglishJourney key={startingCategory??'all'} initialCategory={startingCategory} onHome={goPractice} onLegacy={goClassic} journey={journey} onJourney={setJourney}/>
+:<><div className="wiz-back-line"><button onClick={goPractice}><ArrowLeft size={17}/> Back to English learning</button><span>English Practice • Original Beginner Crosswords</span></div><section className="wiz-classic-heading" aria-labelledby="page-heading"><div><span className="wiz-kicker">ENGLISH PRACTICE • ORIGINAL BEGINNER PUZZLES</span><h1 id="page-heading">Word adventures with <span>Wizpiko!</span></h1><p>Choose a clue, tap a word, and earn your stars. All original puzzles remain available.</p></div><img src="./wizpiko-icon.webp" alt="" /></section>
 
       <div className="workspace">
         <aside className="adventures" id="adventures" aria-label="Choose a crossword adventure">
@@ -256,20 +323,20 @@ export default function App() {
 <div className="wiz-word-tip"><Sparkles size={18}/> Choose a clue in the center and pick the matching word here.</div><div className="saved-note"><Check size={13}/> {storageWarning ? 'Progress saved for this visit' : 'Your progress is saved as you play'}</div></aside>
       </div>
       </>}
-      <footer className="wiz-site-footer wz-footer"><div className="wz-footer-grid"><div className="wz-footer-identity"><img src="./wizpiko-wordmark.png" alt="Wizpiko — Think. Play. Shine."/><p>A cheerful place to explore, practise and grow with curiosity.</p></div><div><strong>Platform</strong><button onClick={goHome}>Home</button><button onClick={()=>{goHome();window.setTimeout(()=>document.getElementById('wiz-subjects')?.scrollIntoView({behavior:'smooth'}),20);}}>Subjects</button>{account.auth.user&&<button onClick={()=>goHub('progress')}>My Progress</button>}</div><div><strong>Support</strong><button onClick={()=>account.auth.user?goHub('help'):setDialog('privacy')}>Help Center</button><button onClick={()=>setDialog('privacy')}>Privacy & Safety</button><button onClick={()=>setDialog('privacy')}>Account Guide</button></div><div><strong>Company</strong><button onClick={()=>setDialog('about')}>About Us</button><button onClick={()=>setDialog('about')}>Our Mission</button></div><div><strong>Follow Us</strong><span className="wz-social-icons"><span title="Official Facebook link pending"><Facebook size={23}/></span><span title="Official Instagram link pending"><Instagram size={23}/></span></span><small>© {new Date().getFullYear()} Wizpiko.</small></div></div></footer>
+      </Suspense>
+      <SiteFooter signedIn={!!account.auth.user} onHome={goHome} onSubjects={goSubjects} onProgress={()=>goHub('progress')} onInfo={openInfo} onContact={openContact}/>
+
     </main>
 
-    {accountOpen && <AccountDialog onClose={() => setAccountOpen(false)} configured={account.auth.configured} email={account.auth.user?.email} profile={account.auth.profile} recovery={account.auth.recovery} status={account.auth.status} signUp={account.signUp} signIn={account.signIn} signOut={account.signOut} sendPasswordReset={account.sendPasswordReset} updatePassword={account.updatePassword} />}
+    {accountOpen && <Suspense fallback={<div className="wz-auth-loading" role="status">Opening Sign In…</div>}><AccountDialog onClose={() => {setAccountOpen(false);saveIntent(null);setPendingDestination(null);}} configured={account.auth.configured} email={account.auth.user?.email} profile={account.auth.profile} recovery={account.auth.recovery} status={account.auth.status} signUp={account.signUp} signIn={account.signIn} signOut={account.signOut} sendPasswordReset={account.sendPasswordReset} updatePassword={account.updatePassword} resendSignupConfirmation={account.resendSignupConfirmation}/></Suspense>}
 
     <div className={`notice ${notice ? 'notice-visible' : ''} ${notice?.kind ?? ''}`} role="status" aria-live="polite" aria-atomic="true">{notice && <>{notice.kind === 'success' ? <Sparkles size={20} /> : notice.kind === 'hint' ? <Lightbulb size={20} /> : <Leaf size={20} />}<span>{notice.text}</span><button aria-label="Dismiss message" onClick={() => setNotice(null)}><X size={16} /></button></>}</div>
 
     {dialog === 'signout'&&<Modal title="Sign out?" onClose={()=>setDialog(null)}><h2>See you soon! 🌟</h2><p className="modal-subtitle">Your saved progress will be waiting when you sign in again.</p><div className="modal-actions"><button className="secondary-button" onClick={()=>setDialog(null)}>Keep learning</button><button className="primary-button" onClick={()=>{void account.signOut().then(()=>{setDialog(null);goHome();});}}>Sign Out</button></div></Modal>}
-    {dialog === 'help' && <Modal title="How to play" onClose={() => setDialog(null)}><img className="wiz-modal-robot" src="./wizpiko-icon.webp" alt="" /><div className="eyebrow">READY, SET, SHINE</div><h2>A little play goes a long way.</h2><p className="modal-subtitle">Your next word adventure is just three little steps away.</p><ol className="help-steps"><li><span>1</span><div><strong>Pick a clue</strong><p>Tap an Across or Down clue. Its squares will light up in the grid.</p></div></li><li><span>2</span><div><strong>Find your word</strong><p>Drag a word from the word bank onto the highlighted squares. On a phone, just tap the word!</p></div></li><li><span>3</span><div><strong>Watch it grow</strong><p>The right word turns green. If it doesn’t fit, try again. Need a nudge? Ask for a little hint.</p></div></li></ol><div className="grownup-note"><BookOpen size={20} /><p><strong>A note for grown-ups</strong>All 10 puzzles come from the original Beginner English practice collection. Your progress saves locally as you play and can sync across devices after you sign in. Timed challenges are available in the English categories.</p></div><button className="primary-button" onClick={() => setDialog(null)}>Let’s play <ArrowRight size={17} /></button></Modal>}
+    {dialog === 'help' && <Modal title="How to play" onClose={() => setDialog(null)}><img className="wiz-modal-robot" src="./wizpiko-icon.webp" alt="" /><div className="eyebrow">READY, SET, SHINE</div><h2>A little play goes a long way.</h2><p className="modal-subtitle">Your next word adventure is just three little steps away.</p><ol className="help-steps"><li><span>1</span><div><strong>Pick a clue</strong><p>Tap an Across or Down clue. Its squares will light up in the grid.</p></div></li><li><span>2</span><div><strong>Find your word</strong><p>Drag a word from the word bank onto the highlighted squares. On a phone, just tap the word!</p></div></li><li><span>3</span><div><strong>Watch it grow</strong><p>The right word turns green. If it doesn’t fit, try again. Need a nudge? Ask for a little hint.</p></div></li></ol><div className="grownup-note"><BookOpen size={20} /><p><strong>A note for grown-ups</strong>All 10 puzzles come from the original Beginner English practice collection. Your learning progress stays connected to your signed-in account. Check the save status as you play. Timed challenges are available in the English categories.</p></div><button className="primary-button" onClick={() => setDialog(null)}>Let’s play <ArrowRight size={17} /></button></Modal>}
 
-    {dialog === 'progress' && <Modal title="My progress" onClose={() => setDialog(null)}><img className="wiz-modal-robot" src="./wizpiko-icon.webp" alt="" /><div className="eyebrow">LOOK AT YOU SHINE</div><h2>Every little word counts.</h2><p className="modal-subtitle">An adventure is made of little victories. Here are yours.</p><div className="progress-stats"><div><strong>{solvedTotal}<small> / {totalWords}</small></strong><span>Original words discovered</span></div><div><strong>{completedTotal}<small> / 10</small></strong><span>Original puzzles complete</span></div><div><strong>{academyXP}</strong><span>English challenge XP</span></div><div><strong>{unlockedLevels}</strong><span>New levels unlocked</span></div></div><h3 className="badges-title"><Award size={18} /> Your little milestones</h3><div className="badge-list">{badges.map(badge => <div className={`badge ${badge.unlocked ? 'badge-unlocked' : ''}`} key={badge.name}><span>{badge.emoji}</span><div><strong>{badge.name}</strong><small>{badge.detail}</small></div>{badge.unlocked && <Check size={17} />}</div>)}</div><p className="privacy-note">{account.auth.user ? account.auth.status : "Guest progress saves in this browser. Sign in to sync progress across devices."}</p><button className="primary-button" onClick={() => setDialog(null)}>Keep exploring <ArrowRight size={17} /></button></Modal>}
+    {dialog === 'progress' && <Modal title="My progress" onClose={() => setDialog(null)}><img className="wiz-modal-robot" src="./wizpiko-icon.webp" alt="" /><div className="eyebrow">LOOK AT YOU SHINE</div><h2>Every little word counts.</h2><p className="modal-subtitle">An adventure is made of little victories. Here are yours.</p><div className="progress-stats"><div><strong>{solvedTotal}<small> / {totalWords}</small></strong><span>Original words discovered</span></div><div><strong>{completedTotal}<small> / 10</small></strong><span>Original puzzles complete</span></div><div><strong>{academyXP}</strong><span>Learning XP</span></div><div><strong>{unlockedLevels}</strong><span>New levels unlocked</span></div></div><h3 className="badges-title"><Award size={18} /> Your little milestones</h3><div className="badge-list">{badges.map(badge => <div className={`badge ${badge.unlocked ? 'badge-unlocked' : ''}`} key={badge.name}><span>{badge.emoji}</span><div><strong>{badge.name}</strong><small>{badge.detail}</small></div>{badge.unlocked && <Check size={17} />}</div>)}</div><p className="privacy-note">{account.auth.user ? account.auth.status : "Sign in to open your saved learning progress."}</p><button className="primary-button" onClick={() => setDialog(null)}>Keep exploring <ArrowRight size={17} /></button></Modal>}
 
-    {dialog === 'about' && <Modal title="About Wizpiko" onClose={() => setDialog(null)}><img className="wiz-modal-robot" src="./wizpiko-icon.webp" alt=""/><h2>Learning should feel like an adventure.</h2><p className="modal-subtitle">Wizpiko is growing into a welcoming learning platform for curious learners of different ages. English practice is available today; additional subjects are in development.</p><button className="primary-button" onClick={() => setDialog(null)}>Continue exploring</button></Modal>}
-    {dialog === 'privacy' && <Modal title="Privacy and safety" onClose={() => setDialog(null)}><h2>Privacy & safety</h2><p className="modal-subtitle">Wizpiko lets visitors practise as guests using local browser storage. Registered users can sync their progress securely with Supabase. Your account uses your nickname, date of birth, email address and learning preferences to personalize your experience.</p><p className="modal-subtitle">Guest progress stays in this browser. Signed-in progress is associated with your account. You can change your nickname, avatar and learning preferences from your profile, and sign out on shared devices. Clearing browser storage removes locally saved guest progress.</p><button className="primary-button" onClick={() => setDialog(null)}>Got it</button></Modal>}
     {dialog === 'reset' && <Modal title="Start this puzzle over?" onClose={() => setDialog(null)}><span className="modal-emoji">🍃</span><h2>A fresh little start?</h2><p className="modal-subtitle">This clears the words and hints in <strong>{puzzle.title}</strong>. Your other adventures will stay just as they are.</p><div className="modal-actions"><button className="secondary-button" onClick={() => setDialog(null)}><ArrowLeft size={16} /> Keep playing</button><button className="primary-button" onClick={() => { setProgress(current => ({ ...current, [puzzle.id]: initialProgress() })); chooseEntry(puzzle.entries[0]); setDialog(null); setNotice(null); }}>Start fresh <RotateCcw size={15} /></button></div></Modal>}
 
     {dialog === 'complete' && <Modal title="Puzzle complete!" onClose={() => setDialog(null)}><div className="confetti" aria-hidden="true">{Array.from({ length: 18 }, (_, index) => <i key={index} style={{ '--i': index } as CSSProperties} />)}</div><img src="./wizpiko-icon.webp" alt="" className="wiz-celebration-robot"/><div className="eyebrow"><Trophy size={15} /> A BIG LITTLE VICTORY</div><h2>You’re a word wonder!</h2><p className="modal-subtitle">You found all {puzzle.entries.length} words in <strong>{puzzle.title}</strong>.<br />Give yourself a little happy dance!</p><div className="completion-stars" aria-label="Three stars earned">★ ★ ★</div><button className="primary-button" onClick={() => { if (puzzleIndex < puzzles.length - 1) choosePuzzle(puzzleIndex + 1); else setDialog('progress'); }}>{puzzleIndex < puzzles.length - 1 ? 'Next adventure' : 'See my discoveries'} <ArrowRight size={17} /></button><button className="text-button modal-back" onClick={() => setDialog(null)}>Admire my puzzle</button></Modal>}
