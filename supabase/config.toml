@@ -1,2 +1,5 @@
 [functions.guardian-consent]
 verify_jwt = false
+
+[functions.public-support]
+verify_jwt = false

@@ -17,7 +17,7 @@ type Props = {
   onPractice: () => void;
 };
 
-const iconSheet = `${import.meta.env.BASE_URL}learning-stage-icons.png`;
+const iconSheet = `${import.meta.env.BASE_URL}learning-stage-icons.webp`;
 const iconPositions = ['0% 0%', '50% 0%', '100% 0%', '0% 100%', '50% 100%', '100% 100%'];
 
 export function LearningStages({ onChooseStage, onPractice }: Props) {

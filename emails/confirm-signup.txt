@@ -1,0 +1,15 @@
+Welcome to Wizpiko
+
+Hello, curious mind!
+
+You’re one step away from your Wizpiko account. Confirm your email address to start practising, save your progress and enjoy learning at your own pace.
+
+Confirm my email: {{ .ConfirmationURL }}
+
+After confirming, return to Wizpiko and sign in to begin.
+
+If you did not create a Wizpiko account, you can ignore this email.
+
+Need a hand? Contact support@wizpiko.com.
+Wizpiko · Think. Play. Shine.
+https://wizpiko.com

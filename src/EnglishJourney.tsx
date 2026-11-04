@@ -3,29 +3,11 @@ import type { CSSProperties } from 'react';
 import { ArrowLeft, ArrowRight, Check, ChevronRight, Clock3, Lightbulb, LockKeyhole, Star, Trophy } from 'lucide-react';
 import { categories, makeCrossword, makeQuestions } from './englishContent';
 import type { CategoryId, GeneratedCrossword } from './englishContent';
-import { recordActivity } from './learnerData';
+import { recordLearningCompletion } from './learningMetrics';
 
-export type GameMode = 'crossword' | 'mcq';
-export type LevelRecord = { unlocked: number; completed: number; bestScore: number; xp: number };
-export type GameSession = {
-  key: string; endsAt: number; index: number;
-  answers: Record<number, string>; solved: string[];
-  hints: Record<string, number[]>; startedAt: number;
-};
-export type JourneyProgress = { records: Record<string, LevelRecord>; session?: GameSession; activityDates?: string[] };
-export const JOURNEY_STORAGE = 'wizpiko-english-journey-v1';
-export const emptyJourney = (): JourneyProgress => ({ records: {} });
-export function readJourney(): JourneyProgress {
-  try {
-    const raw = JSON.parse(localStorage.getItem(JOURNEY_STORAGE) || '{}') as JourneyProgress;
-    if (!raw || typeof raw !== 'object' || !raw.records || typeof raw.records !== 'object') return emptyJourney();
-    return raw;
-  } catch { return emptyJourney(); }
-}
-export function saveJourney(value: JourneyProgress): boolean {
-  try { localStorage.setItem(JOURNEY_STORAGE, JSON.stringify(value)); return true; }
-  catch { return false; }
-}
+export { JOURNEY_STORAGE, emptyJourney, readJourney, saveJourney } from './journey';
+export type { GameMode, LevelRecord, GameSession, JourneyProgress } from './journey';
+import type { GameMode, LevelRecord, GameSession, JourneyProgress } from './journey';
 export function formatTime(seconds: number): string {
   return Math.floor(Math.max(0, seconds) / 60).toString().padStart(2, '0') + ':' + Math.max(0, seconds % 60).toString().padStart(2, '0');
 }
@@ -100,7 +82,14 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCa
       bestScore: Math.max(previous.bestScore, score),
       xp: previous.xp + xp,
     };
-    onJourney({ ...journey, activityDates: doneCount > 0 ? recordActivity(journey.activityDates) : journey.activityDates, session: undefined, records: { ...journey.records, [recordKey(categoryId, mode)]: record } });
+    const next: JourneyProgress = { ...journey, session: undefined, records: { ...journey.records, [recordKey(categoryId, mode)]: record } };
+    onJourney(doneCount > 0 ? recordLearningCompletion(next, {
+      id: `game:${active.key}:${active.startedAt}`,
+      title: `${category?.name || 'English'} ${mode === 'mcq' ? 'MCQ Challenge' : 'Crossword Quest'}`,
+      kind: mode,
+      completedAt: new Date().toISOString(),
+      xp, correct: correctCount, total: possible,
+    }) : next);
     setFinished({ score, passed, xp, timedOut });
   }
   useEffect(() => {
