@@ -151,3 +151,93 @@ describe('explicit contact mail transport selection', () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 });
+
+const diagnosticRequestId = '1e3551bb-7e39-4f04-90f2-3ccbfa66aefa';
+describe('private server-side SMTP failure diagnostics', () => {
+  it('classifies a runtime error without copying its message or stack', async () => {
+    const report = vi.fn();
+    sendMail.mockRejectedValueOnce(new TypeError(config.smtpPassword));
+    await expect(createSmtpMailer(config, factory, report)!.send({ ...mail, requestId: diagnosticRequestId })).rejects.toThrow(/^mail_delivery_failed$/);
+    expect(report).toHaveBeenCalledExactlyOnceWith({ requestId: diagnosticRequestId, phase: 'compose', code: 'TYPE_ERROR', responseCode: null });
+    expect(JSON.stringify(report.mock.calls)).not.toContain(config.smtpPassword);
+  });
+  it('reports only a correlation id, phase, whitelisted code and numeric response code', async () => {
+    const report = vi.fn();
+    const providerError = Object.assign(new Error('AUTH PLAIN private-mailbox-password visitor@example.com'), {
+      code: 'EAUTH', responseCode: 535, response: '535 sensitive provider reply',
+      stack: 'sensitive stack', auth: config.smtpPassword,
+    });
+    factory.mockImplementationOnce(() => ({ sendMail, close, getPhase: () => 'auth' }));
+    sendMail.mockRejectedValueOnce(providerError);
+    await expect(createSmtpMailer(config, factory, report)!.send({ ...mail, requestId: diagnosticRequestId })).rejects.toThrow(/^mail_delivery_failed$/);
+    expect(report).toHaveBeenCalledExactlyOnceWith({ requestId: diagnosticRequestId, phase: 'auth', code: 'EAUTH', responseCode: 535 });
+    expect(JSON.stringify(report.mock.calls)).not.toMatch(/password|visitor@|sensitive|AUTH PLAIN/);
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+  it('drops arbitrary provider values from every diagnostic field', async () => {
+    const report = vi.fn();
+    factory.mockImplementationOnce(() => ({ sendMail, close, getPhase: () => config.smtpPassword }));
+    sendMail.mockRejectedValueOnce({ code: config.smtpPassword, originalCode: mail.text, responseCode: '535 '+mail.replyTo,
+      message: config.smtpPassword, response: mail.text, stack: mail.text });
+    await expect(createSmtpMailer(config, factory, report)!.send({ ...mail, requestId: mail.replyTo })).rejects.toThrow(/^mail_delivery_failed$/);
+    expect(report).toHaveBeenCalledExactlyOnceWith({ requestId: 'unavailable', phase: 'unknown', code: 'SMTP_UNKNOWN', responseCode: null });
+    expect(JSON.stringify(report.mock.calls)).not.toContain(config.smtpPassword);
+    expect(JSON.stringify(report.mock.calls)).not.toContain(mail.replyTo);
+  });
+  it('preserves a whitelisted underlying network code without logging server text', async () => {
+    const report = vi.fn();
+    factory.mockImplementationOnce(() => ({ sendMail, close, getPhase: () => 'connect' }));
+    sendMail.mockRejectedValueOnce({ code: 'ESOCKET', originalCode: 'ECONNREFUSED', responseCode: 999, response: config.smtpPassword });
+    await expect(createSmtpMailer(config, factory, report)!.send({ ...mail, requestId: diagnosticRequestId })).rejects.toThrow(/^mail_delivery_failed$/);
+    expect(report).toHaveBeenCalledExactlyOnceWith({ requestId: diagnosticRequestId, phase: 'connect', code: 'ECONNREFUSED', responseCode: null });
+  });
+  it('reports invalid final acceptance as its own phase rather than an auth failure', async () => {
+    const report = vi.fn();
+    factory.mockImplementationOnce(() => ({ sendMail, close, getPhase: () => 'send' }));
+    sendMail.mockResolvedValueOnce({ ...accepted, response: '550 rejected' });
+    await expect(createSmtpMailer(config, factory, report)!.send({ ...mail, requestId: diagnosticRequestId })).rejects.toThrow(/^mail_delivery_failed$/);
+    expect(report).toHaveBeenCalledExactlyOnceWith({ requestId: diagnosticRequestId, phase: 'acceptance', code: 'SMTP_NOT_ACCEPTED', responseCode: null });
+  });
+  it('records the active phase on its overall deadline and still closes only once', async () => {
+    vi.useFakeTimers();
+    const report = vi.fn();
+    factory.mockImplementationOnce(() => ({ sendMail, close, getPhase: () => 'connect' }));
+    sendMail.mockImplementationOnce(() => new Promise(() => {}));
+    const result = expect(createSmtpMailer(config, factory, report)!.send({ ...mail, requestId: diagnosticRequestId })).rejects.toThrow(/^mail_delivery_failed$/);
+    await vi.advanceTimersByTimeAsync(SMTP_TIMEOUT_MS);
+    await result;
+    expect(report).toHaveBeenCalledExactlyOnceWith({ requestId: diagnosticRequestId, phase: 'connect', code: 'SMTP_TIMEOUT', responseCode: null });
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+  it('keeps the same failure and cleanup if the diagnostic sink fails', async () => {
+    const report = vi.fn().mockImplementation(() => { throw new Error('logger unavailable'); });
+    sendMail.mockRejectedValueOnce({ code: 'EAUTH', responseCode: 535 });
+    await expect(createSmtpMailer(config, factory, report)!.send(mail)).rejects.toThrow(/^mail_delivery_failed$/);
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+  it('serializes only the safe diagnostic object through the default server logger', async () => {
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      sendMail.mockRejectedValueOnce({ code: 'EAUTH', responseCode: 535, message: config.smtpPassword, response: mail.text });
+      await expect(createSmtpMailer(config, factory)!.send({ ...mail, requestId: diagnosticRequestId })).rejects.toThrow(/^mail_delivery_failed$/);
+      expect(logger).toHaveBeenCalledExactlyOnceWith(JSON.stringify({ requestId: diagnosticRequestId, phase: 'compose', code: 'EAUTH', responseCode: 535 }));
+    } finally { logger.mockRestore(); }
+  });
+  it('does not expose diagnostics in the public contact response', async () => {
+    const backend = createPublicSupportBackend(config, vi.fn(), factory);
+    backend.rpc = vi.fn().mockResolvedValue({ allowed: true });
+    sendMail.mockRejectedValueOnce({ code: 'EAUTH', responseCode: 535, message: config.smtpPassword, response: mail.text });
+    const logger = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const response = await createPublicSupportHandler(config, backend)(new Request('https://example.supabase.co/functions/v1/public-support', {
+        method: 'POST', headers: { Origin: config.appOrigin, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'contact', name: 'Visitor', email: mail.replyTo, suggestion: 'A deployment test message.' }),
+      }));
+      expect(response.status).toBe(502);
+      const body = await response.json();
+      expect(body).toEqual({ error: 'Your message could not be sent. Please try again later.', code: 'delivery_failed' });
+      expect(JSON.stringify(body)).not.toMatch(/EAUTH|535|phase|password/);
+      expect(logger).toHaveBeenCalledTimes(1);
+    } finally { logger.mockRestore(); }
+  });
+});
