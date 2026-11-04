@@ -66,7 +66,7 @@ export default function SiteHeader({signedIn,loading,profile,isHome,streak,compl
     </nav>
     <div className="wz-header-right"><form role="search" className={`wz-search${searchOpen?' open':''}`} onSubmit={event=>{event.preventDefault();if(query.trim()){navigate(()=>onSearch(query.trim()));setQuery('');}}}>
       <button aria-label="Search" type={searchOpen?'submit':'button'} onClick={()=>{if(!searchOpen)setSearchOpen(true);}}><Search size={23}/></button>
-      {(signedIn||reserveSignedIn||searchOpen)&&<input ref={searchInput} type="search" aria-label="Search Wizpiko" placeholder="Search..." maxLength={80} value={query} onFocus={()=>setSearchOpen(true)} onChange={event=>setQuery(event.target.value)} onKeyDown={event=>{if(event.key==='Escape'){setSearchOpen(false);searchInput.current?.blur();}}}/>}
+      {(signedIn||reserveSignedIn||searchOpen)&&<input ref={searchInput} type="search" aria-label="Search Wizpiko" placeholder="Search..." maxLength={80} value={query} onFocus={()=>setSearchOpen(true)} onChange={event=>{setQuery(event.target.value);setSearchOpen(true);}} onKeyDown={event=>{if(event.key==='Escape'){setSearchOpen(false);searchInput.current?.blur();}}}/>}
     </form>
     {loading?<span className="wz-account-placeholder" aria-hidden="true"/>:signedIn?<div className="wz-account-tools" ref={accountTools}>
       <div className="wz-reminder-wrap"><button ref={reminderButton} className="wz-reminder-button" type="button" aria-label="Learning reminders" aria-expanded={reminderOpen} aria-controls="wz-learning-reminder" onClick={()=>{setAvatarOpen(false);setReminderOpen(!reminderOpen);}}><Bell size={26}/>{!completedToday&&<span className="wz-reminder-dot" aria-hidden="true"/>}</button>
