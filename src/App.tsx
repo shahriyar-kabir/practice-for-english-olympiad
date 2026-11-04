@@ -7,7 +7,7 @@ import { buildCells, cellAt, entryContains, initialProgress, readProgress, saveP
 import type { Progress } from './game';
 import { readJourney, saveJourney } from './journey';
 import type { JourneyProgress } from './journey';
-import { useWizpikoAccount } from './cloudAccount';
+import { readStoredSession, useWizpikoAccount } from './cloudAccount';
 import SiteHeader from './SiteHeader';
 import SiteFooter from './SiteFooter';
 import type { InfoPageId } from './content/siteCopy';
@@ -90,6 +90,7 @@ export default function App() {
   const [progress, setProgress] = useState<Progress>(readProgress);
   const [journey, setJourney] = useState<JourneyProgress>(readJourney);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [returningAccount] = useState(() => Boolean(readStoredSession()));
   const [view, setView] = useState<RouteView>(() => readAppRoute().view);
   const [infoPage,setInfoPage] = useState<InfoPageId>(() => readAppRoute().infoPage || 'about');
   const [startingCategory] = useState<CategoryId | null>(null);
@@ -99,6 +100,8 @@ export default function App() {
   const [comingSubject,setComingSubject]=useState(() => readAppRoute().subject || '');
   const [pendingDestination,setPendingDestination]=useState<Destination | null>(readIntent);
   const account = useWizpikoAccount({ legacy: progress, journey }, restored => { setProgress(restored.legacy); setJourney(restored.journey); });
+
+  const accountLayout = !!account.auth.user || (account.auth.loading && returningAccount);
 
   function changeURL(path: string, replace = false) {
     const next = appHref(path);
@@ -293,8 +296,8 @@ export default function App() {
   ];
 
   return <>
-    <SiteHeader signedIn={!!account.auth.user} loading={account.auth.loading} profile={account.auth.profile} isHome={view==='home'} streak={learningStats.streak.current} onHome={goHome} onSubjects={goSubjects} onGames={goPracticeGames} onInfo={openInfo} onContact={openContact} onSignIn={()=>setAccountOpen(true)} onHub={goHub} onSignOut={()=>setDialog('signout')} onSearch={search}/>
-    <main className="page-wrap">
+    <SiteHeader signedIn={!!account.auth.user} loading={account.auth.loading} reserveSignedIn={account.auth.loading && returningAccount} profile={account.auth.profile} isHome={view==='home'} streak={learningStats.streak.current} completedToday={learningStats.streak.todayCompleted} onHome={goHome} onSubjects={goSubjects} onGames={goPracticeGames} onInfo={openInfo} onContact={openContact} onSignIn={()=>setAccountOpen(true)} onHub={goHub} onSignOut={()=>setDialog('signout')} onSearch={search}/>
+    <main className={`page-wrap${view==='home'&&accountLayout?' wp-home-shell':''}`}>
       <Suspense fallback={<PageLoading/>}>
       {account.auth.loading&&view!=='info'&&view!=='contact'?<PageLoading session/>:view==='info'?<InfoPages page={infoPage} onNavigate={openInfo} onHome={goHome} onContact={openContact} onSignIn={()=>setAccountOpen(true)}/>:view==='contact'?<ContactPage onHome={goHome} onPrivacy={()=>openInfo('privacy')}/>:view!=='home'&&view!=='not-found'&&!account.auth.user?<section className="wz-login-gate"><LockKeyhole size={35}/><h1>Your learning space is waiting</h1><p>Sign in to open lessons, activities and your saved progress.</p><button className="wz-action-button" onClick={()=>setAccountOpen(true)}>Sign In</button><button className="wz-secondary-link" onClick={goHome}>Back to Home</button></section>:view==='home'?<WizpikoPortal onPractice={goPractice} onChooseStage={goLearningStage} onComingSoon={goComing} signedIn={!!account.auth.user} nickname={account.auth.profile?.display_name} avatar={account.auth.profile?.avatar} learnerAge={ageFromBirthdate(account.auth.profile?.birth_date||'')} onProgress={()=>goHub('progress')} onStreak={()=>goHub('streak')} onAchievements={()=>goHub('achievements')} xp={academyXP} streak={learningStats.streak.current} solvedTotal={solvedTotal} completedTotal={completedTotal} journey={journey} preferences={account.auth.profile?.preferences} onLesson={goLesson} onClassic={goClassic} onGames={goPracticeGames} archivedClassic={archivedClassic}/>:view==='hub'&&account.auth.user?<LearnerHub page={hubPage} profile={account.auth.profile} email={account.auth.user.email||''} journey={journey} solvedTotal={solvedTotal} completedTotal={completedTotal} totalWords={totalWords} onPage={goHub} onHome={goHome} onPractice={goPractice} onSignOut={()=>setDialog('signout')} onSaveProfile={account.updateProfile} onContact={openContact} onLesson={goLesson} onClassic={goClassic} archivedClassic={archivedClassic}/>:view==='coming'?<section className="wz-coming-page"><Sparkles size={42}/><h1>{comingSubject}</h1><p>Something wonderful is coming soon! For now, enjoy English Practice.</p><button className="wz-action-button" onClick={goPractice}>Explore English Practice <ArrowRight size={17}/></button><button className="wz-secondary-link" onClick={goHome}>Back home</button></section>:view==='not-found'?<section className="wz-coming-page"><h1>Page not found</h1><p>That page does not exist. Return to Wizpiko to continue learning.</p><button className="wz-action-button" onClick={goHome}>Back to Home <ArrowRight size={17}/></button></section>:view==='categories'?<EnglishAcademy key={academyLesson||academyLevel} initialLevel={academyLevel} initialLessonId={academyLesson} journey={journey} onJourney={setJourney} onHome={goHome} onClassic={goClassic} onPracticeGames={goPracticeGames}/>:view==='games'?<EnglishJourney key={startingCategory??'all'} initialCategory={startingCategory} onHome={goPractice} onLegacy={goClassic} journey={journey} onJourney={setJourney}/>
 :<><div className="wiz-back-line"><button onClick={goPractice}><ArrowLeft size={17}/> Back to English learning</button><span>English Practice • Wizpiko Word Puzzles</span></div><section className="wiz-classic-heading" aria-labelledby="page-heading"><div><span className="wiz-kicker">ENGLISH PRACTICE • NEW WORD DISCOVERIES</span><h1 id="page-heading">Word adventures with <span>Wizpiko!</span></h1><p>Choose a clue, tap a word, and earn your stars. Explore ten newly written Wizpiko puzzles at your own pace.</p></div><img src={import.meta.env.BASE_URL + 'wizpiko-icon.webp'} alt="" /></section>
