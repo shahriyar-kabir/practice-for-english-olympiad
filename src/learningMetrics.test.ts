@@ -7,6 +7,17 @@ const now = new Date(2026, 10, 3, 12);
 const completion = (id: string, day = '2026-11-03'): LearningEvent => ({ id, title: 'A real completed crossword', kind: 'crossword', completedAt: new Date(day + 'T10:00:00').toISOString(), xp: 25, correct: 8, total: 10 });
 
 describe('Actual learning metrics and durable achievements', () => {
+  it('keeps earlier collection completions and earned word milestones after content replacement', () => {
+    const journey = { records: {} };
+    const history = { solvedTotal: 0, completedTotal: 0, retiredSolvedTotal: 110, retiredCompletedTotal: 10 };
+    const summary = learningSummary(journey, new Date('2026-11-04'), history);
+    expect(summary.activitiesCompleted).toBe(10);
+    expect(summary.gamesCompleted).toBe(10);
+    const badges = learningAchievements(journey, new Date('2026-11-04'), history);
+    expect(badges.filter(badge => ['classic-first-word','classic-crossword-explorer','classic-word-champion'].includes(badge.id)).every(badge => badge.earned)).toBe(true);
+    expect(summary.xp).toBe(0);
+  });
+
   it('sums saved lesson and game XP once, without adding activity-event XP', () => {
     const journey: JourneyProgress = {
       records: { 'kids:mcq': { completed: 2, unlocked: 3, bestScore: 80, xp: 70 } },

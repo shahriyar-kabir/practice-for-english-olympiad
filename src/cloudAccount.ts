@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { JourneyProgress } from './journey';
+import type { GameSession, JourneyProgress } from './journey';
 import { validateSignup } from './learnerData';
 import type { LearnerProfile } from './learnerData';
 import type { AcademyProgress, LearningEvent, LessonResult } from './learningTypes';
@@ -113,13 +113,39 @@ function mergeActivity(local: LearningEvent[] = [], cloud: LearningEvent[] = [])
   }
   return [...events.values()].sort((a, b) => timestamp(b.completedAt) - timestamp(a.completedAt)).slice(0, 500);
 }
+function mergeGameSession(local: GameSession | undefined, cloud: GameSession | undefined, completed: Set<string>): GameSession | undefined {
+  const open = (session: GameSession | undefined): session is GameSession => !!session &&
+    !completed.has(`game:${session.key}:${session.startedAt}`);
+  const sessions = [local, cloud].filter(open).sort((a, b) => b.startedAt - a.startedAt || b.index - a.index);
+  const newest = sessions[0], other = sessions[1];
+  if (!newest || !other || newest.key !== other.key || newest.startedAt !== other.startedAt) return newest;
+  const hints = { ...other.hints };
+  for (const id of Object.keys(newest.hints)) hints[id] = [...new Set([...(other.hints[id] || []), ...newest.hints[id]])];
+  return {
+    ...other, ...newest,
+    answers: { ...other.answers, ...newest.answers },
+    solved: [...new Set([...other.solved, ...newest.solved])],
+    hints,
+    ...(newest.groupStart !== undefined || other.groupStart !== undefined ? { groupStart: Math.max(newest.groupStart || 0, other.groupStart || 0) } : {}),
+    ...(newest.questionCount !== undefined || other.questionCount !== undefined ? { questionCount: Math.max(newest.questionCount || 0, other.questionCount || 0) } : {}),
+    ...(newest.completedGroups || other.completedGroups ? { completedGroups: [...new Set([...(other.completedGroups || []), ...(newest.completedGroups || [])])] } : {}),
+  };
+}
 export function mergeJourney(local: JourneyProgress, cloud: JourneyProgress): JourneyProgress {
   const records = { ...(cloud.records || {}), ...(local.records || {}) };
   for (const id of Object.keys(records)) {
     const a = local.records?.[id], b = cloud.records?.[id];
     if (a && b) records[id] = { unlocked: Math.max(a.unlocked, b.unlocked), completed: Math.max(a.completed, b.completed), bestScore: Math.max(a.bestScore, b.bestScore), xp: Math.max(a.xp, b.xp) };
   }
-  const sessions = [local.session, cloud.session].filter(s => s && s.endsAt > Date.now());
+  const retired = new Map<string, GameSession>();
+  for (const session of [...(local.retiredSessions || []), ...(cloud.retiredSessions || [])]) {
+    const id = `${session.key}:${session.startedAt}`;
+    retired.set(id, mergeGameSession(retired.get(id), session, new Set())!);
+  }
+  const completionIds = [...new Set([
+    ...(cloud.completionIds || []), ...(local.completionIds || []),
+    ...(cloud.activityLog || []).map(event => event.id), ...(local.activityLog || []).map(event => event.id),
+  ])];
   const earnedBadges = { ...cloud.earnedBadges, ...local.earnedBadges };
   for (const id of Object.keys(earnedBadges)) {
     const a = local.earnedBadges?.[id], b = cloud.earnedBadges?.[id];
@@ -128,15 +154,14 @@ export function mergeJourney(local: JourneyProgress, cloud: JourneyProgress): Jo
   return {
     records,
     activityDates: [...new Set([...(local.activityDates || []), ...(cloud.activityDates || [])])].sort(),
-    session: sessions.sort((a, b) => (b?.startedAt || 0) - (a?.startedAt || 0))[0],
+    session: mergeGameSession(local.session && !retired.has(`${local.session.key}:${local.session.startedAt}`) ? local.session : undefined,
+      cloud.session && !retired.has(`${cloud.session.key}:${cloud.session.startedAt}`) ? cloud.session : undefined, new Set(completionIds)),
+    ...(retired.size ? { retiredSessions: [...retired.values()] } : {}),
     academy: mergeAcademy(local.academy, cloud.academy),
     activityLog: mergeActivity(local.activityLog, cloud.activityLog),
     earnedBadges,
     streakRecord: Math.max(local.streakRecord || 0, cloud.streakRecord || 0),
-    completionIds: [...new Set([
-      ...(cloud.completionIds || []), ...(local.completionIds || []),
-      ...(cloud.activityLog || []).map(event => event.id), ...(local.activityLog || []).map(event => event.id),
-    ])],
+    completionIds,
   };
 }
 export function mergeSnapshots(local: Snapshot, cloud: Snapshot): Snapshot {

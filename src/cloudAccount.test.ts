@@ -192,6 +192,46 @@ describe('progress merging and account ownership', () => {
     expect(merged.legacy.a.hints.word.sort()).toEqual([0, 1, 2]);
     expect(merged.journey.session).toEqual(active);
   });
+  it('keeps saved puzzle answers after the old session deadline has passed', () => {
+    const old = { key: 'beginners:mcq:1', endsAt: 1, startedAt: 1, index: 42, answers: { 0: 'CAT', 41: 'DOG' }, solved: [], hints: {} };
+    const merged = account.mergeJourney({ records: {} }, { records: {}, session: old });
+    expect(merged.session).toEqual(old);
+  });
+  it('resumes an untimed session in preference to an older attempt', () => {
+    const older = { key: 'beginners:mcq:1', startedAt: 1, index: 1, answers: { 0: 'CAT' }, solved: [], hints: {} };
+    const newer = { ...older, key: 'beginners:mcq:2', startedAt: 2, questionCount: 5 };
+    const merged = account.mergeJourney({ records: {}, session: older }, { records: {}, session: newer });
+    expect(merged.session).toEqual(newer);
+  });
+  it('unions answers and credited groups when two devices resume the same old attempt', () => {
+    const shared = { key: 'beginners:mcq:1', startedAt: 1, endsAt: 2, questionCount: 50, solved: ['CAT'], hints: { cat: [0] } };
+    const merged = account.mergeJourney(
+      { records: {}, session: { ...shared, index: 12, groupStart: 10, completedGroups: [0, 1], answers: { 11: 'CAT' } } },
+      { records: {}, session: { ...shared, index: 24, groupStart: 20, completedGroups: [1, 2, 3], answers: { 23: 'DOG' }, solved: ['DOG'], hints: { cat: [1] } } },
+    );
+    expect(merged.session).toMatchObject({ index: 24, groupStart: 20, answers: { 11: 'CAT', 23: 'DOG' } });
+    expect(merged.session?.solved.sort()).toEqual(['CAT', 'DOG']);
+    expect(merged.session?.hints.cat.sort()).toEqual([0, 1]);
+    expect(merged.session?.completedGroups?.sort()).toEqual([0, 1, 2, 3]);
+  });
+  it('does not revive a completed untimed attempt from a stale device snapshot', () => {
+    const saved = { key: 'beginners:mcq:1', startedAt: 1, index: 4, questionCount: 5, answers: { 4: 'CAT' }, solved: [], hints: {} };
+    const merged = account.mergeJourney(
+      { records: {}, completionIds: ['game:beginners:mcq:1:1'] },
+      { records: {}, session: saved },
+    );
+    expect(merged.session).toBeUndefined();
+  });
+  it('preserves archived old-bank answers and does not restore them as a new activity', () => {
+    const old = { key: 'beginners:mcq:1', startedAt: 1, endsAt: 2, index: 42, answers: { 41: 'OLD ANSWER' }, solved: [], hints: {} };
+    const merged = account.mergeJourney(
+      { records: {}, retiredSessions: [old] },
+      { records: {}, session: old, retiredSessions: [{ ...old, index: 3, answers: { 2: 'EARLIER ANSWER' } }] },
+    );
+    expect(merged.session).toBeUndefined();
+    expect(merged.retiredSessions).toHaveLength(1);
+    expect(merged.retiredSessions?.[0].answers).toEqual({ 2: 'EARLIER ANSWER', 41: 'OLD ANSWER' });
+  });
   it('never carries account A progress into B, and preserves A unsynced work in its own cache', () => {
     const a = account.prepareLocalProgressForUser('account-a', snapshot('guest'));
     a.journey.records['unsynced-a'] = record(3, 99);

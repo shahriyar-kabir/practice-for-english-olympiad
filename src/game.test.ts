@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { puzzles, type Puzzle } from './data/puzzles';
-import { buildCells, cellAt, entryContains, initialProgress, readProgress, saveProgress, STORAGE_KEY } from './game';
+import { buildCells, cellAt, entryContains, initialProgress, readProgress, retiredClassicSummary, saveProgress, STORAGE_KEY } from './game';
 
 const sample: Puzzle = {
   id: 'sample', title: 'Sample', category: 'Test', emoji: '🌱', color: '#254f43', description: '',
@@ -50,6 +50,40 @@ describe('crossword placement', () => {
 });
 
 describe('saved progress', () => {
+  it('round-trips retired history alongside fresh play without crediting its answers to new puzzles', () => {
+    const current = puzzles[0];
+    const prior = { solved: ['1-down', '2-across'], hints: { '3-down': [0, 2] } };
+    const fresh = { solved: [current.entries[0].id], hints: {} };
+    let stored = JSON.stringify({ 'animal-friends': prior, [current.id]: fresh });
+    vi.stubGlobal('localStorage', {
+      getItem: () => stored,
+      setItem: (_key: string, value: string) => { stored = value; },
+    });
+    const restored = readProgress();
+    expect(restored['animal-friends']).toEqual(prior);
+    expect(restored[current.id]).toEqual(fresh);
+    expect(retiredClassicSummary(restored)).toEqual({ solvedWords: 2, completedPuzzles: 0, totalWords: 110, totalPuzzles: 10 });
+    expect(saveProgress(restored)).toBe(true);
+    expect(readProgress()).toEqual(restored);
+  });
+
+  it('reports completed retired puzzles independently of the current collection', () => {
+    const history = { 'animal-friends': { solved: Array.from({ length: 10 }, (_, i) => `${i + 1}-across`), hints: {} } };
+    expect(retiredClassicSummary(history)).toMatchObject({ solvedWords: 10, completedPuzzles: 1 });
+    expect(retiredClassicSummary({ [puzzles[0].id]: { solved: puzzles[0].entries.map(entry => entry.id), hints: {} } }))
+      .toMatchObject({ solvedWords: 0, completedPuzzles: 0 });
+  });
+
+  it('retains safe historical hint positions while rejecting malformed archive values', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: () => JSON.stringify({ 'animal-friends': {
+        solved: ['1-down', '1-down', 'unknown', null, 4],
+        hints: { '2-across': [0, 4, 4, -1, 64, '2'], unknown: [0] },
+      } }),
+    });
+    expect(readProgress()).toEqual({ 'animal-friends': { solved: ['1-down'], hints: { '2-across': [0, 4] } } });
+  });
+
   it('round-trips valid progress', () => {
     let saved = '';
     vi.stubGlobal('localStorage', {

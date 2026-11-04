@@ -167,7 +167,7 @@ export default function EnglishAcademy({ journey, onJourney, onHome, onClassic, 
       const Icon = skillIcons[skill]; const result = results[item.id];
       return <button key={skill} className={`ea-skill ea-${skillColours[skill]}`} onClick={() => openLesson(item.id)}><span className="ea-skill-icon"><Icon size={25} /></span><span className="ea-skill-label">{skillLabels[skill]}</span><h3>{item.title}</h3><p>{item.description}</p><span className="ea-skill-foot"><span><Clock3 size={14} /> {item.duration} · No timer</span>{result ? <span><CheckCircle2 size={14} /> Best {result.score}%</span> : <ArrowRight size={18} />}</span></button>;
     })}</div>
-    <aside className="ea-game-links"><div><h2>A little play, too?</h2><p>Explore practice games or revisit the original 10 crosswords.</p></div><div className="ea-actions"><button className="ea-button ea-secondary" onClick={onPracticeGames}>Practice games <ArrowRight size={16} /></button><button className="ea-text-button" onClick={onClassic}>Original 10 crosswords <ArrowRight size={16} /></button></div></aside>
+    <aside className="ea-game-links"><div><h2>A little play, too?</h2><p>Try five-question sets or discover ten newly written Wizpiko word puzzles.</p></div><div className="ea-actions"><button className="ea-button ea-secondary" onClick={onPracticeGames}>Practice games <ArrowRight size={16} /></button><button className="ea-text-button" onClick={onClassic}>Wizpiko word puzzles <ArrowRight size={16} /></button></div></aside>
   </section>;
 
   if (!lesson) return <section className="ea-page">{topbar}<div className="ea-panel ea-loading" role={loadError ? 'alert' : 'status'}><BookOpen size={36} /><h1>{loadError ? 'Let’s try that again' : 'Opening your lesson…'}</h1><p>{loadError || 'Getting your examples and practice ready.'}</p>{loadError && <div className="ea-actions"><button className="ea-button" onClick={() => setLoadRetry(value => value + 1)}>Try again</button><button className="ea-button ea-secondary" onClick={returnToLessons}>Choose a lesson</button></div>}</div></section>;
@@ -209,7 +209,7 @@ export default function EnglishAcademy({ journey, onJourney, onHome, onClassic, 
       <p className="ea-small">{completion.delta ? 'Lesson XP grows only when your best score improves, up to 50 XP per lesson.' : 'You keep your best score and XP. Improve your score to earn the remaining lesson XP.'}</p>
       <div className="ea-recap"><h3>Your next real-life step</h3><p>{lesson.recap}</p></div>
       <div className="ea-actions">{nextLesson && <button className="ea-button" onClick={() => openLesson(nextLesson.id)}>Next lesson <ArrowRight size={18} /></button>}<button className="ea-button ea-secondary" onClick={returnToLessons}>Explore lessons</button><button className="ea-text-button" onClick={retry}><RotateCcw size={16} /> Practise again</button></div>
-      <div className="ea-game-footer"><button className="ea-text-button" onClick={onPracticeGames}>Try practice games</button><button className="ea-text-button" onClick={onClassic}>Original 10 crosswords</button></div>
+      <div className="ea-game-footer"><button className="ea-text-button" onClick={onPracticeGames}>Try practice games</button><button className="ea-text-button" onClick={onClassic}>Wizpiko word puzzles</button></div>
     </div>}
   </section>;
 }

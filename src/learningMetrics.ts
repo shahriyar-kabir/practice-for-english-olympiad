@@ -3,7 +3,7 @@ import type { LearningEvent, LessonResult } from './learningTypes';
 import { dayKey, learningStreak, validActivityDays } from './learnerData';
 
 export const LEARNING_LOG_LIMIT = 240;
-export type ClassicLearningStats = { solvedTotal?: number; completedTotal?: number };
+export type ClassicLearningStats = { solvedTotal?: number; completedTotal?: number; retiredSolvedTotal?: number; retiredCompletedTotal?: number };
 
 export type LearningAchievement = {
   id: string;
@@ -48,7 +48,7 @@ export function learningSummary(journey: JourneyProgress, now = new Date(), clas
   const gameXP = records.reduce((sum, record) => sum + nonnegative(record.xp), 0);
   const lessonsCompleted = lessons.length;
   const englishGamesCompleted = records.reduce((sum, record) => sum + count(record.completed), 0);
-  const classicCompleted = count(classic.completedTotal);
+  const classicCompleted = count(classic.completedTotal) + count(classic.retiredCompletedTotal);
   const gamesCompleted = englishGamesCompleted + classicCompleted;
   const dates = validActivityDays([
     ...(Array.isArray(journey.activityDates) ? journey.activityDates : []),
@@ -77,9 +77,9 @@ export function learningAchievements(journey: JourneyProgress, now = new Date(),
   const summary = learningSummary(journey, now, classic);
   const events = completedEvents(journey, now);
   const definitions = [
-    { id: 'classic-first-word', title: 'First word', description: 'Discover your first word in an original crossword.', icon: '🔤', done: count(classic.solvedTotal) > 0 },
-    { id: 'classic-crossword-explorer', title: 'Crossword explorer', description: 'Complete your first original crossword.', icon: '🧭', done: summary.classicCompleted > 0 },
-    { id: 'classic-word-champion', title: 'Word champion', description: 'Complete all ten original crosswords.', icon: '👑', done: summary.classicCompleted >= 10 },
+    { id: 'classic-first-word', title: 'First word', description: 'Discover your first word in a Wizpiko word puzzle.', icon: '🔤', done: count(classic.solvedTotal) + count(classic.retiredSolvedTotal) > 0 },
+    { id: 'classic-crossword-explorer', title: 'Crossword explorer', description: 'Complete your first Wizpiko word puzzle.', icon: '🧭', done: summary.classicCompleted > 0 },
+    { id: 'classic-word-champion', title: 'Word champion', description: 'Complete ten word puzzles.', icon: '👑', done: summary.classicCompleted >= 10 },
     { id: 'first-activity', title: 'First discovery', description: 'Complete your first learning activity.', icon: '✨', done: summary.activitiesCompleted > 0 || events.length > 0 },
     { id: 'first-lesson', title: 'Lesson explorer', description: 'Finish your first English lesson.', icon: '📖', done: summary.lessonsCompleted > 0 },
     { id: 'three-lessons', title: 'Building momentum', description: 'Complete three different English lessons.', icon: '🌱', done: summary.lessonsCompleted >= 3 },
