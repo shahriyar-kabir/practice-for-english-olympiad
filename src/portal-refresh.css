@@ -3,8 +3,8 @@
 .wp-avatar-frame { position: absolute; inset: 0; display: block; }
 .wp-avatar-frame > img { position: absolute; width: 300% !important; height: 200% !important; max-width: none !important; left: calc(var(--avatar-x) * -100%); top: calc(var(--avatar-y) * -100%); object-fit: fill !important; margin: 0 !important; pointer-events: none; }
 .wz-site-header .wp-avatar.wz-avatar-pic { width: 37px; height: 37px; padding: 0; border-radius: 50%; background: linear-gradient(145deg, #e3eeff, #f8dcff); }
-.wz-site-header .wz-avatar-pic .wp-avatar-frame { transform: scale(1.7); transform-origin: 50% 0%; }
-.wd-shell .wd-avatar .wp-avatar-frame { transform: scale(1.55); transform-origin: 50% 0%; }
+.wz-site-header .wz-avatar-pic .wp-avatar-frame { transform: scale(1.25); transform-origin: 50% 12%; }
+.wd-shell .wd-avatar .wp-avatar-frame { transform: scale(1.25); transform-origin: 50% 12%; }
 .wz-site-header .wz-avatar-button { background: #eaf3ff; color: #102956; border-radius: 28px; }
 .wz-site-header .wz-avatar-menu { border: 1px solid #e0e9fb; border-radius: 20px; background: #fff; box-shadow: 0 18px 45px #183b7626; }
 .wz-site-header .wz-menu-person { align-items: center; }
@@ -27,10 +27,9 @@
 .wp-hero-streak > svg:first-child { color: #fa7917; flex: none; }
 .wp-welcome-art { position: relative; min-height: 365px; isolation: isolate; }
 .wp-welcome-art::before { content: ''; position: absolute; width: 95%; height: 60%; left: 1%; bottom: -12%; border-radius: 50%; background: #fffaf2b5; filter: blur(20px); }
-.wp-welcome-art .wp-hero-person { position: absolute; width: min(70%, 410px); height: auto; aspect-ratio: 1; left: -5%; bottom: 0; border-radius: 0; background: none; z-index: 2; }
-.wp-welcome-art .wp-hero-robot { position: absolute; bottom: 21px; right: 3%; width: 57%; height: auto; object-fit: contain; z-index: 1; filter: drop-shadow(0 10px 10px #3679b61a); }
-.wp-welcome-art.wp-robot-selected .wp-hero-person { width: min(82%, 430px); left: 7%; }
-.wp-hero-art-caption { position: absolute; z-index: 3; bottom: 14px; left: 20%; padding: 5px 12px; background: #ffffffd9; border: 1px solid #ffffff; border-radius: 30px; font-size: 9px; color: #365b89; font-weight: 800; }
+.wp-welcome-art .wp-hero-person { position: absolute; width: min(78%, 460px); height: auto; aspect-ratio: 1; left: -8%; bottom: -18px; border-radius: 0; background: none; z-index: 2; }
+.wp-welcome-art .wp-hero-robot { position: absolute; bottom: -18px; right: -5%; width: 62%; height: auto; aspect-ratio: 1; border-radius: 0; background: none; z-index: 1; filter: drop-shadow(0 10px 10px #3679b61a); }
+.wp-welcome-art.wp-robot-selected .wp-hero-person { width: min(88%, 470px); left: 5%; }
 .wp-benefit-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 0 18px 20px; padding: 15px 4px; background: #ffffffd4; border: 1px solid #e3edff; border-top: 0; border-radius: 0 0 22px 22px; }
 .wp-benefit-strip > button { display: flex; gap: 12px; align-items: center; text-align: left; padding: 2px 20px; border-right: 1px solid #dce6fa; }
 .wp-benefit-strip > button:last-child { border-right: 0; }
@@ -226,10 +225,9 @@
   .wp-welcome-copy .wp-blue-button { font-size: 12px; min-height: 43px; padding: 11px 19px; }
   .wp-hero-streak { margin: 13px auto 0; justify-content: center; max-width: 100%; }
   .wp-welcome-art { min-height: 245px; width: 100%; }
-  .wp-welcome-art .wp-hero-person { width: 65%; max-width: 270px; left: 2%; bottom: 1px; }
-  .wp-welcome-art .wp-hero-robot { width: 50%; right: 1%; bottom: 23px; }
+  .wp-welcome-art .wp-hero-person { width: 72%; max-width: 290px; left: -4%; bottom: -12px; }
+  .wp-welcome-art .wp-hero-robot { width: 58%; right: -5%; bottom: -12px; }
   .wp-welcome-art.wp-robot-selected .wp-hero-person { width: 75%; max-width: 300px; left: 12%; }
-  .wp-hero-art-caption { bottom: 8px; left: 24%; font-size: 8px; }
   .wp-benefit-strip { border-radius: 0 0 17px 17px; gap: 12px 0; margin-bottom: 17px; }
   .wp-benefit-strip > button { padding: 1px 10px; gap: 8px; align-items: flex-start; }
   .wp-shortcut-icon { width: 35px; height: 35px; font-size: 20px; }
