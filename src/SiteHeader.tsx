@@ -4,6 +4,7 @@ import type { LearnerProfile } from './learnerData';
 import type { LearnerPage } from './LearnerHub';
 import type { InfoPageId } from './content/siteCopy';
 import { LearnerAvatar } from './LearnerAvatar';
+import { appHref } from './routes';
 
 type Props = {
   signedIn: boolean; loading: boolean; profile: LearnerProfile | null; isHome: boolean; streak: number;
@@ -42,15 +43,15 @@ export default function SiteHeader({signedIn,loading,profile,isHome,streak,onHom
   function navigate(work:()=>void){setAvatarOpen(false);setMobileOpen(false);work();}
   const nickname=profile?.display_name||'Learner';
   return <header className="site-header wz-site-header"><div className="header-inner wz-header-inner">
-    <button className="wz-header-logo" type="button" onClick={()=>navigate(onHome)} aria-label="Wizpiko home"><img src="./wizpiko-wordmark.webp" width="720" height="240" decoding="async" alt="Wizpiko — Think. Play. Shine."/></button>
+    <button className="wz-header-logo" type="button" onClick={()=>navigate(onHome)} aria-label="Wizpiko home"><img src={import.meta.env.BASE_URL + 'wizpiko-wordmark.webp'} width="720" height="240" decoding="async" alt="Wizpiko — Think. Play. Shine."/></button>
     <button className="wz-mobile-menu" type="button" onClick={()=>setMobileOpen(!mobileOpen)} aria-label={mobileOpen?'Close navigation':'Open navigation'} aria-expanded={mobileOpen} aria-controls="wz-main-nav">{mobileOpen?<X size={23}/>:<Menu size={23}/>}</button>
     <nav id="wz-main-nav" className={`wz-header-nav${mobileOpen?' is-open':''}`} aria-label="Main navigation">
       <button className={isHome?'active':''} type="button" onClick={()=>navigate(onHome)}>Home</button>
       <button type="button" onClick={()=>navigate(onSubjects)}>Subjects</button>
       <button type="button" onClick={()=>navigate(onGames)}>Games</button>
       {(signedIn||loading)&&<button type="button" disabled={loading} className={loading?'wz-loading-nav':''} aria-hidden={loading||undefined} onClick={()=>navigate(()=>onHub('progress'))}>My Learning</button>}
-      <a href="?page=about" onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(()=>onInfo('about'));}}}>About Us</a>
-      <a href="?page=contact" onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(onContact);}}}>Contact Us</a>
+      <a href={appHref('/about-us')} onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(()=>onInfo('about'));}}}>About Us</a>
+      <a href={appHref('/contact-us')} onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(onContact);}}}>Contact Us</a>
     </nav>
     <div className="wz-header-right"><form role="search" className={`wz-search${searchOpen?' open':''}`} onSubmit={event=>{event.preventDefault();if(query.trim()){navigate(()=>onSearch(query.trim()));setSearchOpen(false);setQuery('');}}}>
       {searchOpen&&<input autoFocus type="search" aria-label="Search Wizpiko" placeholder="Search…" maxLength={80} value={query} onChange={event=>setQuery(event.target.value)} onKeyDown={event=>{if(event.key==='Escape')setSearchOpen(false);}}/>}
