@@ -22,15 +22,16 @@ function cellsFor(puzzle: Puzzle) {
   return cells;
 }
 
-describe('crosswords from the supplied English Olympiad document', () => {
+describe('original Wizpiko word puzzles', () => {
   it('contains all ten puzzles and 110 words with unique puzzle IDs', () => {
     expect(puzzles).toHaveLength(10);
     expect(puzzles.reduce((count, puzzle) => count + puzzle.entries.length, 0)).toBe(110);
     expect(new Set(puzzles.map(puzzle => puzzle.id)).size).toBe(10);
+    expect(puzzles.every(puzzle => puzzle.id.startsWith('wizpiko-'))).toBe(true);
     expect(puzzles.map(puzzle => puzzle.title)).toEqual([
-      'Animal Friends', 'In the Classroom', 'Food and Drinks', 'Our Natural World',
-      'Opposites', 'Action Words', 'Around the House', 'Travel and Transport',
-      'Time and Calendar', 'English Word Skills',
+      'Rooftop Garden', 'After the Rain', 'The Creative Desk', 'Picnic Plans',
+      'The Makers Table', 'The Kindness Club', 'Market Morning', 'The Story Lantern',
+      'A City Discovery', 'Space Workshop',
     ]);
   });
 

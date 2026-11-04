@@ -6,8 +6,9 @@ import { completedLessonResults, learningAchievements, learningSummary } from '.
 import { lessonCatalog, levelLabels, skillLabels } from './academy/catalog';
 import type { AcademyLevel, AcademySkill } from './learningTypes';
 import { supportFaqs } from './content/siteCopy';
-import { Award, ArrowLeft, ArrowRight, BookOpen, Check, ChevronLeft, ChevronRight, Flame, HelpCircle, Lock, LogOut, Mail, Search, Settings2, Sparkles, Star, TrendingUp, UserRound } from 'lucide-react';
+import { Award, ArrowLeft, ArrowRight, BookOpen, Check, ChevronLeft, ChevronRight, Flame, HelpCircle, Lock, LogOut, Mail, Search, Settings2, Star, TrendingUp, UserRound } from 'lucide-react';
 import './dashboard.css';
+import { LearnerAvatar, learnerAvatars } from './LearnerAvatar';
 
 export type LearnerPage = 'profile' | 'progress' | 'achievements' | 'streak' | 'preferences' | 'help';
 export const learnerMenu: { id: LearnerPage; label: string; icon: typeof UserRound }[] = [
@@ -35,9 +36,10 @@ type Props = {
   onContact?: () => void;
   onLesson?: (lessonId: string) => void;
   onClassic?: () => void;
+  archivedClassic?: { solvedWords: number; completedPuzzles: number };
 };
 
-const avatarEmoji: Record<LearnerProfile['avatar'], string> = { girl: '👧', boy: '👦', robot: '🤖', panda: '🐼', cat: '🐱' };
+
 const skills: AcademySkill[] = ['sounds', 'vocabulary', 'grammar', 'reading', 'listening', 'writing'];
 const levels: AcademyLevel[] = ['starter', 'beginner', 'intermediate', 'advanced'];
 const pageIntro: Record<LearnerPage, string> = {
@@ -57,7 +59,7 @@ function dateLabel(value: string) {
   return Number.isFinite(date.getTime()) ? date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
 }
 
-export function LearnerHub({ page, profile, email, journey, solvedTotal, completedTotal, totalWords, onPage, onHome, onPractice, onSignOut, onSaveProfile, onContact, onLesson, onClassic }: Props) {
+export function LearnerHub({ page, profile, email, journey, solvedTotal, completedTotal, totalWords, onPage, onHome, onPractice, onSignOut, onSaveProfile, onContact, onLesson, onClassic, archivedClassic }: Props) {
   const [name, setName] = useState(profile?.display_name || '');
   const [preferences, setPreferences] = useState<LearnerProfile['preferences']>(profile?.preferences || {});
   const [feedback, setFeedback] = useState('');
@@ -67,9 +69,9 @@ export function LearnerHub({ page, profile, email, journey, solvedTotal, complet
   useEffect(() => { setName(profile?.display_name || ''); }, [profile?.display_name]);
   useEffect(() => { setPreferences(profile?.preferences || {}); }, [profile?.preferences]);
   useEffect(() => { setFeedback(''); }, [page]);
-  const summary = learningSummary(journey, new Date(), { solvedTotal, completedTotal });
+  const summary = learningSummary(journey, new Date(), { solvedTotal, completedTotal, retiredSolvedTotal: archivedClassic?.solvedWords, retiredCompletedTotal: archivedClassic?.completedPuzzles });
   const streak = summary.streak;
-  const achievements = learningAchievements(journey, new Date(), { solvedTotal, completedTotal });
+  const achievements = learningAchievements(journey, new Date(), { solvedTotal, completedTotal, retiredSolvedTotal: archivedClassic?.solvedWords, retiredCompletedTotal: archivedClassic?.completedPuzzles });
   const earned = achievements.filter(badge => badge.earned);
   const age = ageFromBirthdate(profile?.birth_date || '');
   const displayName = profile?.display_name || email.split('@')[0] || 'Learner';
@@ -83,6 +85,16 @@ export function LearnerHub({ page, profile, email, journey, solvedTotal, complet
   const firstWeekday = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1).getDay();
   const daysInMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate();
   const atCurrentMonth = calendarMonth.getFullYear() === today.getFullYear() && calendarMonth.getMonth() === today.getMonth();
+  const weekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (today.getDay() + 6) % 7);
+  const weeklyDays = Array.from({ length: 7 }, (_, offset) => {
+    const day = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + offset);
+    const key = dayKey(day);
+    const completed = new Set((journey.activityLog || []).filter(event => Number.isFinite(Date.parse(event.completedAt)) && Date.parse(event.completedAt) <= today.getTime() && dayKey(new Date(event.completedAt)) === key).map(event => event.id)).size;
+    return { key, label: day.toLocaleDateString(undefined, { weekday: 'short' }), completed };
+  });
+  const weeklyMax = Math.max(1, ...weeklyDays.map(day => day.completed));
+  const lessonTotals = Object.values(results).reduce((sum, result) => ({ correct: sum.correct + result.correct, total: sum.total + result.total }), { correct: 0, total: 0 });
+  const lessonAccuracy = lessonTotals.total ? `${Math.round(lessonTotals.correct / lessonTotals.total * 100)}%` : '—';
   const finishedWordsPercent = Math.min(100, Math.round(solvedTotal / Math.max(1, totalWords) * 100));
   const filteredFaqs = supportFaqs.filter(faq => `${faq.question} ${faq.answer.join(' ')}`.toLowerCase().includes(helpQuery.toLowerCase().trim()));
   const finish = async (work: () => Promise<void>) => {
@@ -98,16 +110,16 @@ export function LearnerHub({ page, profile, email, journey, solvedTotal, complet
   return <section className="wd-shell" aria-label="Your learning account">
     <aside className="wd-sidebar">
       <button className="wd-back" onClick={onHome}><ArrowLeft size={17} /> Back to Home</button>
-      <div className="wd-sidebar-person"><span className="wd-avatar" aria-hidden="true">{avatarEmoji[profile?.avatar || 'robot']}</span><strong>{displayName}</strong><span>{ageLabel(age)}</span></div>
+      <div className="wd-sidebar-person"><LearnerAvatar avatar={profile?.avatar} className="wd-avatar" decorative /><strong>{displayName}</strong><span>{ageLabel(age)}</span></div>
       <nav aria-label="Account navigation">{learnerMenu.map(({ id, label, icon: Icon }) => <button key={id} type="button" className={page === id ? 'is-active' : ''} aria-current={page === id ? 'page' : undefined} onClick={() => onPage(id)}><Icon size={19} /><span>{label}</span>{page === id && <ChevronRight size={16} />}</button>)}</nav>
-      <div className="wd-sidebar-tip"><span aria-hidden="true">🌱</span><strong>Little steps. Big possibilities.</strong><p>Your next discovery is waiting.</p><button type="button" onClick={onPractice}>Keep learning <ArrowRight size={15} /></button></div>
+      <div className="wd-sidebar-tip"><img src={`${import.meta.env.BASE_URL}wizpiko-mascot.webp`} width="300" height="300" alt="" loading="lazy" /><strong>Little steps. Big possibilities.</strong><p>Your next discovery is waiting.</p><button type="button" onClick={onPractice}>Keep learning <ArrowRight size={15} /></button></div>
       <button className="wd-signout" onClick={onSignOut}><LogOut size={18} /> Sign Out</button>
     </aside>
     <div className="wd-main">
-      <header className="wd-page-heading"><span className="wd-eyebrow"><Sparkles size={15} /> Your learning space</span><h1>{title}</h1><p>{pageIntro[page]}</p></header>
+      <header className="wd-page-heading"><span className="wd-eyebrow"><BookOpen size={15} /> Your learning space</span><h1>{title}</h1><p>{pageIntro[page]}</p></header>
 
       {page === 'profile' && <>
-        <div className="wd-profile-banner"><span className="wd-avatar wd-avatar-xl" aria-hidden="true">{avatarEmoji[profile?.avatar || 'robot']}</span><div><span className="wd-eyebrow">Hello, curious mind!</span><h2>{displayName}</h2><p>{ageLabel(age)} · {levelLabels[preferences.learning_level || 'beginner']}</p></div><div className="wd-profile-spark" aria-hidden="true">✦</div></div>
+        <div className="wd-profile-banner"><LearnerAvatar avatar={profile?.avatar} className="wd-avatar wd-avatar-xl" decorative /><div><span className="wd-eyebrow">Hello, curious mind!</span><h2>{displayName}</h2><p>{ageLabel(age)} · {levelLabels[preferences.learning_level || 'beginner']}</p></div><span className="wp-profile-private"><Lock size={14} /> Private learner profile</span></div>
         <div className="wd-split">
           <section className="wd-card"><div className="wd-card-heading"><UserRound size={21} /><h2>About you</h2></div><p className="wd-muted">Your display name appears in your learning space.</p>
             <form onSubmit={event => { event.preventDefault(); void finish(() => onSaveProfile({ display_name: name.trim() })); }}>
@@ -117,24 +129,27 @@ export function LearnerHub({ page, profile, email, journey, solvedTotal, complet
               <button className="wd-primary" type="submit" disabled={pending || name.trim().length < 2}>{pending ? 'Saving…' : 'Save profile'} <Check size={17} /></button>
             </form>
           </section>
-          <section className="wd-card"><div className="wd-card-heading"><Star size={21} /><h2>Choose your companion</h2></div><p className="wd-muted">Pick the avatar that feels like you. You can change it anytime.</p><div className="wd-avatar-grid">{(Object.keys(avatarEmoji) as LearnerProfile['avatar'][]).map(avatar => <button key={avatar} type="button" disabled={pending} className={avatar === (profile?.avatar || 'robot') ? 'is-selected' : ''} onClick={() => { void finish(() => onSaveProfile({ avatar })); }} aria-pressed={avatar === (profile?.avatar || 'robot')} aria-label={`Choose ${avatar} avatar`}><span aria-hidden="true">{avatarEmoji[avatar]}</span><small>{avatar}</small>{avatar === (profile?.avatar || 'robot') && <Check size={14} />}</button>)}</div><div className="wd-soft-note">Your companion stays with you across your learning pages.</div></section>
+          <div className="wp-profile-right"><section className="wd-card"><div className="wd-card-heading"><Star size={21} /><h2>Choose your avatar</h2></div><p className="wd-muted">Pick the avatar that feels like you. You can change it anytime.</p><div className="wd-avatar-grid">{learnerAvatars.map(avatar => <button key={avatar} type="button" disabled={pending} className={avatar === (profile?.avatar || 'robot') ? 'is-selected' : ''} onClick={() => { void finish(() => onSaveProfile({ avatar })); }} aria-pressed={avatar === (profile?.avatar || 'robot')} aria-label={`Choose ${avatar} avatar`}><LearnerAvatar avatar={avatar} className="wp-avatar-choice" decorative /><small>{avatar}</small>{avatar === (profile?.avatar || 'robot') && <Check size={14} />}</button>)}</div><div className="wd-soft-note">Your choice appears on your homepage, profile and account menu.</div></section><section className="wd-card"><h2>Quick snapshot</h2><div className="wp-snapshot"><Metric icon="🔥" value={streak.current} label="Active-day streak" color="orange" /><Metric icon="⭐" value={summary.xp} label="Learning XP" color="purple" /></div><p className="wd-soft-note">Every completed activity is another small discovery.</p></section></div>
         </div>
       </>}
 
       {page === 'progress' && <>
-        <div className="wd-metrics"><Metric icon="🏆" value={summary.xp} label="Total XP" color="purple" /><Metric icon="📖" value={summary.lessonsCompleted} label="Lessons completed" color="blue" /><Metric icon="🎮" value={summary.gamesCompleted} label="Practice games completed" color="green" /><Metric icon="🔥" value={streak.current} label="Active-day streak" color="orange" /></div>
+        <div className="wd-metrics"><Metric icon="📚" value={summary.activitiesCompleted} label="Activities completed" color="blue" /><Metric icon="🎯" value={lessonAccuracy} label="Lesson accuracy" color="green" /><Metric icon="🔥" value={streak.current} label="Active-day streak" color="orange" /><Metric icon="⭐" value={summary.xp} label="XP earned" color="purple" /></div>
+        <section className="wd-card wp-learning-journey"><div className="wp-section-heading"><div><h2>Your learning journey</h2><p>Recorded activities this week</p></div><span className="wp-small-label">This week</span></div><div className="wp-weekly-chart" role="img" aria-label={weeklyDays.map(day => `${day.label}: ${day.completed} completed activities`).join(', ')}>{weeklyDays.map(day => <div key={day.key} className={day.key === todayKey ? 'is-today' : ''}><strong>{day.completed}</strong><span className="wp-chart-column"><span style={{ height: `${day.completed / weeklyMax * 100}%` }} /></span><small>{day.label}</small></div>)}</div><p className="wp-chart-note">{weeklyDays.some(day => day.completed) ? 'Each bar uses the activities saved for that day.' : 'Your first completed activity will appear here. Every small step counts!'}</p></section>
         <div className="wd-split"><section className="wd-card"><div className="wd-card-heading"><BookOpen size={21} /><h2>Your English skills</h2></div><p className="wd-muted">Scores come from lessons you have completed.</p><div className="wd-skill-progress">{skills.map(skill => {
           const completed = lessonCatalog.filter(lesson => lesson.skill === skill && results[lesson.id]);
           const score = completed.length ? Math.round(completed.reduce((sum, lesson) => sum + results[lesson.id].score, 0) / completed.length) : 0;
           return <div key={skill}><div><strong>{skillLabels[skill]}</strong><span>{completed.length ? `${score}% average` : 'Ready to explore'}</span></div><div className="wd-progress-track" role="progressbar" aria-label={`${skillLabels[skill]} average lesson score`} aria-valuenow={score} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${score}%` }} /></div></div>;
         })}</div><button type="button" className="wd-text-button" onClick={onPractice}>Explore English <ArrowRight size={16} /></button></section>
-        <section className="wd-card wd-classic-progress"><span className="wd-card-illustration" aria-hidden="true">🧩</span><h2>Classic crossword discoveries</h2><p className="wd-muted">Your original ten puzzles, always ready to play.</p><strong className="wd-big-number">{solvedTotal}<small> / {totalWords} words</small></strong><div className="wd-progress-track" role="progressbar" aria-label="Classic crossword words completed" aria-valuenow={solvedTotal} aria-valuemin={0} aria-valuemax={totalWords}><span style={{ width: `${finishedWordsPercent}%` }} /></div><p>{completedTotal} of 10 crosswords completed</p><button type="button" className="wd-primary" onClick={onClassic || onPractice}>Continue practice <ArrowRight size={17} /></button></section></div>
+        <section className="wd-card wd-classic-progress"><span className="wd-card-illustration" aria-hidden="true">🧩</span><h2>Your word puzzle progress</h2><p className="wd-muted">Keep exploring your word puzzles at your own pace.</p><strong className="wd-big-number">{solvedTotal}<small> / {totalWords} words</small></strong><div className="wd-progress-track" role="progressbar" aria-label="Wizpiko word puzzle words completed" aria-valuenow={solvedTotal} aria-valuemin={0} aria-valuemax={totalWords}><span style={{ width: `${finishedWordsPercent}%` }} /></div><p>{completedTotal} of 10 new puzzles completed</p>{archivedClassic && (archivedClassic.solvedWords > 0 || archivedClassic.completedPuzzles > 0) && <p className="wp-panel-note">Earlier collection: {archivedClassic.solvedWords} words / {archivedClassic.completedPuzzles} puzzles saved</p>}<button type="button" className="wd-primary" onClick={onClassic || onPractice}>Continue practice <ArrowRight size={17} /></button></section></div>
         <section className="wd-card"><div className="wd-card-heading"><TrendingUp size={21} /><h2>Recent learning</h2></div>{recentActivity.length ? <div className="wd-activity-list">{recentActivity.map(event => <div key={event.id}><span className="wd-activity-icon" aria-hidden="true">{event.kind === 'lesson' ? '📖' : '🧩'}</span><div><strong>{event.title}</strong><small>{dateLabel(event.completedAt)}{event.total ? event.kind === 'classic' ? ` · ${event.total} words discovered` : event.correct !== undefined ? ` · ${event.correct}/${event.total} correct` : '' : ''}</small></div><span className="wd-complete-label"><Check size={14} /> Completed</span></div>)}</div> : recentLessons.length ? <div className="wd-activity-list">{recentLessons.map(([id, result]) => <div key={id}><span className="wd-activity-icon" aria-hidden="true">📖</span><div><strong>{lessonCatalog.find(lesson => lesson.id === id)?.title || 'English lesson'}</strong><small>{dateLabel(result.completedAt)} · {result.score}%</small></div>{onLesson && <button type="button" className="wd-text-button" onClick={() => onLesson(id)}>Revisit <ArrowRight size={15} /></button>}</div>)}</div> : <div className="wd-empty"><span aria-hidden="true">🌱</span><h3>Your story starts here</h3><p>Finish a lesson or a practice game and see your real progress grow.</p><button type="button" className="wd-primary" onClick={onPractice}>Start learning <ArrowRight size={17} /></button></div>}</section>
       </>}
 
       {page === 'achievements' && <>
         <div className="wd-achievement-banner"><div><span className="wd-eyebrow">Every little win matters</span><h2>{earned.length ? `${earned.length} milestones to be proud of` : 'Your first milestone is waiting'}</h2><p>Earn badges through completed learning. Once earned, they stay yours.</p></div><span aria-hidden="true">🏆</span></div>
-        <div className="wd-badge-grid">{achievements.map(badge => <article key={badge.id} className={`wd-badge ${badge.earned ? 'is-earned' : 'is-locked'}`}><span className="wd-badge-art" aria-hidden="true">{badge.earned ? badge.icon : <Lock size={27} />}</span><h2>{badge.title}</h2><p>{badge.description}</p><span className="wd-badge-status">{badge.earned ? <><Check size={14} /> Earned{badge.earnedAt ? ` · ${dateLabel(badge.earnedAt)}` : ''}</> : 'Keep exploring'}</span></article>)}</div>
+        <section className="wd-card wp-badge-collection"><div className="wp-section-heading"><h2>Badges you have earned</h2><span className="wp-status-pill">{earned.length} earned</span></div>{earned.length ? <div className="wd-badge-grid">{earned.map(badge => <article key={badge.id} className="wd-badge is-earned"><span className="wd-badge-art" aria-hidden="true">{badge.icon}</span><h2>{badge.title}</h2><p>{badge.description}</p><span className="wd-badge-status"><Check size={14} /> Earned{badge.earnedAt ? ` · ${dateLabel(badge.earnedAt)}` : ''}</span></article>)}</div> : <div className="wp-earned-empty"><span aria-hidden="true">🌱</span><p>Complete a learning activity to begin your collection. Your first milestone is waiting!</p><button type="button" className="wd-primary" onClick={onPractice}>Start learning <ArrowRight size={16} /></button></div>}</section>
+        <section className="wd-card wp-badge-collection"><div className="wp-section-heading"><h2>Your next discoveries</h2><span className="wp-status-pill wp-status-blue">Coming up</span></div><div className="wd-badge-grid">{achievements.filter(badge => !badge.earned).map(badge => <article key={badge.id} className="wd-badge is-locked"><span className="wd-badge-art" aria-hidden="true"><Lock size={27} /></span><h2>{badge.title}</h2><p>{badge.description}</p><span className="wd-badge-status">Keep exploring</span></article>)}</div>{earned.length === achievements.length && <p className="wd-muted">You have earned every current milestone. Keep exploring and building your skills!</p>}</section>
+        <p className="wd-soft-note">Badges you earn stay in your collection, even when a streak ends.</p>
       </>}
 
       {page === 'streak' && <>
@@ -159,6 +174,14 @@ export function LearnerHub({ page, profile, email, journey, solvedTotal, complet
 
       {page === 'help' && <>
         <section className="wd-help-banner"><div><span className="wd-eyebrow">A little help along the way</span><h2>What can we help you discover?</h2><p>Search the answers below for learning, your account, and saved progress.</p></div><span aria-hidden="true">💡</span></section>
+        <div className="wp-help-topics">{[
+          ['🚀', 'Getting Started', 'Choose and begin an activity', 'activity'],
+          ['👤', 'Accounts & Profiles', 'Sign in and manage your details', 'account'],
+          ['📖', 'Learning Activities', 'Find your starting point', 'stage'],
+          ['🏅', 'Progress & Streaks', 'Understand your saved learning', 'streak'],
+          ['🔒', 'Sign-in Help', 'Confirmation and password recovery', 'password'],
+          ['🛠️', 'Technical Support', 'Tell us about a website issue', 'contact'],
+        ].map(([icon, label, description, query]) => <button type="button" key={label} onClick={() => { if (query === 'contact' && onContact) onContact(); else setHelpQuery(query); }}><span aria-hidden="true">{icon}</span><strong>{label}</strong><small>{description}</small><b>{query === 'contact' ? 'Contact us' : 'Find answers'} →</b></button>)}</div>
         <label className="wd-help-search"><Search size={21} /><input type="search" value={helpQuery} placeholder="Search help topics…" aria-label="Search help topics" onChange={event => setHelpQuery(event.target.value)} /></label>
         <section className="wd-card"><div className="wd-card-heading"><HelpCircle size={21} /><h2>Helpful answers</h2></div><div className="wd-faq-list">{filteredFaqs.map(faq => <details key={faq.id}><summary>{faq.question}<ChevronRight size={18} /></summary><div>{faq.answer.map((paragraph, index) => <p key={index}>{paragraph}</p>)}{faq.link?.target === 'contact' && onContact && <button type="button" className="wd-text-button" onClick={onContact}>{faq.link.label} <ArrowRight size={15} /></button>}</div></details>)}{!filteredFaqs.length && <div className="wd-empty"><Search size={30} /><h3>No matching answers yet</h3><p>Try words such as “progress”, “password”, or “streak”.</p></div>}</div></section>
         {onContact && <section className="wd-contact-card"><span aria-hidden="true">✉️</span><div><h2>Still need a hand?</h2><p>Send the Wizpiko team a question about your learning or account.</p></div><button type="button" className="wd-primary" onClick={onContact}>Contact us <ArrowRight size={17} /></button></section>}

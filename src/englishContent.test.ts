@@ -2,14 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { categories, makeCrossword, makeQuestions, wordsFor } from './englishContent';
 
 describe('Wizpiko English Academy', () => {
-  it('includes exactly the seven approved age categories', () => {
-    expect(categories.map(c => c.name)).toEqual(['Beginners', 'Kids', 'Small Starts', 'Juniors', 'High Flyers', 'Trailblazers', 'Seniors']);
+  it('keeps saved path IDs while displaying the original Wizpiko skill paths', () => {
+    expect(categories.map(c => c.name)).toEqual(['Word Sprouts', 'Everyday Explorer', 'Story Sparks', 'Conversation Corner', 'Meaning Makers', 'Idea Builders', 'Clear Communicators']);
+  });
+  it('keeps each MCQ group small even when a caller requests an old 50-question count', () => {
+    expect(makeQuestions(categories[0].id, 1, 50)).toHaveLength(5);
+    expect(makeQuestions(categories[0].id, 1, 3)).toHaveLength(3);
+    expect(makeQuestions(categories[0].id, 1)).toEqual(makeQuestions(categories[0].id, 1));
   });
   for (const category of categories) {
-    it('prepares 50 answerable four-option MCQs for ' + category.name, () => {
+    it('prepares five answerable four-option MCQs for ' + category.name, () => {
       const questions = makeQuestions(category.id, 1);
-      expect(questions).toHaveLength(50);
-      expect(new Set(questions.map(q => q.id)).size).toBe(50);
+      expect(questions).toHaveLength(5);
+      expect(new Set(questions.map(q => q.id)).size).toBe(5);
       for (const question of questions) {
         expect(question.options).toHaveLength(4);
         expect(new Set(question.options).size).toBe(4);

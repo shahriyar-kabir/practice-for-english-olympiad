@@ -1,6 +1,7 @@
-/** Beginner crosswords transcribed from the supplied English Olympiad PDF.
- * Coordinates, clue numbering, clues, and word banks preserve the original ten puzzles.
- * Rows and columns are zero-based; unused border cells are omitted.
+/** Newly authored Wizpiko word-puzzle collection.
+ * Each theme, clue and connected layout was created for this collection.
+ * New IDs deliberately keep historical answers separate from these activities.
+ * Rows and columns are zero-based.
  */
 export interface Entry {
   id: string;
@@ -27,1243 +28,1243 @@ export interface Puzzle {
 
 export const puzzles: Puzzle[] = [
   {
-    "id": "animal-friends",
-    "title": "Animal Friends",
-    "category": "Animals",
-    "emoji": "🦁",
-    "color": "#7a9c48",
-    "description": "Meet some furry, feathered, and fantastic friends!",
-    "rows": 15,
-    "cols": 12,
+    "id": "wizpiko-rooftop-garden",
+    "title": "Rooftop Garden",
+    "category": "Growing things",
+    "emoji": "🌱",
+    "color": "#22a779",
+    "description": "Help turn a sunny roof into a little green retreat.",
+    "rows": 10,
+    "cols": 13,
     "entries": [
       {
-        "id": "4-across",
-        "number": 4,
-        "direction": "across",
-        "row": 3,
-        "col": 6,
-        "answer": "MONKEY",
-        "clue": "An animal that can swing in trees."
-      },
-      {
-        "id": "5-across",
-        "number": 5,
-        "direction": "across",
-        "row": 4,
+        "answer": "HARVEST",
+        "clue": "When the beans are ready, it is time to gather this season’s crop.",
+        "row": 0,
         "col": 0,
-        "answer": "SHEEP",
-        "clue": "A farm animal that gives us wool."
-      },
-      {
-        "id": "6-across",
-        "number": 6,
-        "direction": "across",
-        "row": 6,
-        "col": 1,
-        "answer": "GIRAFFE",
-        "clue": "A tall animal with a very long neck."
-      },
-      {
-        "id": "8-across",
-        "number": 8,
-        "direction": "across",
-        "row": 9,
-        "col": 4,
-        "answer": "TIGER",
-        "clue": "A big wild cat with orange fur and black stripes."
-      },
-      {
-        "id": "10-across",
-        "number": 10,
-        "direction": "across",
-        "row": 13,
-        "col": 7,
-        "answer": "LION",
-        "clue": "A big wild cat known for its mane."
-      },
-      {
-        "id": "1-down",
-        "number": 1,
         "direction": "down",
+        "number": 1,
+        "id": "1-down"
+      },
+      {
+        "answer": "SEED",
+        "clue": "Mina plants this tiny beginning of a bean in a pot.",
         "row": 0,
         "col": 9,
-        "answer": "DUCK",
-        "clue": "A bird that swims and says quack."
-      },
-      {
-        "id": "2-down",
+        "direction": "across",
         "number": 2,
+        "id": "2-across"
+      },
+      {
+        "answer": "SHADE",
+        "clue": "Move the delicate seedling out of direct sunshine and into this.",
+        "row": 0,
+        "col": 9,
         "direction": "down",
+        "number": 2,
+        "id": "2-down"
+      },
+      {
+        "answer": "WATER",
+        "clue": "Fill the can with this before giving thirsty plants a drink.",
         "row": 2,
-        "col": 7,
-        "answer": "HORSE",
-        "clue": "An animal people may ride."
-      },
-      {
-        "id": "3-down",
-        "number": 3,
-        "direction": "down",
-        "row": 3,
-        "col": 3,
-        "answer": "ZEBRA",
-        "clue": "A horse-like animal with black and white stripes."
-      },
-      {
-        "id": "7-down",
-        "number": 7,
-        "direction": "down",
-        "row": 6,
-        "col": 6,
-        "answer": "FROG",
-        "clue": "A small green animal that jumps and croaks."
-      },
-      {
-        "id": "9-down",
-        "number": 9,
-        "direction": "down",
-        "row": 9,
         "col": 8,
-        "answer": "RABBIT",
-        "clue": "An animal with long ears that hops."
+        "direction": "across",
+        "number": 3,
+        "id": "3-across"
+      },
+      {
+        "answer": "ROOT",
+        "clue": "Look under the soil for the part that takes in water.",
+        "row": 2,
+        "col": 12,
+        "direction": "down",
+        "number": 4,
+        "id": "4-down"
+      },
+      {
+        "answer": "STEM",
+        "clue": "This upright part holds the sunflower above its leaves.",
+        "row": 4,
+        "col": 7,
+        "direction": "across",
+        "number": 5,
+        "id": "5-across"
+      },
+      {
+        "answer": "SPADE",
+        "clue": "Use this small digging tool to make a planting hole.",
+        "row": 4,
+        "col": 7,
+        "direction": "down",
+        "number": 5,
+        "id": "5-down"
+      },
+      {
+        "answer": "SOIL",
+        "clue": "The roots settle into this dark material inside the planter.",
+        "row": 5,
+        "col": 0,
+        "direction": "across",
+        "number": 6,
+        "id": "6-across"
+      },
+      {
+        "answer": "LEAF",
+        "clue": "A caterpillar has nibbled one green part growing from the stem.",
+        "row": 5,
+        "col": 3,
+        "direction": "down",
+        "number": 7,
+        "id": "7-down"
+      },
+      {
+        "answer": "POT",
+        "clue": "The balcony tomato grows inside this round container.",
+        "row": 7,
+        "col": 5,
+        "direction": "down",
+        "number": 8,
+        "id": "8-down"
+      },
+      {
+        "answer": "FLOWER",
+        "clue": "The bee lands on the colourful part of the marigold.",
+        "row": 8,
+        "col": 3,
+        "direction": "across",
+        "number": 9,
+        "id": "9-across"
       }
     ],
     "wordBank": [
-      "RABBIT",
-      "TIGER",
-      "HORSE",
-      "GIRAFFE",
-      "FROG",
-      "SHEEP",
-      "LION",
-      "MONKEY",
-      "ZEBRA",
-      "DUCK"
+      "SOIL",
+      "FLOWER",
+      "SEED",
+      "LEAF",
+      "SHADE",
+      "ROOT",
+      "STEM",
+      "POT",
+      "HARVEST",
+      "WATER",
+      "SPADE"
     ]
   },
   {
-    "id": "in-the-classroom",
-    "title": "In the Classroom",
-    "category": "School",
-    "emoji": "🎒",
-    "color": "#6c8ed1",
-    "description": "Pack your curiosity. A classroom adventure is waiting!",
-    "rows": 11,
-    "cols": 12,
+    "id": "wizpiko-rainy-day-walk",
+    "title": "After the Rain",
+    "category": "Weather discoveries",
+    "emoji": "🌦️",
+    "color": "#4c8fea",
+    "description": "Follow a puddle-filled path and notice what the weather leaves behind.",
+    "rows": 13,
+    "cols": 16,
     "entries": [
       {
-        "id": "2-across",
-        "number": 2,
-        "direction": "across",
+        "answer": "BOOTS",
+        "clue": "Wear these waterproof shoes before stepping into the wet garden.",
         "row": 0,
-        "col": 7,
-        "answer": "DESK",
-        "clue": "A table used by a student at school."
-      },
-      {
-        "id": "4-across",
-        "number": 4,
-        "direction": "across",
-        "row": 1,
         "col": 0,
-        "answer": "TEACHER",
-        "clue": "A person who helps students learn."
+        "direction": "down",
+        "number": 1,
+        "id": "1-down"
       },
       {
-        "id": "7-across",
-        "number": 7,
-        "direction": "across",
+        "answer": "PUDDLE",
+        "clue": "A little pool on the pavement invites one careful splash.",
+        "row": 0,
+        "col": 3,
+        "direction": "down",
+        "number": 2,
+        "id": "2-down"
+      },
+      {
+        "answer": "DRIZZLE",
+        "clue": "The rain is very light, with tiny drops rather than a downpour.",
         "row": 3,
         "col": 6,
-        "answer": "LESSON",
-        "clue": "Something a teacher teaches in class."
-      },
-      {
-        "id": "8-across",
-        "number": 8,
-        "direction": "across",
-        "row": 5,
-        "col": 2,
-        "answer": "PAPER",
-        "clue": "You can write on a sheet of this."
-      },
-      {
-        "id": "9-across",
-        "number": 9,
-        "direction": "across",
-        "row": 8,
-        "col": 1,
-        "answer": "SCHOOL",
-        "clue": "A place where children go to learn."
-      },
-      {
-        "id": "10-across",
-        "number": 10,
-        "direction": "across",
-        "row": 10,
-        "col": 1,
-        "answer": "CLASS",
-        "clue": "A group of students learning together."
-      },
-      {
-        "id": "1-down",
-        "number": 1,
         "direction": "down",
-        "row": 0,
-        "col": 2,
-        "answer": "BAG",
-        "clue": "You carry your school things in this."
-      },
-      {
-        "id": "3-down",
         "number": 3,
-        "direction": "down",
-        "row": 0,
+        "id": "3-down"
+      },
+      {
+        "answer": "SHELTER",
+        "clue": "Wait in a covered place until the heavy shower passes.",
+        "row": 4,
+        "col": 0,
+        "direction": "across",
+        "number": 4,
+        "id": "4-across"
+      },
+      {
+        "answer": "CLOUD",
+        "clue": "The grey shape above us is carrying many tiny water drops.",
+        "row": 4,
         "col": 8,
-        "answer": "ERASER",
-        "clue": "You use this to remove pencil marks."
-      },
-      {
-        "id": "5-down",
+        "direction": "across",
         "number": 5,
-        "direction": "down",
-        "row": 1,
-        "col": 6,
-        "answer": "RULER",
-        "clue": "You use this to draw straight lines."
+        "id": "5-across"
       },
       {
-        "id": "6-down",
+        "answer": "DRAIN",
+        "clue": "Water runs off the street through this opening.",
+        "row": 4,
+        "col": 12,
+        "direction": "down",
         "number": 6,
-        "direction": "down",
-        "row": 2,
-        "col": 10,
-        "answer": "BOOK",
-        "clue": "You read pages in this."
+        "id": "6-down"
       },
       {
-        "id": "8-down",
-        "number": 8,
+        "answer": "RAINBOW",
+        "clue": "Sunlight and raindrops make a curved band of colours.",
+        "row": 6,
+        "col": 10,
         "direction": "down",
-        "row": 5,
-        "col": 2,
-        "answer": "PENCIL",
-        "clue": "You write or draw with it; it can be sharpened."
+        "number": 7,
+        "id": "7-down"
+      },
+      {
+        "answer": "DRY",
+        "clue": "After hanging in the sun, the towel is no longer wet.",
+        "row": 7,
+        "col": 3,
+        "direction": "down",
+        "number": 8,
+        "id": "8-down"
+      },
+      {
+        "answer": "REFLECTION",
+        "clue": "The still water shows an upside-down image of the bridge.",
+        "row": 8,
+        "col": 3,
+        "direction": "across",
+        "number": 9,
+        "id": "9-across"
+      },
+      {
+        "answer": "COAT",
+        "clue": "Zip up this outer layer before leaving in chilly weather.",
+        "row": 8,
+        "col": 8,
+        "direction": "down",
+        "number": 10,
+        "id": "10-down"
+      },
+      {
+        "answer": "BREEZE",
+        "clue": "A gentle wind moves the washing on the line.",
+        "row": 10,
+        "col": 10,
+        "direction": "across",
+        "number": 11,
+        "id": "11-across"
       }
     ],
     "wordBank": [
-      "CLASS",
-      "BAG",
-      "BOOK",
-      "TEACHER",
-      "SCHOOL",
-      "PENCIL",
-      "DESK",
-      "PAPER",
-      "ERASER",
-      "RULER",
-      "LESSON"
+      "CLOUD",
+      "DRIZZLE",
+      "DRAIN",
+      "RAINBOW",
+      "REFLECTION",
+      "COAT",
+      "BOOTS",
+      "BREEZE",
+      "DRY",
+      "SHELTER",
+      "PUDDLE"
     ]
   },
   {
-    "id": "food-and-drinks",
-    "title": "Food and Drinks",
-    "category": "Food",
-    "emoji": "🍎",
-    "color": "#d98559",
-    "description": "A delicious puzzle full of everyday favorites.",
-    "rows": 13,
+    "id": "wizpiko-creative-desk",
+    "title": "The Creative Desk",
+    "category": "Drawing and making",
+    "emoji": "🎨",
+    "color": "#a06bdb",
+    "description": "Set up a small studio for a colourful afternoon project.",
+    "rows": 17,
     "cols": 9,
     "entries": [
       {
-        "id": "4-across",
-        "number": 4,
-        "direction": "across",
-        "row": 2,
-        "col": 4,
-        "answer": "MILK",
-        "clue": "A white drink that comes from cows."
-      },
-      {
-        "id": "5-across",
-        "number": 5,
-        "direction": "across",
-        "row": 4,
-        "col": 0,
-        "answer": "ORANGE",
-        "clue": "A round citrus fruit of the same colour."
-      },
-      {
-        "id": "8-across",
-        "number": 8,
-        "direction": "across",
-        "row": 6,
-        "col": 4,
-        "answer": "APPLE",
-        "clue": "A round fruit that can be red or green."
-      },
-      {
-        "id": "10-across",
-        "number": 10,
-        "direction": "across",
-        "row": 8,
-        "col": 1,
-        "answer": "WATER",
-        "clue": "A clear drink we need every day."
-      },
-      {
-        "id": "11-across",
-        "number": 11,
-        "direction": "across",
-        "row": 11,
-        "col": 0,
-        "answer": "HONEY",
-        "clue": "Sweet food made by bees."
-      },
-      {
-        "id": "1-down",
-        "number": 1,
-        "direction": "down",
+        "answer": "ERASER",
+        "clue": "Rub out a pencil mark with this instead of crossing it out.",
         "row": 0,
-        "col": 0,
-        "answer": "CARROT",
-        "clue": "An orange vegetable that grows underground."
+        "col": 1,
+        "direction": "down",
+        "number": 1,
+        "id": "1-down"
       },
       {
-        "id": "2-down",
+        "answer": "PAINT",
+        "clue": "Mix yellow and blue portions of this to make green.",
+        "row": 2,
+        "col": 0,
+        "direction": "across",
         "number": 2,
-        "direction": "down",
-        "row": 1,
-        "col": 2,
-        "answer": "BREAD",
-        "clue": "Food made from flour and baked into loaves."
+        "id": "2-across"
       },
       {
-        "id": "3-down",
-        "number": 3,
-        "direction": "down",
-        "row": 1,
-        "col": 5,
-        "answer": "RICE",
-        "clue": "Small grains often eaten with curry."
-      },
-      {
-        "id": "6-down",
-        "number": 6,
-        "direction": "down",
-        "row": 4,
-        "col": 4,
-        "answer": "GRAPES",
-        "clue": "Small round fruits that grow in bunches."
-      },
-      {
-        "id": "7-down",
-        "number": 7,
-        "direction": "down",
-        "row": 4,
-        "col": 8,
-        "answer": "CHEESE",
-        "clue": "A food made from milk, often on pizza."
-      },
-      {
-        "id": "9-down",
-        "number": 9,
-        "direction": "down",
-        "row": 7,
-        "col": 2,
-        "answer": "BANANA",
-        "clue": "A long yellow fruit you peel."
-      }
-    ],
-    "wordBank": [
-      "BANANA",
-      "GRAPES",
-      "WATER",
-      "CHEESE",
-      "MILK",
-      "ORANGE",
-      "RICE",
-      "CARROT",
-      "APPLE",
-      "HONEY",
-      "BREAD"
-    ]
-  },
-  {
-    "id": "our-natural-world",
-    "title": "Our Natural World",
-    "category": "Nature",
-    "emoji": "🌿",
-    "color": "#65a393",
-    "description": "Explore the wonderful world just outside your window.",
-    "rows": 12,
-    "cols": 7,
-    "entries": [
-      {
-        "id": "1-across",
-        "number": 1,
-        "direction": "across",
-        "row": 0,
-        "col": 0,
-        "answer": "LEAF",
-        "clue": "A flat green part of a plant."
-      },
-      {
-        "id": "3-across",
-        "number": 3,
-        "direction": "across",
-        "row": 2,
-        "col": 1,
-        "answer": "CLOUD",
-        "clue": "A white or grey shape high in the sky."
-      },
-      {
-        "id": "4-across",
-        "number": 4,
-        "direction": "across",
-        "row": 4,
-        "col": 0,
-        "answer": "TREE",
-        "clue": "A tall plant with a trunk and branches."
-      },
-      {
-        "id": "6-across",
-        "number": 6,
-        "direction": "across",
-        "row": 5,
-        "col": 3,
-        "answer": "RAIN",
-        "clue": "Water that falls from clouds."
-      },
-      {
-        "id": "8-across",
-        "number": 8,
-        "direction": "across",
-        "row": 8,
-        "col": 2,
-        "answer": "STORM",
-        "clue": "Weather with strong wind, often with rain."
-      },
-      {
-        "id": "9-across",
-        "number": 9,
-        "direction": "across",
-        "row": 9,
-        "col": 0,
-        "answer": "SUN",
-        "clue": "The star that gives Earth light and warmth."
-      },
-      {
-        "id": "10-across",
-        "number": 10,
-        "direction": "across",
-        "row": 11,
-        "col": 2,
-        "answer": "WIND",
-        "clue": "Air that moves outside."
-      },
-      {
-        "id": "2-down",
-        "number": 2,
-        "direction": "down",
-        "row": 0,
-        "col": 3,
-        "answer": "FLOWER",
-        "clue": "The colourful part of a plant."
-      },
-      {
-        "id": "5-down",
-        "number": 5,
-        "direction": "down",
-        "row": 4,
-        "col": 5,
-        "answer": "RIVER",
-        "clue": "A long stream of flowing water."
-      },
-      {
-        "id": "7-down",
-        "number": 7,
-        "direction": "down",
-        "row": 6,
-        "col": 0,
-        "answer": "GRASS",
-        "clue": "The short green plants covering many lawns."
-      },
-      {
-        "id": "8-down",
-        "number": 8,
-        "direction": "down",
-        "row": 8,
-        "col": 2,
-        "answer": "SNOW",
-        "clue": "Soft white ice that falls from the sky."
-      }
-    ],
-    "wordBank": [
-      "RIVER",
-      "SUN",
-      "TREE",
-      "CLOUD",
-      "LEAF",
-      "FLOWER",
-      "GRASS",
-      "STORM",
-      "WIND",
-      "SNOW",
-      "RAIN"
-    ]
-  },
-  {
-    "id": "opposites",
-    "title": "Opposites",
-    "category": "Word play",
-    "emoji": "↔️",
-    "color": "#a48bc6",
-    "description": "Big or small, hot or cold? Find the other side!",
-    "rows": 10,
-    "cols": 11,
-    "entries": [
-      {
-        "id": "1-across",
-        "number": 1,
-        "direction": "across",
-        "row": 0,
-        "col": 1,
-        "answer": "COLD",
-        "clue": "The opposite of hot."
-      },
-      {
-        "id": "6-across",
-        "number": 6,
-        "direction": "across",
-        "row": 2,
-        "col": 6,
-        "answer": "SMALL",
-        "clue": "The opposite of big."
-      },
-      {
-        "id": "7-across",
-        "number": 7,
-        "direction": "across",
+        "answer": "GLUE",
+        "clue": "A thin layer of this joins the collage pieces.",
         "row": 3,
-        "col": 2,
-        "answer": "SHORT",
-        "clue": "The opposite of tall (about height)."
+        "col": 5,
+        "direction": "down",
+        "number": 3,
+        "id": "3-down"
       },
       {
-        "id": "8-across",
-        "number": 8,
-        "direction": "across",
-        "row": 5,
-        "col": 4,
-        "answer": "EARLY",
-        "clue": "The opposite of late."
-      },
-      {
-        "id": "9-across",
-        "number": 9,
-        "direction": "across",
-        "row": 8,
+        "answer": "PENCIL",
+        "clue": "Sketch lightly with this so you can change your lines later.",
+        "row": 4,
         "col": 0,
-        "answer": "QUIET",
-        "clue": "The opposite of noisy."
+        "direction": "across",
+        "number": 4,
+        "id": "4-across"
       },
       {
-        "id": "10-across",
-        "number": 10,
+        "answer": "SKETCH",
+        "clue": "Make a quick, light drawing before adding the details.",
+        "row": 4,
+        "col": 8,
+        "direction": "down",
+        "number": 5,
+        "id": "5-down"
+      },
+      {
+        "answer": "PALETTE",
+        "clue": "The artist mixes colours on this little board.",
+        "row": 6,
+        "col": 2,
         "direction": "across",
+        "number": 6,
+        "id": "6-across"
+      },
+      {
+        "answer": "PAPER",
+        "clue": "Fold this flat sheet to begin your greeting card.",
+        "row": 6,
+        "col": 2,
+        "direction": "down",
+        "number": 6,
+        "id": "6-down"
+      },
+      {
+        "answer": "BRUSH",
+        "clue": "Dip its soft bristles into blue paint for the sky.",
         "row": 9,
         "col": 4,
-        "answer": "YOUNG",
-        "clue": "The opposite of old (about age)."
+        "direction": "across",
+        "number": 7,
+        "id": "7-across"
       },
       {
-        "id": "2-down",
-        "number": 2,
+        "answer": "RULER",
+        "clue": "Use this straight measuring tool to draw the border.",
+        "row": 9,
+        "col": 5,
         "direction": "down",
+        "number": 8,
+        "id": "8-down"
+      },
+      {
+        "answer": "SCISSORS",
+        "clue": "These two joined blades cut the paper into strips.",
+        "row": 9,
+        "col": 7,
+        "direction": "down",
+        "number": 9,
+        "id": "9-down"
+      },
+      {
+        "answer": "FOLDER",
+        "clue": "Keep the finished drawings together inside this flat cover.",
+        "row": 15,
+        "col": 2,
+        "direction": "across",
+        "number": 10,
+        "id": "10-across"
+      }
+    ],
+    "wordBank": [
+      "SKETCH",
+      "PAPER",
+      "PENCIL",
+      "PAINT",
+      "BRUSH",
+      "SCISSORS",
+      "PALETTE",
+      "RULER",
+      "FOLDER",
+      "GLUE",
+      "ERASER"
+    ]
+  },
+  {
+    "id": "wizpiko-picnic-plan",
+    "title": "Picnic Plans",
+    "category": "An outdoor meal",
+    "emoji": "🧺",
+    "color": "#ef9a28",
+    "description": "Pack a shared lunch and leave the park as tidy as you found it.",
+    "rows": 14,
+    "cols": 15,
+    "entries": [
+      {
+        "answer": "FRUIT",
+        "clue": "Apples and bananas belong to this food group.",
         "row": 0,
-        "col": 3,
-        "answer": "LIGHT",
-        "clue": "The opposite of heavy."
+        "col": 13,
+        "direction": "down",
+        "number": 1,
+        "id": "1-down"
       },
       {
-        "id": "3-down",
-        "number": 3,
-        "direction": "down",
-        "row": 0,
-        "col": 6,
-        "answer": "FAST",
-        "clue": "The opposite of slow."
-      },
-      {
-        "id": "4-down",
-        "number": 4,
-        "direction": "down",
-        "row": 1,
-        "col": 8,
-        "answer": "HAPPY",
-        "clue": "The opposite of sad."
-      },
-      {
-        "id": "5-down",
-        "number": 5,
-        "direction": "down",
+        "answer": "SHARE",
+        "clue": "Give everyone some of the strawberries instead of keeping them all.",
         "row": 1,
         "col": 10,
-        "answer": "CLEAN",
-        "clue": "The opposite of dirty."
+        "direction": "across",
+        "number": 2,
+        "id": "2-across"
       },
       {
-        "id": "8-down",
-        "number": 8,
-        "direction": "down",
-        "row": 5,
-        "col": 4,
-        "answer": "EMPTY",
-        "clue": "The opposite of full."
-      }
-    ],
-    "wordBank": [
-      "CLEAN",
-      "SHORT",
-      "EMPTY",
-      "LIGHT",
-      "EARLY",
-      "HAPPY",
-      "FAST",
-      "QUIET",
-      "YOUNG",
-      "SMALL",
-      "COLD"
-    ]
-  },
-  {
-    "id": "action-words",
-    "title": "Action Words",
-    "category": "Actions",
-    "emoji": "🚀",
-    "color": "#deaa4e",
-    "description": "Jump into a puzzle packed with things to do!",
-    "rows": 12,
-    "cols": 10,
-    "entries": [
-      {
-        "id": "1-across",
-        "number": 1,
-        "direction": "across",
-        "row": 0,
-        "col": 2,
-        "answer": "READ",
-        "clue": "To look at words and understand them."
-      },
-      {
-        "id": "5-across",
-        "number": 5,
-        "direction": "across",
-        "row": 1,
-        "col": 7,
-        "answer": "RUN",
-        "clue": "To move faster than walking."
-      },
-      {
-        "id": "7-across",
-        "number": 7,
-        "direction": "across",
-        "row": 3,
+        "answer": "SPOON",
+        "clue": "Use this curved utensil to eat the yoghurt.",
+        "row": 2,
         "col": 5,
-        "answer": "CLAP",
-        "clue": "To hit your hands together to applaud."
+        "direction": "down",
+        "number": 3,
+        "id": "3-down"
       },
       {
-        "id": "8-across",
-        "number": 8,
-        "direction": "across",
+        "answer": "BASKET",
+        "clue": "Carry the picnic food in this woven container.",
         "row": 4,
-        "col": 1,
-        "answer": "WRITE",
-        "clue": "To make words with a pen or pencil."
+        "col": 8,
+        "direction": "across",
+        "number": 4,
+        "id": "4-across"
       },
       {
-        "id": "9-across",
-        "number": 9,
-        "direction": "across",
+        "answer": "BOTTLE",
+        "clue": "Screw the lid onto this container of drinking water.",
+        "row": 4,
+        "col": 8,
+        "direction": "down",
+        "number": 4,
+        "id": "4-down"
+      },
+      {
+        "answer": "PLATE",
+        "clue": "Rest your slice of pie on this flat dish.",
+        "row": 5,
+        "col": 3,
+        "direction": "down",
+        "number": 5,
+        "id": "5-down"
+      },
+      {
+        "answer": "BLANKET",
+        "clue": "Spread this over the grass so everyone has a place to sit.",
         "row": 6,
-        "col": 0,
-        "answer": "LAUGH",
-        "clue": "To make a happy sound when something is funny."
+        "col": 2,
+        "direction": "across",
+        "number": 6,
+        "id": "6-across"
       },
       {
-        "id": "10-across",
-        "number": 10,
-        "direction": "across",
+        "answer": "SANDWICH",
+        "clue": "Put a filling between two slices of bread to make this.",
+        "row": 6,
+        "col": 10,
+        "direction": "down",
+        "number": 7,
+        "id": "7-down"
+      },
+      {
+        "answer": "LITTER",
+        "clue": "Take these dropped wrappers to a bin before leaving.",
         "row": 8,
         "col": 0,
-        "answer": "SWIM",
-        "clue": "To move through water using your body."
-      },
-      {
-        "id": "11-across",
-        "number": 11,
         "direction": "across",
-        "row": 10,
-        "col": 0,
-        "answer": "EAT",
-        "clue": "To put food in your mouth and swallow it."
-      },
-      {
-        "id": "2-down",
-        "number": 2,
-        "direction": "down",
-        "row": 0,
-        "col": 5,
-        "answer": "DANCE",
-        "clue": "To move your body to music."
-      },
-      {
-        "id": "3-down",
-        "number": 3,
-        "direction": "down",
-        "row": 0,
-        "col": 8,
-        "answer": "JUMP",
-        "clue": "To push yourself up off the ground."
-      },
-      {
-        "id": "4-down",
-        "number": 4,
-        "direction": "down",
-        "row": 1,
-        "col": 1,
-        "answer": "DRAW",
-        "clue": "To make a picture using lines."
-      },
-      {
-        "id": "6-down",
-        "number": 6,
-        "direction": "down",
-        "row": 3,
-        "col": 3,
-        "answer": "SING",
-        "clue": "To make music with your voice."
-      },
-      {
-        "id": "9-down",
-        "number": 9,
-        "direction": "down",
-        "row": 6,
-        "col": 0,
-        "answer": "LISTEN",
-        "clue": "To pay attention to sounds."
-      }
-    ],
-    "wordBank": [
-      "DRAW",
-      "READ",
-      "LAUGH",
-      "SING",
-      "RUN",
-      "EAT",
-      "DANCE",
-      "JUMP",
-      "CLAP",
-      "SWIM",
-      "LISTEN",
-      "WRITE"
-    ]
-  },
-  {
-    "id": "around-the-house",
-    "title": "Around the House",
-    "category": "Home",
-    "emoji": "🏡",
-    "color": "#cb9186",
-    "description": "Open the door to familiar things around your home.",
-    "rows": 13,
-    "cols": 10,
-    "entries": [
-      {
-        "id": "1-across",
-        "number": 1,
-        "direction": "across",
-        "row": 0,
-        "col": 0,
-        "answer": "PILLOW",
-        "clue": "A soft thing you rest your head on in bed."
-      },
-      {
-        "id": "5-across",
-        "number": 5,
-        "direction": "across",
-        "row": 4,
-        "col": 4,
-        "answer": "SOFA",
-        "clue": "A long, soft seat for several people."
-      },
-      {
-        "id": "6-across",
-        "number": 6,
-        "direction": "across",
-        "row": 5,
-        "col": 7,
-        "answer": "BED",
-        "clue": "Furniture you sleep on."
-      },
-      {
-        "id": "7-across",
-        "number": 7,
-        "direction": "across",
-        "row": 7,
-        "col": 2,
-        "answer": "KITCHEN",
-        "clue": "The room where meals are prepared."
-      },
-      {
-        "id": "9-across",
-        "number": 9,
-        "direction": "across",
-        "row": 9,
-        "col": 4,
-        "answer": "GARDEN",
-        "clue": "An outdoor area where flowers may grow."
-      },
-      {
-        "id": "11-across",
-        "number": 11,
-        "direction": "across",
-        "row": 11,
-        "col": 3,
-        "answer": "MIRROR",
-        "clue": "You look into this to see your reflection."
-      },
-      {
-        "id": "2-down",
-        "number": 2,
-        "direction": "down",
-        "row": 0,
-        "col": 2,
-        "answer": "LAMP",
-        "clue": "An electric light that stands on a desk or table."
-      },
-      {
-        "id": "3-down",
-        "number": 3,
-        "direction": "down",
-        "row": 0,
-        "col": 5,
-        "answer": "WINDOW",
-        "clue": "A glass opening that lets light into a room."
-      },
-      {
-        "id": "4-down",
-        "number": 4,
-        "direction": "down",
-        "row": 3,
-        "col": 7,
-        "answer": "TABLE",
-        "clue": "Furniture you can eat or work at."
-      },
-      {
-        "id": "8-down",
         "number": 8,
-        "direction": "down",
-        "row": 7,
-        "col": 5,
-        "answer": "CHAIR",
-        "clue": "Furniture for one person to sit on."
+        "id": "8-across"
       },
       {
-        "id": "10-down",
-        "number": 10,
-        "direction": "down",
+        "answer": "BREAD",
+        "clue": "Slice this loaf to prepare the picnic sandwiches.",
         "row": 9,
-        "col": 7,
-        "answer": "DOOR",
-        "clue": "You open this to enter a room."
+        "col": 6,
+        "direction": "across",
+        "number": 9,
+        "id": "9-across"
+      },
+      {
+        "answer": "NAPKIN",
+        "clue": "Use this small cloth to wipe your fingers after eating.",
+        "row": 11,
+        "col": 6,
+        "direction": "across",
+        "number": 10,
+        "id": "10-across"
       }
     ],
     "wordBank": [
-      "LAMP",
-      "PILLOW",
-      "BED",
-      "CHAIR",
-      "DOOR",
-      "GARDEN",
-      "KITCHEN",
-      "WINDOW",
-      "SOFA",
-      "MIRROR",
-      "TABLE"
+      "BLANKET",
+      "LITTER",
+      "BASKET",
+      "PLATE",
+      "BREAD",
+      "SHARE",
+      "FRUIT",
+      "NAPKIN",
+      "BOTTLE",
+      "SANDWICH",
+      "SPOON"
     ]
   },
   {
-    "id": "travel-and-transport",
-    "title": "Travel and Transport",
-    "category": "Travel",
-    "emoji": "🚂",
-    "color": "#709fba",
-    "description": "All aboard! Discover words that take you places.",
-    "rows": 8,
+    "id": "wizpiko-makers-table",
+    "title": "The Makers Table",
+    "category": "Build and test",
+    "emoji": "🛠️",
+    "color": "#24a6b0",
+    "description": "Gather simple materials and try a small building challenge.",
+    "rows": 11,
     "cols": 14,
     "entries": [
       {
-        "id": "1-across",
-        "number": 1,
-        "direction": "across",
-        "row": 0,
-        "col": 3,
-        "answer": "ROAD",
-        "clue": "A path for cars, buses and other vehicles."
-      },
-      {
-        "id": "6-across",
-        "number": 6,
-        "direction": "across",
-        "row": 2,
-        "col": 5,
-        "answer": "AIRPORT",
-        "clue": "The place where planes take off and land."
-      },
-      {
-        "id": "7-across",
-        "number": 7,
-        "direction": "across",
-        "row": 4,
-        "col": 0,
-        "answer": "BICYCLE",
-        "clue": "A two-wheeled vehicle with pedals."
-      },
-      {
-        "id": "8-across",
-        "number": 8,
-        "direction": "across",
-        "row": 4,
-        "col": 8,
-        "answer": "BRIDGE",
-        "clue": "A structure that carries a road over water."
-      },
-      {
-        "id": "9-across",
-        "number": 9,
-        "direction": "across",
-        "row": 7,
-        "col": 7,
-        "answer": "STATION",
-        "clue": "A place where trains stop for passengers."
-      },
-      {
-        "id": "2-down",
-        "number": 2,
-        "direction": "down",
+        "answer": "WHEEL",
+        "clue": "This round part lets the model roll across the table.",
         "row": 0,
         "col": 6,
-        "answer": "DRIVER",
-        "clue": "The person who controls a car."
+        "direction": "down",
+        "number": 1,
+        "id": "1-down"
       },
       {
-        "id": "3-down",
-        "number": 3,
-        "direction": "down",
-        "row": 0,
-        "col": 13,
-        "answer": "PLANE",
-        "clue": "A flying vehicle with wings."
-      },
-      {
-        "id": "4-down",
-        "number": 4,
-        "direction": "down",
+        "answer": "TAPE",
+        "clue": "A short sticky strip holds the paper wheel in place.",
         "row": 1,
-        "col": 10,
-        "answer": "TRAIN",
-        "clue": "A vehicle that runs on railway tracks."
+        "col": 1,
+        "direction": "down",
+        "number": 2,
+        "id": "2-down"
       },
       {
-        "id": "5-down",
-        "number": 5,
-        "direction": "down",
+        "answer": "BALANCE",
+        "clue": "Adjust both sides so the model does not tip over.",
         "row": 2,
-        "col": 2,
-        "answer": "TICKET",
-        "clue": "A paper or digital pass for a journey."
-      },
-      {
-        "id": "7-down",
-        "number": 7,
-        "direction": "down",
-        "row": 4,
         "col": 0,
-        "answer": "BUS",
-        "clue": "A large road vehicle that carries passengers."
+        "direction": "across",
+        "number": 3,
+        "id": "3-across"
       },
       {
-        "id": "8-down",
-        "number": 8,
-        "direction": "down",
+        "answer": "FOLD",
+        "clue": "Bend the sheet neatly along a line without cutting it.",
         "row": 4,
+        "col": 4,
+        "direction": "across",
+        "number": 4,
+        "id": "4-across"
+      },
+      {
+        "answer": "DESIGN",
+        "clue": "Plan how the useful parts of your invention will fit together.",
+        "row": 4,
+        "col": 7,
+        "direction": "down",
+        "number": 5,
+        "id": "5-down"
+      },
+      {
+        "answer": "MEASURE",
+        "clue": "Find the strip’s length before cutting it.",
+        "row": 4,
+        "col": 9,
+        "direction": "down",
+        "number": 6,
+        "id": "6-down"
+      },
+      {
+        "answer": "TEST",
+        "clue": "Try the model to discover whether your idea works.",
+        "row": 5,
+        "col": 11,
+        "direction": "down",
+        "number": 7,
+        "id": "7-down"
+      },
+      {
+        "answer": "BUILD",
+        "clue": "Put the pieces together to make your model bridge.",
+        "row": 6,
+        "col": 5,
+        "direction": "down",
+        "number": 8,
+        "id": "8-down"
+      },
+      {
+        "answer": "SHAPE",
+        "clue": "A circle, triangle or square is one of these.",
+        "row": 6,
+        "col": 7,
+        "direction": "across",
+        "number": 9,
+        "id": "9-across"
+      },
+      {
+        "answer": "STRING",
+        "clue": "Tie the two card pieces together with this thin cord.",
+        "row": 8,
+        "col": 2,
+        "direction": "across",
+        "number": 10,
+        "id": "10-across"
+      },
+      {
+        "answer": "REPAIR",
+        "clue": "Fix the broken handle so the model can be used again.",
+        "row": 10,
         "col": 8,
-        "answer": "BOAT",
-        "clue": "A small vehicle used to travel on water."
+        "direction": "across",
+        "number": 11,
+        "id": "11-across"
       }
     ],
     "wordBank": [
-      "AIRPORT",
-      "BRIDGE",
-      "BUS",
-      "TICKET",
-      "BICYCLE",
-      "BOAT",
-      "TRAIN",
-      "DRIVER",
-      "STATION",
-      "ROAD",
-      "PLANE"
+      "SHAPE",
+      "FOLD",
+      "BUILD",
+      "MEASURE",
+      "TAPE",
+      "BALANCE",
+      "STRING",
+      "REPAIR",
+      "WHEEL",
+      "TEST",
+      "DESIGN"
     ]
   },
   {
-    "id": "time-and-calendar",
-    "title": "Time and Calendar",
-    "category": "Time",
-    "emoji": "⏰",
-    "color": "#ba9c5a",
-    "description": "Make a little time for a word adventure.",
-    "rows": 12,
-    "cols": 10,
+    "id": "wizpiko-kindness-club",
+    "title": "The Kindness Club",
+    "category": "Words that help",
+    "emoji": "🤝",
+    "color": "#e5749c",
+    "description": "Practise small actions that make a shared space welcoming.",
+    "rows": 11,
+    "cols": 13,
     "entries": [
       {
-        "id": "3-across",
-        "number": 3,
-        "direction": "across",
-        "row": 1,
-        "col": 3,
-        "answer": "MORNING",
-        "clue": "The time of day before noon."
-      },
-      {
-        "id": "4-across",
-        "number": 4,
-        "direction": "across",
-        "row": 3,
-        "col": 0,
-        "answer": "NIGHT",
-        "clue": "The dark part of the day."
-      },
-      {
-        "id": "6-across",
-        "number": 6,
-        "direction": "across",
-        "row": 4,
-        "col": 4,
-        "answer": "HOUR",
-        "clue": "Sixty minutes."
-      },
-      {
-        "id": "8-across",
-        "number": 8,
-        "direction": "across",
-        "row": 7,
-        "col": 2,
-        "answer": "MONDAY",
-        "clue": "The day after Sunday."
-      },
-      {
-        "id": "10-across",
-        "number": 10,
-        "direction": "across",
-        "row": 9,
-        "col": 0,
-        "answer": "WEEK",
-        "clue": "A period of seven days."
-      },
-      {
-        "id": "11-across",
-        "number": 11,
-        "direction": "across",
-        "row": 11,
-        "col": 0,
-        "answer": "FRIDAY",
-        "clue": "The day before Saturday."
-      },
-      {
-        "id": "1-down",
-        "number": 1,
-        "direction": "down",
+        "answer": "THANKS",
+        "clue": "Say this when a neighbour helps carry your bag.",
         "row": 0,
-        "col": 4,
-        "answer": "MONTH",
-        "clue": "One of the twelve parts of a year."
+        "col": 9,
+        "direction": "down",
+        "number": 1,
+        "id": "1-down"
       },
       {
-        "id": "2-down",
-        "number": 2,
-        "direction": "down",
-        "row": 1,
+        "answer": "PATIENT",
+        "clue": "Someone who waits calmly while a partner learns the new game is this.",
+        "row": 2,
         "col": 0,
-        "answer": "MINUTE",
-        "clue": "Sixty seconds."
+        "direction": "across",
+        "number": 2,
+        "id": "2-across"
       },
       {
-        "id": "5-down",
-        "number": 5,
+        "answer": "ENCOURAGE",
+        "clue": "Say something supportive when a friend wants to try again.",
+        "row": 2,
+        "col": 4,
         "direction": "down",
+        "number": 3,
+        "id": "3-down"
+      },
+      {
+        "answer": "HELP",
+        "clue": "Offer to carry one box when a friend has too much to hold.",
         "row": 3,
-        "col": 6,
-        "answer": "SUNDAY",
-        "clue": "The day before Monday."
+        "col": 7,
+        "direction": "down",
+        "number": 4,
+        "id": "4-down"
       },
       {
-        "id": "7-down",
-        "number": 7,
+        "answer": "PLEASE",
+        "clue": "Add this polite word when asking someone to pass the jug.",
+        "row": 3,
+        "col": 11,
         "direction": "down",
-        "row": 5,
-        "col": 3,
-        "answer": "CLOCK",
-        "clue": "Something that shows the time."
+        "number": 5,
+        "id": "5-down"
       },
       {
-        "id": "9-down",
-        "number": 9,
-        "direction": "down",
-        "row": 8,
+        "answer": "WELCOME",
+        "clue": "Offer this greeting when a new person joins the club.",
+        "row": 4,
         "col": 1,
-        "answer": "YEAR",
-        "clue": "A period of twelve months."
+        "direction": "across",
+        "number": 6,
+        "id": "6-across"
+      },
+      {
+        "answer": "LISTEN",
+        "clue": "Give your attention to what another person is saying.",
+        "row": 5,
+        "col": 7,
+        "direction": "across",
+        "number": 7,
+        "id": "7-across"
+      },
+      {
+        "answer": "FAIR",
+        "clue": "Give each player the same number of turns to make the game this.",
+        "row": 7,
+        "col": 9,
+        "direction": "down",
+        "number": 8,
+        "id": "8-down"
+      },
+      {
+        "answer": "CARE",
+        "clue": "Show thoughtful attention to someone who feels worried.",
+        "row": 8,
+        "col": 8,
+        "direction": "across",
+        "number": 9,
+        "id": "9-across"
+      },
+      {
+        "answer": "RESPECT",
+        "clue": "Treat another person’s feelings and choices as important.",
+        "row": 10,
+        "col": 0,
+        "direction": "across",
+        "number": 10,
+        "id": "10-across"
+      },
+      {
+        "answer": "TRUST",
+        "clue": "When someone keeps promises, you learn to rely on them.",
+        "row": 10,
+        "col": 8,
+        "direction": "across",
+        "number": 11,
+        "id": "11-across"
       }
     ],
     "wordBank": [
-      "SUNDAY",
-      "FRIDAY",
-      "WEEK",
-      "YEAR",
-      "MORNING",
-      "MINUTE",
-      "HOUR",
-      "MONDAY",
-      "MONTH",
-      "CLOCK",
-      "NIGHT"
+      "THANKS",
+      "ENCOURAGE",
+      "RESPECT",
+      "CARE",
+      "PLEASE",
+      "LISTEN",
+      "WELCOME",
+      "FAIR",
+      "HELP",
+      "TRUST",
+      "PATIENT"
     ]
   },
   {
-    "id": "english-word-skills",
-    "title": "English Word Skills",
-    "category": "English",
-    "emoji": "🔤",
-    "color": "#8b83bc",
-    "description": "Become a word wizard with a little language magic.",
-    "rows": 9,
+    "id": "wizpiko-market-morning",
+    "title": "Market Morning",
+    "category": "Everyday choices",
+    "emoji": "🍐",
+    "color": "#86a943",
+    "description": "Read the stalls, compare choices and prepare for a simple shopping trip.",
+    "rows": 14,
+    "cols": 9,
+    "entries": [
+      {
+        "answer": "COINS",
+        "clue": "Count these small pieces of metal money at the till.",
+        "row": 0,
+        "col": 2,
+        "direction": "across",
+        "number": 1,
+        "id": "1-across"
+      },
+      {
+        "answer": "CHANGE",
+        "clue": "The seller returns this when you pay more than the total.",
+        "row": 0,
+        "col": 2,
+        "direction": "down",
+        "number": 1,
+        "id": "1-down"
+      },
+      {
+        "answer": "BAG",
+        "clue": "Put your shopping into this reusable carrier.",
+        "row": 2,
+        "col": 1,
+        "direction": "across",
+        "number": 2,
+        "id": "2-across"
+      },
+      {
+        "answer": "FRESH",
+        "clue": "These vegetables were picked recently and still look crisp.",
+        "row": 3,
+        "col": 4,
+        "direction": "down",
+        "number": 3,
+        "id": "3-down"
+      },
+      {
+        "answer": "QUEUE",
+        "clue": "Join the line of people waiting for their turn to pay.",
+        "row": 5,
+        "col": 0,
+        "direction": "across",
+        "number": 4,
+        "id": "4-across"
+      },
+      {
+        "answer": "STALL",
+        "clue": "A seller arranges pears on this small market stand.",
+        "row": 6,
+        "col": 4,
+        "direction": "across",
+        "number": 5,
+        "id": "5-across"
+      },
+      {
+        "answer": "LIST",
+        "clue": "Write the items you need here before leaving home.",
+        "row": 6,
+        "col": 7,
+        "direction": "down",
+        "number": 6,
+        "id": "6-down"
+      },
+      {
+        "answer": "BUNCH",
+        "clue": "Choose one group of bananas joined together.",
+        "row": 7,
+        "col": 0,
+        "direction": "across",
+        "number": 7,
+        "id": "7-across"
+      },
+      {
+        "answer": "RECEIPT",
+        "clue": "Keep this printed record of the items you bought.",
+        "row": 9,
+        "col": 1,
+        "direction": "across",
+        "number": 8,
+        "id": "8-across"
+      },
+      {
+        "answer": "PRICE",
+        "clue": "Check this number to find how much the apples cost.",
+        "row": 9,
+        "col": 6,
+        "direction": "down",
+        "number": 9,
+        "id": "9-down"
+      },
+      {
+        "answer": "SCALE",
+        "clue": "The seller places the potatoes on this to find their weight.",
+        "row": 13,
+        "col": 2,
+        "direction": "across",
+        "number": 10,
+        "id": "10-across"
+      }
+    ],
+    "wordBank": [
+      "BAG",
+      "FRESH",
+      "RECEIPT",
+      "QUEUE",
+      "BUNCH",
+      "SCALE",
+      "CHANGE",
+      "STALL",
+      "COINS",
+      "LIST",
+      "PRICE"
+    ]
+  },
+  {
+    "id": "wizpiko-story-lantern",
+    "title": "The Story Lantern",
+    "category": "Reading together",
+    "emoji": "📖",
+    "color": "#9f7bdd",
+    "description": "Find the pieces that help a little tale make sense.",
+    "rows": 17,
+    "cols": 9,
+    "entries": [
+      {
+        "answer": "TITLE",
+        "clue": "Read the story’s name at the top of the first page.",
+        "row": 0,
+        "col": 0,
+        "direction": "across",
+        "number": 1,
+        "id": "1-across"
+      },
+      {
+        "answer": "IMAGINE",
+        "clue": "Picture the strange floating island in your own mind.",
+        "row": 0,
+        "col": 1,
+        "direction": "down",
+        "number": 2,
+        "id": "2-down"
+      },
+      {
+        "answer": "ENDING",
+        "clue": "The final part reveals whether the lost key was found.",
+        "row": 1,
+        "col": 6,
+        "direction": "down",
+        "number": 3,
+        "id": "3-down"
+      },
+      {
+        "answer": "PAGE",
+        "clue": "Turn one sheet of the book to carry on reading.",
+        "row": 2,
+        "col": 0,
+        "direction": "across",
+        "number": 4,
+        "id": "4-across"
+      },
+      {
+        "answer": "DIALOGUE",
+        "clue": "The lines inside quotation marks show a conversation.",
+        "row": 5,
+        "col": 4,
+        "direction": "down",
+        "number": 5,
+        "id": "5-down"
+      },
+      {
+        "answer": "SETTING",
+        "clue": "A seaside village in winter gives the story its place and time.",
+        "row": 6,
+        "col": 0,
+        "direction": "across",
+        "number": 6,
+        "id": "6-across"
+      },
+      {
+        "answer": "SCENE",
+        "clue": "One part of the tale happens beside an old lighthouse.",
+        "row": 6,
+        "col": 0,
+        "direction": "down",
+        "number": 6,
+        "id": "6-down"
+      },
+      {
+        "answer": "CLUE",
+        "clue": "A muddy footprint gives the reader a useful hint.",
+        "row": 8,
+        "col": 3,
+        "direction": "across",
+        "number": 7,
+        "id": "7-across"
+      },
+      {
+        "answer": "HERO",
+        "clue": "This central character tries to solve the story’s main problem.",
+        "row": 9,
+        "col": 8,
+        "direction": "down",
+        "number": 8,
+        "id": "8-down"
+      },
+      {
+        "answer": "CHAPTER",
+        "clue": "One numbered section of a longer book has this name.",
+        "row": 10,
+        "col": 6,
+        "direction": "down",
+        "number": 9,
+        "id": "9-down"
+      },
+      {
+        "answer": "AUTHOR",
+        "clue": "This person chose and wrote the words of the story.",
+        "row": 11,
+        "col": 3,
+        "direction": "across",
+        "number": 10,
+        "id": "10-across"
+      }
+    ],
+    "wordBank": [
+      "SCENE",
+      "CHAPTER",
+      "HERO",
+      "PAGE",
+      "IMAGINE",
+      "CLUE",
+      "SETTING",
+      "TITLE",
+      "ENDING",
+      "AUTHOR",
+      "DIALOGUE"
+    ]
+  },
+  {
+    "id": "wizpiko-city-discovery",
+    "title": "A City Discovery",
+    "category": "Finding your way",
+    "emoji": "🚌",
+    "color": "#478ed1",
+    "description": "Use signs and useful words to explore a new part of town.",
+    "rows": 12,
     "cols": 17,
     "entries": [
       {
-        "id": "3-across",
-        "number": 3,
-        "direction": "across",
-        "row": 1,
-        "col": 1,
-        "answer": "VOWEL",
-        "clue": "One of the letters A, E, I, O or U."
-      },
-      {
-        "id": "7-across",
-        "number": 7,
-        "direction": "across",
-        "row": 3,
-        "col": 9,
-        "answer": "QUESTION",
-        "clue": "A sentence that asks something."
-      },
-      {
-        "id": "8-across",
-        "number": 8,
-        "direction": "across",
-        "row": 4,
-        "col": 3,
-        "answer": "LETTER",
-        "clue": "One symbol of the English alphabet."
-      },
-      {
-        "id": "10-across",
-        "number": 10,
-        "direction": "across",
-        "row": 6,
-        "col": 4,
-        "answer": "CAPITAL",
-        "clue": "A big letter, such as A instead of a."
-      },
-      {
-        "id": "11-across",
-        "number": 11,
-        "direction": "across",
-        "row": 7,
-        "col": 0,
-        "answer": "RHYME",
-        "clue": "Two words do this when their endings sound alike."
-      },
-      {
-        "id": "1-down",
+        "answer": "LANDMARK",
+        "clue": "The tall clock tower is a recognisable feature that helps you navigate.",
+        "row": 0,
+        "col": 16,
+        "direction": "down",
         "number": 1,
-        "direction": "down",
-        "row": 0,
-        "col": 2,
-        "answer": "NOUN",
-        "clue": "A word that names a person, place or thing."
+        "id": "1-down"
       },
       {
-        "id": "2-down",
-        "number": 2,
-        "direction": "down",
-        "row": 0,
-        "col": 4,
-        "answer": "SENTENCE",
-        "clue": "A group of words that gives a complete thought."
-      },
-      {
-        "id": "4-down",
-        "number": 4,
-        "direction": "down",
+        "answer": "TICKET",
+        "clue": "Keep this small pass ready to show before boarding.",
         "row": 1,
-        "col": 10,
-        "answer": "PLURAL",
-        "clue": "The form of a noun meaning more than one."
+        "col": 14,
+        "direction": "down",
+        "number": 2,
+        "id": "2-down"
       },
       {
-        "id": "5-down",
-        "number": 5,
-        "direction": "down",
+        "answer": "STATION",
+        "clue": "The train stops here so passengers can get on and off.",
         "row": 2,
-        "col": 15,
-        "answer": "COMMA",
-        "clue": "The punctuation mark (,) used for a short pause."
+        "col": 10,
+        "direction": "across",
+        "number": 3,
+        "id": "3-across"
       },
       {
-        "id": "6-down",
-        "number": 6,
+        "answer": "CROSSING",
+        "clue": "Use the marked place where people safely walk across the road.",
+        "row": 4,
+        "col": 10,
         "direction": "down",
-        "row": 3,
-        "col": 7,
-        "answer": "PERIOD",
-        "clue": "The punctuation mark (.) at the end of a statement."
+        "number": 4,
+        "id": "4-down"
       },
       {
-        "id": "9-down",
-        "number": 9,
-        "direction": "down",
+        "answer": "BRIDGE",
+        "clue": "Cross this structure to reach the other side of the river.",
         "row": 5,
+        "col": 9,
+        "direction": "across",
+        "number": 5,
+        "id": "5-across"
+      },
+      {
+        "answer": "CORNER",
+        "clue": "Turn left where the two streets meet.",
+        "row": 6,
         "col": 0,
-        "answer": "VERB",
-        "clue": "A word that describes an action, like run."
+        "direction": "across",
+        "number": 6,
+        "id": "6-across"
+      },
+      {
+        "answer": "ROUTE",
+        "clue": "Choose the path that takes you from the library to the park.",
+        "row": 6,
+        "col": 5,
+        "direction": "down",
+        "number": 7,
+        "id": "7-down"
+      },
+      {
+        "answer": "MUSEUM",
+        "clue": "Visit this building to explore carefully kept objects and displays.",
+        "row": 7,
+        "col": 8,
+        "direction": "across",
+        "number": 8,
+        "id": "8-across"
+      },
+      {
+        "answer": "MAP",
+        "clue": "Follow the marked streets on this guide to find the museum.",
+        "row": 8,
+        "col": 7,
+        "direction": "down",
+        "number": 9,
+        "id": "9-down"
+      },
+      {
+        "answer": "TRAFFIC",
+        "clue": "Many moving cars and buses make the road busy with this.",
+        "row": 9,
+        "col": 5,
+        "direction": "across",
+        "number": 10,
+        "id": "10-across"
+      },
+      {
+        "answer": "SIGN",
+        "clue": "Read the board that points towards the swimming pool.",
+        "row": 11,
+        "col": 8,
+        "direction": "across",
+        "number": 11,
+        "id": "11-across"
       }
     ],
     "wordBank": [
-      "LETTER",
-      "VOWEL",
-      "VERB",
-      "RHYME",
-      "QUESTION",
-      "PERIOD",
-      "COMMA",
-      "CAPITAL",
-      "NOUN",
-      "PLURAL",
-      "SENTENCE"
+      "STATION",
+      "CROSSING",
+      "MUSEUM",
+      "CORNER",
+      "LANDMARK",
+      "TRAFFIC",
+      "BRIDGE",
+      "ROUTE",
+      "SIGN",
+      "MAP",
+      "TICKET"
+    ]
+  },
+  {
+    "id": "wizpiko-space-workshop",
+    "title": "Space Workshop",
+    "category": "Curious questions",
+    "emoji": "🚀",
+    "color": "#6674d5",
+    "description": "Prepare an imaginary space mission using words from observation and discovery.",
+    "rows": 16,
+    "cols": 9,
+    "entries": [
+      {
+        "answer": "ORBIT",
+        "clue": "The station follows this curved path around Earth.",
+        "row": 0,
+        "col": 5,
+        "direction": "down",
+        "number": 1,
+        "id": "1-down"
+      },
+      {
+        "answer": "OBSERVE",
+        "clue": "Look carefully and record what you notice.",
+        "row": 0,
+        "col": 8,
+        "direction": "down",
+        "number": 2,
+        "id": "2-down"
+      },
+      {
+        "answer": "PLANET",
+        "clue": "Earth is one; Mars is another world travelling around the Sun.",
+        "row": 2,
+        "col": 2,
+        "direction": "down",
+        "number": 3,
+        "id": "3-down"
+      },
+      {
+        "answer": "GRAVITY",
+        "clue": "This force pulls objects towards one another.",
+        "row": 4,
+        "col": 0,
+        "direction": "across",
+        "number": 4,
+        "id": "4-across"
+      },
+      {
+        "answer": "EXPLORE",
+        "clue": "Investigate an unfamiliar place to learn what is there.",
+        "row": 6,
+        "col": 2,
+        "direction": "across",
+        "number": 5,
+        "id": "5-across"
+      },
+      {
+        "answer": "ROCKET",
+        "clue": "This vehicle pushes upwards to carry the crew beyond the atmosphere.",
+        "row": 6,
+        "col": 7,
+        "direction": "down",
+        "number": 6,
+        "id": "6-down"
+      },
+      {
+        "answer": "LAUNCH",
+        "clue": "The countdown ends and the spacecraft begins its journey.",
+        "row": 10,
+        "col": 0,
+        "direction": "down",
+        "number": 7,
+        "id": "7-down"
+      },
+      {
+        "answer": "SAMPLE",
+        "clue": "Bring back a small piece of rock for careful study.",
+        "row": 10,
+        "col": 2,
+        "direction": "across",
+        "number": 8,
+        "id": "8-across"
+      },
+      {
+        "answer": "SIGNAL",
+        "clue": "The crew sends this message back to the ground team.",
+        "row": 10,
+        "col": 2,
+        "direction": "down",
+        "number": 8,
+        "id": "8-down"
+      },
+      {
+        "answer": "MODULE",
+        "clue": "The crew attaches one separate working section to the station.",
+        "row": 10,
+        "col": 4,
+        "direction": "down",
+        "number": 9,
+        "id": "9-down"
+      },
+      {
+        "answer": "HELMET",
+        "clue": "The astronaut wears this protective covering around the head.",
+        "row": 15,
+        "col": 0,
+        "direction": "across",
+        "number": 10,
+        "id": "10-across"
+      }
+    ],
+    "wordBank": [
+      "ROCKET",
+      "MODULE",
+      "OBSERVE",
+      "PLANET",
+      "EXPLORE",
+      "HELMET",
+      "SAMPLE",
+      "GRAVITY",
+      "ORBIT",
+      "LAUNCH",
+      "SIGNAL"
     ]
   }
 ];

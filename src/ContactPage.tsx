@@ -118,7 +118,7 @@ export default function ContactPage({ onHome, onPrivacy }: Props) {
         {failure && <p ref={failureRef} tabIndex={-1} className="wz-contact-summary" role="alert">{failure}</p>}
       </form>}
       <aside className="wz-contact-aside">
-        <div className="wz-info-card"><Mail size={26} aria-hidden="true" /><h2>{contactCopy.contactAddressLabel}</h2><a href={`mailto:${contactCopy.contactAddress}`}>{contactCopy.contactAddress}</a></div>
+        <div className="wz-info-card"><Mail size={26} aria-hidden="true" /><h2>{contactCopy.supportTitle}</h2><p>{contactCopy.supportDescription}</p></div>
         <div className="wz-info-card"><h2>{contactCopy.expectationsTitle}</h2><p>{contactCopy.expectationsDescription}</p><p>{contactCopy.accountHint}</p></div>
       </aside>
     </div>

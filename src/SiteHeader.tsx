@@ -3,6 +3,7 @@ import { ArrowRight, Award, ChevronDown, Flame, HelpCircle, LogOut, Menu, Search
 import type { LearnerProfile } from './learnerData';
 import type { LearnerPage } from './LearnerHub';
 import type { InfoPageId } from './content/siteCopy';
+import { LearnerAvatar } from './LearnerAvatar';
 
 type Props = {
   signedIn: boolean; loading: boolean; profile: LearnerProfile | null; isHome: boolean; streak: number;
@@ -14,7 +15,7 @@ const menu = [
   {id:'achievements',label:'My Achievements',Icon:Award},{id:'streak',label:'My Learning Streak',Icon:Flame},
   {id:'preferences',label:'Learning Preferences',Icon:Settings2},{id:'help',label:'Help & Support',Icon:HelpCircle},
 ] as const;
-const avatars={girl:'👧',boy:'👦',robot:'🤖',panda:'🐼',cat:'🐱'} as const;
+
 
 export default function SiteHeader({signedIn,loading,profile,isHome,streak,onHome,onSubjects,onGames,onInfo,onContact,onSignIn,onHub,onSignOut,onSearch}:Props) {
   const [searchOpen,setSearchOpen]=useState(false);
@@ -47,7 +48,7 @@ export default function SiteHeader({signedIn,loading,profile,isHome,streak,onHom
       <button className={isHome?'active':''} type="button" onClick={()=>navigate(onHome)}>Home</button>
       <button type="button" onClick={()=>navigate(onSubjects)}>Subjects</button>
       <button type="button" onClick={()=>navigate(onGames)}>Games</button>
-      {signedIn&&<button type="button" onClick={()=>navigate(()=>onHub('progress'))}>My Learning</button>}
+      {(signedIn||loading)&&<button type="button" disabled={loading} className={loading?'wz-loading-nav':''} aria-hidden={loading||undefined} onClick={()=>navigate(()=>onHub('progress'))}>My Learning</button>}
       <a href="?page=about" onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(()=>onInfo('about'));}}}>About Us</a>
       <a href="?page=contact" onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(onContact);}}}>Contact Us</a>
     </nav>
@@ -55,8 +56,8 @@ export default function SiteHeader({signedIn,loading,profile,isHome,streak,onHom
       {searchOpen&&<input autoFocus type="search" aria-label="Search Wizpiko" placeholder="Search…" maxLength={80} value={query} onChange={event=>setQuery(event.target.value)} onKeyDown={event=>{if(event.key==='Escape')setSearchOpen(false);}}/>}
       <button aria-label="Search" type={searchOpen?'submit':'button'} onClick={()=>{if(!searchOpen)setSearchOpen(true);}}><Search size={21}/></button>
     </form>
-    {signedIn?<div className="wz-avatar-wrap" ref={avatarWrap}><button ref={avatarButton} className="wz-avatar-button" type="button" onClick={()=>setAvatarOpen(!avatarOpen)} aria-expanded={avatarOpen} aria-haspopup="menu" aria-controls="wz-account-menu"><span className="wz-avatar-pic" aria-hidden="true">{avatars[profile?.avatar||'robot']}</span><span>{nickname}</span><ChevronDown size={16}/></button>
-      {avatarOpen&&<div id="wz-account-menu" className="wz-avatar-menu" role="menu" aria-label="Your learning account"><div className="wz-menu-person"><span className="wz-avatar-pic" aria-hidden="true">{avatars[profile?.avatar||'robot']}</span><div><strong>{nickname}</strong><small>Your learning space</small></div></div>
+    {loading?<span className="wz-account-placeholder" aria-hidden="true"/>:signedIn?<div className="wz-avatar-wrap" ref={avatarWrap}><button ref={avatarButton} className="wz-avatar-button" type="button" onClick={()=>setAvatarOpen(!avatarOpen)} aria-expanded={avatarOpen} aria-haspopup="menu" aria-controls="wz-account-menu"><LearnerAvatar avatar={profile?.avatar} className="wz-avatar-pic" decorative /><span>{nickname}</span><ChevronDown size={16}/></button>
+      {avatarOpen&&<div id="wz-account-menu" className="wz-avatar-menu" role="menu" aria-label="Your learning account"><div className="wz-menu-person"><LearnerAvatar avatar={profile?.avatar} className="wz-avatar-pic" decorative /><div><strong>{nickname}</strong><small>Your learning space</small></div></div>
         {menu.map(({id,label,Icon})=><button key={id} role="menuitem" type="button" onClick={()=>navigate(()=>onHub(id))}><Icon size={18}/><span>{label}</span>{id==='streak'&&streak>0?<span className="wz-menu-flame">🔥 {streak}</span>:<ArrowRight size={15} className="wz-menu-arrow"/>}</button>)}
         <button role="menuitem" type="button" className="wz-menu-signout" onClick={()=>navigate(onSignOut)}><LogOut size={18}/>Sign Out</button>
       </div>}

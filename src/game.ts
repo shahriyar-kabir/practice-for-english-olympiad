@@ -9,6 +9,26 @@ export type Progress = Record<string, PuzzleProgress>;
 
 export const STORAGE_KEY = 'wordsprout-progress-v1';
 
+// IDs/counts alone identify retired history. No former clues or layouts ship.
+const retiredPuzzleCounts: Readonly<Record<string, number>> = {
+  'animal-friends': 10, 'in-the-classroom': 11, 'food-and-drinks': 11,
+  'our-natural-world': 11, opposites: 11, 'action-words': 12,
+  'around-the-house': 11, 'travel-and-transport': 11,
+  'time-and-calendar': 11, 'english-word-skills': 11,
+};
+
+/** Historical answers stay separate from the current collection and its score. */
+export function retiredClassicSummary(progress: Progress) {
+  let solvedWords = 0, completedPuzzles = 0;
+  for (const [id, count] of Object.entries(retiredPuzzleCounts)) {
+    const solved = new Set((Array.isArray(progress[id]?.solved) ? progress[id].solved : [])
+      .filter(value => typeof value === 'string' && /^\d{1,3}-(across|down)$/.test(value))).size;
+    solvedWords += Math.min(count, solved);
+    if (solved >= count) completedPuzzles++;
+  }
+  return { solvedWords, completedPuzzles, totalWords: 110, totalPuzzles: 10 };
+}
+
 export function initialProgress(): PuzzleProgress {
   return { solved: [], hints: {} };
 }
@@ -17,7 +37,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-/** Only restore answers and hint positions that still exist in our puzzle set. */
+/** Restore current play plus recognized retired history without mixing answers. */
 export function readProgress(): Progress {
   try {
     const saved: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
@@ -45,6 +65,23 @@ export function readProgress(): Progress {
       }
 
       progress[puzzle.id] = { solved, hints };
+    }
+
+    for (const id of Object.keys(retiredPuzzleCounts)) {
+      const candidate = saved[id];
+      if (!isRecord(candidate)) continue;
+      const entryId = (value: unknown): value is string => typeof value === 'string' && /^\d{1,3}-(across|down)$/.test(value);
+      const solved = Array.isArray(candidate.solved) ? [...new Set(candidate.solved.filter(entryId))] : [];
+      const hints: Record<string, number[]> = {};
+      if (isRecord(candidate.hints)) {
+        for (const [entry, positions] of Object.entries(candidate.hints)) {
+          if (!entryId(entry) || !Array.isArray(positions)) continue;
+          const valid = [...new Set(positions.filter((position): position is number =>
+            Number.isInteger(position) && typeof position === 'number' && position >= 0 && position < 64))].sort((a, b) => a - b);
+          if (valid.length) hints[entry] = valid;
+        }
+      }
+      progress[id] = { solved, hints };
     }
 
     return progress;

@@ -3,13 +3,23 @@ import type { AcademyProgress, LearningEvent } from './learningTypes';
 export type GameMode = 'crossword' | 'mcq';
 export type LevelRecord = { unlocked: number; completed: number; bestScore: number; xp: number };
 export type GameSession = {
-  key: string; endsAt: number; index: number;
+  key: string;
+  /** Kept only for compatibility with older saved practice; never expires play. */
+  endsAt?: number;
+  index: number;
   answers: Record<number, string>; solved: string[];
   hints: Record<string, number[]>; startedAt: number;
+  /** New sets have five questions; old sessions retain their original sequence. */
+  questionCount?: number;
+  groupStart?: number;
+  completedGroups?: number[];
+  contentVersion?: number;
 };
 export type JourneyProgress = {
   records: Record<string, LevelRecord>;
   session?: GameSession;
+  /** Kept when old practice content is replaced; never interpreted as new answers. */
+  retiredSessions?: GameSession[];
   activityDates?: string[];
   academy?: AcademyProgress;
   activityLog?: LearningEvent[];
