@@ -428,7 +428,17 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
       refresh_token: response.refresh_token,
       expires_at: Date.now() + (response.expires_in || 3600) * 1000,
     }, remember)) throw new AccountActionError('storage_unavailable', 'Your browser could not save this session. Enable browser storage and try again.');
-    window.location.assign(window.location.origin + window.location.pathname);
+    // After sign-in open /home unless the learner requested a protected page directly.
+    // Existing pending learning destinations are restored by App from session storage.
+    const currentPath = window.location.pathname;
+    const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
+    const relativePath = base && (currentPath === base || currentPath.startsWith(base + '/'))
+      ? currentPath.slice(base.length) || '/'
+      : currentPath;
+    const protectedPaths = ['/home', '/my-profile', '/my-progress', '/my-achievements', '/streak',
+      '/learning-preferences', '/help-support', '/english-academy', '/games', '/word-puzzles'];
+    const nextPath = protectedPaths.includes(relativePath) ? currentPath : base + '/home';
+    window.location.assign(window.location.origin + nextPath);
   }
   async function signIn(email: string, password: string, remember = true) {
     acceptCredentials(await authenticateLearner(email, password), remember);

@@ -61,7 +61,14 @@ describe('account hook session lifecycle', () => {
     expect(account.readStoredSession()).toMatchObject({ access_token: credentials.access_token, refresh_token: credentials.refresh_token, remember });
     expect((remember ? localStorage : sessionStorage).getItem(account.SESSION_STORAGE_KEY)).not.toBeNull();
     expect((remember ? sessionStorage : localStorage).getItem(account.SESSION_STORAGE_KEY)).toBeNull();
-    expect(window.location.assign).toHaveBeenCalledWith('https://wizpiko.com/');
+    expect(window.location.assign).toHaveBeenCalledWith('https://wizpiko.com' + import.meta.env.BASE_URL.replace(/\/+$/, '') + '/home');
+  });
+  it('returns an unauthenticated deep-link visitor to the requested learner page', async () => {
+    const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
+    window.location.pathname = base + '/my-progress';
+    request.mockResolvedValueOnce(Response.json(credentials));
+    await mount().api.signIn('learner@example.com', 'password');
+    expect(window.location.assign).toHaveBeenCalledWith('https://wizpiko.com' + base + '/my-progress');
   });
   it('defaults sign-in to a remembered session', async () => {
     request.mockResolvedValueOnce(Response.json(credentials));
