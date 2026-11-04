@@ -14,7 +14,8 @@ permissions:
 concurrency:
   # PR validation must not wait for a stalled production Pages deployment.
   group: ${{ github.event_name == 'pull_request' && format('wizpiko-pr-{0}', github.event.pull_request.number) || 'github-pages' }}
-  cancel-in-progress: false
+  # A newer production commit supersedes any stalled Pages deployment.
+  cancel-in-progress: ${{ github.event_name != 'pull_request' }}
 
 jobs:
   build:
