@@ -4,6 +4,7 @@ import { ArrowRight, CalendarDays, CheckCircle2, Eye, EyeOff, LockKeyhole, Mail,
 import type { LearnerProfile } from './learnerData';
 import { AccountActionError } from './supportApi';
 import './auth-dialog.css';
+import { appHref } from './routes';
 
 type Mode = 'login' | 'register' | 'forgot' | 'reset' | 'confirmation' | 'reset-sent';
 type Props = {
@@ -78,7 +79,7 @@ export function AccountDialog({ onClose, configured, email, profile, recovery, s
     <section className="wa-dialog-panel">
       <button type="button" className="wa-close" aria-label="Close account dialog" onClick={onClose}><X size={23}/></button>
       <div className="wa-form-side">
-        <img src="./wizpiko-wordmark.webp" width="720" height="240" className="wa-wordmark" alt="Wizpiko — Think. Play. Shine."/>
+        <img src={import.meta.env.BASE_URL + 'wizpiko-wordmark.webp'} width="720" height="240" className="wa-wordmark" alt="Wizpiko — Think. Play. Shine."/>
         {successScreen ? <div className="wa-success-content">
           <span className="wa-success-icon" aria-hidden="true">{mode === 'confirmation' ? <Mail size={34}/> : <CheckCircle2 size={34}/>}</span>
           <h2 id="wa-dialog-title" tabIndex={-1} data-success-heading>{heading}</h2>
@@ -106,7 +107,7 @@ export function AccountDialog({ onClose, configured, email, profile, recovery, s
               <div className="wa-password-wrap"><input id="wa-password" type={showPassword ? 'text' : 'password'} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength={mode === 'login' ? undefined : 8} value={password} onChange={event => setPassword(event.target.value)} required placeholder={mode === 'login' ? 'Your password' : 'At least 8 characters'}/><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button></div>
             </>}
             {(mode === 'register' || mode === 'reset') && <><label htmlFor="wa-confirm">Confirm password</label><input id="wa-confirm" type="password" minLength={8} required autoComplete="new-password" value={confirm} onChange={event => setConfirm(event.target.value)} placeholder="Repeat password"/></>}
-            {mode === 'register' && <label className="wa-consent"><input type="checkbox" checked={permission} onChange={event => setPermission(event.target.checked)} required/><span>I have reviewed Wizpiko’s <a href="?page=privacy" target="_blank" rel="noopener noreferrer">Privacy & Safety</a> and <a href="?page=account-guide" target="_blank" rel="noopener noreferrer">Account Guide</a>.</span></label>}
+            {mode === 'register' && <label className="wa-consent"><input type="checkbox" checked={permission} onChange={event => setPermission(event.target.checked)} required/><span>I have reviewed Wizpiko’s <a href={appHref('/privacy-safety')} target="_blank" rel="noopener noreferrer">Privacy & Safety</a> and <a href={appHref('/account-guide')} target="_blank" rel="noopener noreferrer">Account Guide</a>.</span></label>}
             {mode === 'login' && <div className="wa-form-tools"><label><input type="checkbox" checked={remember} onChange={event => setRemember(event.target.checked)}/> Remember me</label><button type="button" onClick={() => changeMode('forgot')}>Forgot password?</button></div>}
             {message && <p className={`wa-status${errorCode ? ' wa-status-error' : ''}`} role={errorCode ? 'alert' : 'status'}>{message}</p>}
             {errorCode === 'account_not_found' && <button type="button" className="wa-signup-action" onClick={() => changeMode('register')}>Create your Wizpiko account <ArrowRight size={17}/></button>}
@@ -117,7 +118,7 @@ export function AccountDialog({ onClose, configured, email, profile, recovery, s
           <p className="wa-privacy">Sign in to keep your lessons, progress and achievements connected to your Wizpiko account.</p>
         </>}
       </div>
-      {!successScreen && <div className="wa-art-side" aria-hidden="true"><img src="./wizpiko-mascot.webp" width="906" height="576" alt=""/><strong>Think. Play. Shine.</strong><p>A new discovery starts with you.</p></div>}
+      {!successScreen && <div className="wa-art-side" aria-hidden="true"><img src={import.meta.env.BASE_URL + 'wizpiko-mascot.webp'} width="906" height="576" alt=""/><strong>Think. Play. Shine.</strong><p>A new discovery starts with you.</p></div>}
     </section>
   </dialog>;
 }
