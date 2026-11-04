@@ -4,3 +4,9 @@
 
 [build.environment]
   NODE_VERSION = "24"
+
+# Keep clean client-side URLs working on direct visits and refreshes.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
