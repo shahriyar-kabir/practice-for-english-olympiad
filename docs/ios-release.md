@@ -6,7 +6,7 @@ Source publication authorized: after reviewing the local project and previews, t
 
 ## Native setup
 
-Dependencies are pinned in `package.json` and `package-lock.json`. Capacitor 8.6.0 uses Swift Package Manager; `npx cap sync ios` regenerates the package references. No CocoaPods install is needed. The cloud job selects Xcode 26.2 on macOS 15 and compiles simulator and unsigned device archives. No Apple credentials are required for these unsigned outputs.
+Dependencies are pinned in `package.json` and `package-lock.json`. Capacitor 8.6.0 uses Swift Package Manager; `npx cap sync ios` regenerates the package references. No CocoaPods install is needed. The cloud job selects Xcode 26.2 on macOS 15 and compiles simulator and unsigned device archives. No Apple credentials are required: the simulator app is signed ad hoc to exercise Keychain, while the device archive remains unsigned. A debug-only startup marker makes simulator launch readiness a required check.
 
 All native screens and content are bundled. The normal website entry remains `src/main.tsx`; iOS uses `ios.html` and `src/mobile/main.tsx`. Shared App accepts optional mobile chrome/home renderers. The website uses its existing renderers by default. Native fetch uses Capacitor’s HTTPS transport, preserving the website’s CORS allowlist. There is no remote server URL, cleartext exception, analytics SDK or service-role key in the app.
 

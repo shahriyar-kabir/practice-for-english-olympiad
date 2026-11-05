@@ -14,7 +14,7 @@ import '../refresh.css';
 import '../reference-home.css';
 import MobileChrome from './MobileChrome';
 import MobileHome from './MobileHome';
-import { prepareNativeApp } from './native';
+import { prepareNativeApp, reportNativeReady } from './native';
 import './mobile.css';
 
 document.documentElement.classList.add('wi-app');
@@ -26,6 +26,7 @@ function MobileApp() {
     prepareNativeApp().then(()=>{if(!cancelled)setReady(true);}).catch(()=>{if(!cancelled)setError('Your secure learning space could not be opened. Please try again.');});
     return()=>{cancelled=true;};
   },[attempt]);
+  useEffect(()=>{if(ready){const frame=requestAnimationFrame(()=>{void reportNativeReady();});return()=>cancelAnimationFrame(frame);}},[ready]);
   useEffect(()=>{
     const refresh=()=>setEpoch(value=>value+1);
     const network=(event:Event)=>setOnline((event as CustomEvent<boolean>).detail);

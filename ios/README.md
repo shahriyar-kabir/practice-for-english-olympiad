@@ -2,7 +2,7 @@
 
 The iOS app is built from the same reviewed learning engine as wizpiko.com, with its own bundled entry, mobile home, safe areas and bottom navigation. This branch does not deploy the website.
 
-Current status: the owner explicitly approved uploading this app source to the existing public GitHub repository for a Mac cloud build. Local validation passes: 475 automated tests, mobile browser checks, TypeScript builds and native packaging checks. See the iOS Actions run for Xcode compilation status. This is not yet a signed or installable iPhone app. The `app-account` backend function is staged, not deployed, and must be enabled before distribution.
+Current status: the owner explicitly approved uploading this app source to the existing public GitHub repository for a Mac cloud build. Local validation passes: 475 automated tests, mobile browser checks, TypeScript builds and native packaging checks. Xcode compilation runs in the iOS Actions workflow, which also checks that the simulator reaches its learning interface. Simulator builds are signed ad hoc for Keychain testing; the device archive stays unsigned. This is not yet a signed or installable iPhone app. The `app-account` backend function is staged, not deployed, and must be enabled before distribution.
 
 ## Included
 

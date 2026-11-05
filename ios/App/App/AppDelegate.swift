@@ -61,7 +61,8 @@ public final class WizpikoDevicePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "getSession", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setSession", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "clearSession", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "saveDocument", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "saveDocument", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "recordStartup", returnType: CAPPluginReturnPromise)
     ]
     private var query: [String: Any] {
         [kSecClass as String: kSecClassGenericPassword,
@@ -79,6 +80,7 @@ public final class WizpikoDevicePlugin: CAPPlugin, CAPBridgedPlugin {
         if status == errSecItemNotFound { call.resolve(["value": ""]); return }
         guard status == errSecSuccess, let data = result as? Data,
               let value = String(data: data, encoding: .utf8) else {
+            NSLog("Wizpiko secure session read failed (%d)", status)
             call.reject("Secure sign-in storage is unavailable.", "KEYCHAIN_READ_FAILED"); return
         }
         call.resolve(["value": value])
@@ -110,6 +112,24 @@ public final class WizpikoDevicePlugin: CAPPlugin, CAPBridgedPlugin {
         guard status == errSecSuccess || status == errSecItemNotFound else {
             call.reject("Your saved sign-in could not be removed.", "KEYCHAIN_DELETE_FAILED"); return
         }
+        call.resolve()
+    }
+
+    // A debug-only, account-free readiness marker lets the Mac build verify the
+    // real WebKit/Keychain startup instead of accepting a screenshot of an error.
+    @objc func recordStartup(_ call: CAPPluginCall) {
+        #if DEBUG
+        let state = call.getString("state") ?? ""
+        guard ["ready", "failed"].contains(state) else { call.reject("Invalid startup state"); return }
+        let phase = String((call.getString("phase") ?? "").prefix(64))
+        let code = String((call.getString("code") ?? "").prefix(64))
+        do {
+            let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Wizpiko", isDirectory: true)
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let data = try JSONSerialization.data(withJSONObject: ["state": state, "phase": phase, "code": code])
+            try data.write(to: directory.appendingPathComponent("startup.json"), options: .atomic)
+        } catch { call.reject("Startup check unavailable"); return }
+        #endif
         call.resolve()
     }
 

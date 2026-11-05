@@ -15,6 +15,7 @@ type DevicePlugin = {
   setSession: (options: { value: string }) => Promise<void>;
   clearSession: () => Promise<void>;
   saveDocument: (options: { data: string; filename: string }) => Promise<void>;
+  recordStartup: (options: { state: 'ready' | 'failed'; phase?: string; code?: string }) => Promise<void>;
 };
 const device = registerPlugin<DevicePlugin>('WizpikoDevice');
 export function navigateApp(path: string) {
@@ -28,6 +29,8 @@ function setConnected(connected: boolean) { window.dispatchEvent(new CustomEvent
 
 export async function prepareNativeApp() {
   if (!Capacitor.isNativePlatform()) return;
+  let phase = 'secure-session';
+  try {
   const session = await secureSession(device);
   configurePlatform({
     siteOrigin: 'https://wizpiko.com', authRedirect: 'https://wizpiko.com/', session,
@@ -36,12 +39,15 @@ export async function prepareNativeApp() {
     async shareURL(url, title, text) { await Share.share({ title, text, url, dialogTitle: 'Share your achievement' }); },
   });
   const handleLink = async (url: string) => { const path = appLinkPath(url); if (!path) return; await Browser.close().catch(() => {}); navigateApp(path); };
+  phase = 'app-lifecycle';
   await NativeApp.addListener('appUrlOpen', event => { void handleLink(event.url); });
   const launch = await NativeApp.getLaunchUrl();
   if (launch?.url) { const path = appLinkPath(launch.url); if (path) window.history.replaceState(null, '', path); }
+  phase = 'connection-status';
   await Network.addListener('networkStatusChange', status => setConnected(status.connected));
   setConnected((await Network.getStatus()).connected);
   await NativeApp.addListener('appStateChange', state => { if (state.isActive) void Network.getStatus().then(status => setConnected(status.connected)); });
+  phase = 'keyboard';
   await Keyboard.addListener('keyboardWillShow', () => document.documentElement.classList.add('wi-keyboard-open'));
   await Keyboard.addListener('keyboardWillHide', () => document.documentElement.classList.remove('wi-keyboard-open'));
   await StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
@@ -56,4 +62,13 @@ export async function prepareNativeApp() {
     const button = event.target.closest<HTMLButtonElement>('button');
     if (button && !button.disabled) void Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
   });
+  } catch (cause) {
+    const code = String((cause as { code?: unknown })?.code || 'unavailable').replace(/[^a-z0-9_-]/gi, '').slice(0, 64);
+    console.error(`[Wizpiko] Startup failed at ${phase} (${code})`);
+    await device.recordStartup({ state: 'failed', phase, code }).catch(() => {});
+    throw cause;
+  }
+}
+export async function reportNativeReady() {
+  if (Capacitor.isNativePlatform()) await device.recordStartup({ state: 'ready' }).catch(() => {});
 }
