@@ -1,0 +1,81 @@
+.wc-certificate { display: block; width: 100%; height: auto; background: white; box-shadow: 0 16px 45px #15375c12; }
+.wc-review-page { max-width: 1123px; margin: 32px auto; padding: 0 20px 30px; color: #17365f; font: 16px/1.7 'Nunito', sans-serif; }
+.wc-review-page h1 { font-size: 30px; line-height: 1.3; margin: 8px 0 12px; }
+.wc-review-page > header p, .wc-review-note { color: #647a98; }
+.wc-review-page > header { margin-bottom: 25px; }
+.wc-eyebrow { color: #6860aa; font-size: 12px; font-weight: 900; letter-spacing: .1em; }
+.wc-preview-options { display: grid; grid-template-columns: 2fr 1fr 1fr; align-items: end; gap: 16px; margin-bottom: 25px; padding: 23px; background: #f0f5ff; border: 1px solid #e0e8f6; border-radius: 18px; }
+.wc-preview-options label { display: block; font-size: 13px; font-weight: 800; }
+.wc-preview-options input, .wc-preview-options select { width: 100%; box-sizing: border-box; background: white; border: 1px solid #ccd9ed; padding: 12px; border-radius: 9px; margin-top: 6px; color: #17365f; font: inherit; font-size: 16px; }
+.wc-preview-options input:focus-visible, .wc-preview-options select:focus-visible { outline: 3px solid #397bee; outline-offset: 2px; }
+.wc-review-note { font-size: 13px; margin-top: 22px; }
+@media(max-width: 650px) { .wc-review-page { margin-top: 22px; padding-inline: 12px; } .wc-preview-options { grid-template-columns: 1fr; } .wc-review-page h1 { font-size: 25px; } }
+@media print { @page { size: A4 landscape; margin: 0; } body { margin: 0; } .wc-review-page { margin: 0; padding: 0; max-width: none; } .wc-review-page > :not(.wc-certificate) { display: none; } .wc-certificate { width: 297mm; height: 210mm; box-shadow: none; } }
+
+.wc-collection { display: grid; gap: 22px; }
+.wc-collection .wd-card { min-width: 0; }
+.wc-introduction { display: flex; align-items: flex-start; gap: 18px; }
+.wc-introduction > svg { flex: none; color: #a68743; }
+.wc-collection p { color: #60799c; font-size: 14px; line-height: 1.75; margin: 8px 0; }
+.wc-collection h2 { font-size: 22px; line-height: 1.4; }
+.wc-section-heading, .wc-name-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 17px; margin-bottom: 20px; }
+.wc-section-heading > span { font-size: 12px; color: #627a9d; flex: none; }
+.wc-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 22px 0 0; }
+.wc-primary, .wc-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid transparent; min-height: 44px; padding: 10px 18px; border-radius: 24px; font: 900 14px 'Nunito', sans-serif; cursor: pointer; text-decoration: none; }
+.wc-primary { background: #086afa; color: white; }
+.wc-secondary { background: white; color: #306099; border-color: #cfddf5; }
+.wc-primary:disabled, .wc-secondary:disabled { cursor: default; opacity: .55; }
+.wc-message, .wc-error { padding: 15px 18px; border-radius: 12px; font-size: 14px; line-height: 1.6; }
+.wc-message { background: #eaf8f1; color: #267255 !important; }
+.wc-error { background: #fff4e9; color: #9c573a !important; }
+.wc-certificate-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.wc-certificate-list > button { display: flex; align-items: center; gap: 13px; padding: 19px; text-align: left; border: 1px solid #dce6f5; border-radius: 15px; background: #fcfdff; font: inherit; cursor: pointer; }
+.wc-certificate-list > button.is-selected { border-color: #618ee4; background: #eff5ff; }
+.wc-certificate-list > button > svg:first-child { color: #ac8943; flex: none; }
+.wc-certificate-list > button > span { flex: 1; min-width: 0; }
+.wc-certificate-list strong, .wc-certificate-list small { display: block; overflow-wrap: anywhere; }
+.wc-certificate-list strong { font-size: 16px; color: #23436e; }
+.wc-certificate-list small { font-size: 12px; color: #697d9b; margin-top: 5px; }
+.wc-empty { text-align: center; padding: 18px 0 12px; }
+.wc-empty > svg { color: #bea05e; }
+.wc-empty h3 { font-size: 20px; color: #2b4974; margin-top: 14px; }
+.wc-qualification-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; }
+.wc-qualification-grid > article { padding: 21px; border: 1px solid #e0e8f6; border-radius: 16px; }
+.wc-qualification-grid h3 { font-size: 20px; color: #28466e; margin: 7px 0; }
+.wc-qualification-grid .wc-eyebrow { font-size: 11px; }
+.wc-qualification-grid .wc-primary, .wc-qualification-grid .wc-secondary { margin-top: 12px; }
+.wc-name-step label, .wc-sharing label { display: block; font-size: 14px; font-weight: 900; color: #355c89; margin-bottom: 7px; }
+.wc-name-step input, .wc-sharing input { box-sizing: border-box; width: 100%; min-width: 0; padding: 13px; color: #244370; background: white; border: 1px solid #c8d8f0; border-radius: 11px; font: 16px 'Nunito', sans-serif; }
+.wc-name-step form > p { margin: 11px 0 23px; }
+.wc-close { border: 0; background: #f1f5fd; border-radius: 50%; padding: 9px; color: #517097; cursor: pointer; }
+.wc-name-step .wc-certificate { margin-top: 24px; }
+.wc-sharing { margin-top: 28px; padding: 23px; background: #f5f8ff; border-radius: 16px; }
+.wc-sharing h2 { display: flex; align-items: center; gap: 8px; font-size: 20px; }
+.wc-sharing > p { margin: 12px 0 18px; }
+.wc-link-row { display: flex; align-items: stretch; gap: 10px; }
+.wc-link-row > button { flex: none; }
+.wc-social-links { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin: 20px 0; }
+.wc-social-links > a { display: inline-flex; align-items: center; gap: 5px; color: #1465cf; font-size: 13px; font-weight: 800; text-decoration: none; }
+.wc-public-page { max-width: 1123px; padding: 28px 10px 40px; margin: auto; color: #193864; }
+.wc-back { display: inline-flex; gap: 7px; align-items: center; padding: 10px 0; font: 800 14px 'Nunito',sans-serif; color: #527199; margin-bottom: 19px; }
+.wc-public-heading { text-align: center; margin-bottom: 30px; }
+.wc-public-heading > span { display: inline-flex; align-items: center; gap: 7px; color: #148b6c; font-size: 14px; font-weight: 800; }
+.wc-public-heading h1 { font-size: clamp(26px,3vw,37px); line-height: 1.35; margin: 12px 0; }
+.wc-public-heading p, .wc-public-note { font-size: 15px; color: #637c9f; line-height: 1.7; }
+.wc-public-note { text-align: center; margin-top: 24px; }
+.wc-unavailable { background: white; border: 1px solid #dfe7f7; padding: 55px 25px; border-radius: 23px; text-align: center; }
+.wc-unavailable h1 { font-size: 28px; margin: 17px 0; }
+.wc-unavailable p { color: #617b9e; margin-bottom: 22px; }
+.wc-collection :is(button,input,a):focus-visible, .wc-public-page :is(button,a):focus-visible { outline: 3px solid #3477e4; outline-offset: 3px; }
+@media(max-width: 650px) {
+  .wc-introduction { gap: 12px; }
+  .wc-collection h2 { font-size: 20px; }
+  .wc-introduction > svg { width: 26px; }
+  .wc-certificate-list, .wc-qualification-grid { grid-template-columns: minmax(0,1fr); }
+  .wc-section-heading { flex-wrap: wrap; gap: 7px; }
+  .wc-link-row { flex-direction: column; }
+  .wc-sharing { padding: 20px 16px; }
+  .wc-actions { gap: 9px; }
+  .wc-actions > button { font-size: 13px; padding-inline: 15px; }
+  .wc-public-page { padding-inline: 0; }
+}

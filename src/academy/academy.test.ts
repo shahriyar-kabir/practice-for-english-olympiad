@@ -31,7 +31,7 @@ describe('The complete English curriculum', () => {
     await expect(loadLesson('__proto__')).rejects.toThrow('could not be found');
   });
 
-  it('has real teaching, examples, recaps and five practice tasks in every lesson', () => {
+  it('has real teaching, examples, recaps and twenty practice tasks in every lesson', () => {
     const ids: string[] = [];
     for (const lesson of lessons) {
       expect(lesson.id).toBe(`${lesson.level}-${lesson.skill}`);
@@ -41,16 +41,16 @@ describe('The complete English curriculum', () => {
       expect(lesson.examples.length).toBeGreaterThanOrEqual(2);
       expect(lesson.examples.every(example => example.before.trim() && example.after.trim())).toBe(true);
       expect(lesson.recap.length).toBeGreaterThan(50);
-      expect(lesson.tasks).toHaveLength(5);
+      expect(lesson.tasks).toHaveLength(20);
       for (const task of lesson.tasks) {
         ids.push(task.id);
-        expect(task.id).toMatch(/^[a-z]{2}-[a-z]-[1-5]$/);
+        expect(task.id).toMatch(/^[a-z]{2}-[a-z]-(?:[1-9]|1[0-9]|20)$/);
         expect(task.prompt.trim().length).toBeGreaterThan(15);
         expect(task.explanation.trim().length, task.id).toBeGreaterThan(15);
       }
     }
-    expect(ids).toHaveLength(120);
-    expect(new Set(ids).size).toBe(120);
+    expect(ids).toHaveLength(480);
+    expect(new Set(ids).size).toBe(480);
   });
 
   it('keeps every keyed answer valid and every choice unambiguous', () => {
@@ -121,9 +121,9 @@ describe('Meaningful answer checking', () => {
 
   it('scores actual answers in all 24 lessons without rewarding omitted answers', () => {
     for (const lesson of lessons) {
-      expect(scoreLesson(lesson, allCorrect(lesson))).toEqual({ correct: 5, total: 5, score: 100, xp: MAX_LESSON_XP });
-      expect(scoreLesson(lesson, scoreAnswers(lesson, 3))).toEqual({ correct: 3, total: 5, score: 60, xp: 34 });
-      expect(scoreLesson(lesson, {})).toMatchObject({ correct: 0, total: 5, score: 0 });
+      expect(scoreLesson(lesson, allCorrect(lesson))).toEqual({ correct: 20, total: 20, score: 100, xp: MAX_LESSON_XP });
+      expect(scoreLesson(lesson, scoreAnswers(lesson, 3))).toEqual({ correct: 3, total: 20, score: 15, xp: 16 });
+      expect(scoreLesson(lesson, {})).toMatchObject({ correct: 0, total: 20, score: 0 });
       expect(() => completeAcademyLesson({ records: {} }, lesson, {})).toThrow('Answer each');
     }
   });
@@ -134,10 +134,10 @@ describe('Saved lesson progress and retry XP', () => {
   it('records a zero-correct completed lesson, bounded XP, a real activity day and earned lesson badge', () => {
     const original: JourneyProgress = { records: {} };
     const saved = completeAcademyLesson(original, lesson, scoreAnswers(lesson, 0), completionTime);
-    expect(saved.result).toEqual({ correct: 0, total: 5, score: 0, xp: 10, completedAt: completionTime });
+    expect(saved.result).toEqual({ correct: 0, total: 20, score: 0, xp: 10, completedAt: completionTime });
     expect(saved.delta).toBe(10);
     expect(saved.journey.academy?.lastLessonId).toBe(lesson.id);
-    expect(saved.journey.activityLog?.[0]).toMatchObject({ kind: 'lesson', correct: 0, total: 5, xp: 10 });
+    expect(saved.journey.activityLog?.[0]).toMatchObject({ kind: 'lesson', correct: 0, total: 20, xp: 10 });
     expect(saved.journey.earnedBadges?.['first-lesson']).toBe(completionTime);
     expect(saved.journey.activityDates).toHaveLength(1);
     expect(learningSummary(saved.journey).lessonsCompleted).toBe(1);
@@ -147,7 +147,7 @@ describe('Saved lesson progress and retry XP', () => {
 
   it('retains the best result and grants only improvement XP across retries', () => {
     const first = completeAcademyLesson({ records: {} }, lesson, scoreAnswers(lesson, 2), completionTime);
-    expect(first.delta).toBe(26);
+    expect(first.delta).toBe(14);
     const same = completeAcademyLesson(first.journey, lesson, scoreAnswers(lesson, 2), '2026-01-03T12:00:00.000Z');
     expect(same.delta).toBe(0);
     expect(same.result).toEqual(first.result);
@@ -156,8 +156,8 @@ describe('Saved lesson progress and retry XP', () => {
     expect(lower.delta).toBe(0);
     expect(lower.result).toEqual(first.result);
     const better = completeAcademyLesson(lower.journey, lesson, allCorrect(lesson), '2026-01-05T12:00:00.000Z');
-    expect(better.delta).toBe(24);
-    expect(better.result).toMatchObject({ score: 100, correct: 5, total: 5, xp: 50 });
+    expect(better.delta).toBe(36);
+    expect(better.result).toMatchObject({ score: 100, correct: 20, total: 20, xp: 50 });
     expect(learningSummary(better.journey)).toMatchObject({ lessonXP: 50, lessonsCompleted: 1 });
     expect(better.journey.activityLog?.reduce((sum, event) => sum + event.xp, 0)).toBe(50);
   });
@@ -175,7 +175,7 @@ describe('Saved lesson progress and retry XP', () => {
   });
 
   it('keeps existing games and other lesson results when merging a completion', () => {
-    const original: JourneyProgress = { records: { game: { unlocked: 3, completed: 2, bestScore: 90, xp: 100 } }, academy: { results: { other: { score: 100, correct: 5, total: 5, xp: 50, completedAt: completionTime } } } };
+    const original: JourneyProgress = { records: { game: { unlocked: 3, completed: 2, bestScore: 90, xp: 100 } }, academy: { results: { other: { score: 100, correct: 20, total: 20, xp: 50, completedAt: completionTime } } } };
     const saved = completeAcademyLesson(original, lesson, allCorrect(lesson), completionTime);
     expect(saved.journey.records).toBe(original.records);
     expect(saved.journey.academy?.results.other).toBe(original.academy?.results.other);

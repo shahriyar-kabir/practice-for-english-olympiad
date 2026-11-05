@@ -1,6 +1,7 @@
 import type { JourneyProgress } from './journey';
 import type { LearningEvent, LessonResult } from './learningTypes';
 import { dayKey, learningStreak, validActivityDays } from './learnerData';
+import { allSubjectGameStats } from './subjectGameProgress';
 
 export const LEARNING_LOG_LIMIT = 240;
 export type ClassicLearningStats = { solvedTotal?: number; completedTotal?: number; retiredSolvedTotal?: number; retiredCompletedTotal?: number };
@@ -45,11 +46,12 @@ export function learningSummary(journey: JourneyProgress, now = new Date(), clas
   const records = Object.values(journey.records || {}).filter(record => record && typeof record === 'object');
   const events = completedEvents(journey, now);
   const lessonXP = lessons.reduce((sum, result) => sum + nonnegative(result.xp), 0);
-  const gameXP = records.reduce((sum, record) => sum + nonnegative(record.xp), 0);
+  const subjectStats = allSubjectGameStats(journey.subjectGames);
+  const gameXP = records.reduce((sum, record) => sum + nonnegative(record.xp), 0) + subjectStats.xp;
   const lessonsCompleted = lessons.length;
   const englishGamesCompleted = records.reduce((sum, record) => sum + count(record.completed), 0);
   const classicCompleted = count(classic.completedTotal) + count(classic.retiredCompletedTotal);
-  const gamesCompleted = englishGamesCompleted + classicCompleted;
+  const gamesCompleted = englishGamesCompleted + classicCompleted + subjectStats.practised;
   const dates = validActivityDays([
     ...(Array.isArray(journey.activityDates) ? journey.activityDates : []),
     ...events.map(event => dayKey(new Date(event.completedAt))),
@@ -64,6 +66,8 @@ export function learningSummary(journey: JourneyProgress, now = new Date(), clas
     lessonsCompleted,
     gamesCompleted,
     englishGamesCompleted,
+    subjectGamesCompleted: subjectStats.practised,
+    subjectLevelsPassed: subjectStats.passed,
     classicCompleted,
     activitiesCompleted: lessonsCompleted + gamesCompleted,
     activeDays: dates.length,
@@ -83,8 +87,8 @@ export function learningAchievements(journey: JourneyProgress, now = new Date(),
     { id: 'first-activity', title: 'First discovery', description: 'Complete your first learning activity.', icon: '✨', done: summary.activitiesCompleted > 0 || events.length > 0 },
     { id: 'first-lesson', title: 'Lesson explorer', description: 'Finish your first English lesson.', icon: '📖', done: summary.lessonsCompleted > 0 },
     { id: 'three-lessons', title: 'Building momentum', description: 'Complete three different English lessons.', icon: '🌱', done: summary.lessonsCompleted >= 3 },
-    { id: 'first-game', title: 'Game explorer', description: 'Complete your first English game.', icon: '🧩', done: summary.gamesCompleted > 0 || events.some(event => event.kind !== 'lesson') },
-    { id: 'level-explorer', title: 'Level explorer', description: 'Unlock a new English challenge level.', icon: '🚀', done: Object.values(journey.records || {}).some(record => record?.unlocked > 1) },
+    { id: 'first-game', title: 'Game explorer', description: 'Complete your first learning game.', icon: '🧩', done: summary.gamesCompleted > 0 || events.some(event => event.kind !== 'lesson') },
+    { id: 'level-explorer', title: 'Level explorer', description: 'Reach a new challenge level.', icon: '🚀', done: summary.subjectLevelsPassed > 0 || Object.values(journey.records || {}).some(record => record?.unlocked > 1) },
     { id: 'streak-3', title: '3-day spark', description: 'Complete activities on three days in one learning streak.', icon: '🔥', done: summary.streak.longest >= 3 },
     { id: 'streak-7', title: '7-day glow', description: 'Build a learning streak with seven active days.', icon: '🌟', done: summary.streak.longest >= 7 },
     { id: 'streak-14', title: 'Steady explorer', description: 'Build a learning streak with fourteen active days.', icon: '🏅', done: summary.streak.longest >= 14 },

@@ -235,16 +235,21 @@ describe('progress merging and account ownership', () => {
   it('never carries account A progress into B, and preserves A unsynced work in its own cache', () => {
     const a = account.prepareLocalProgressForUser('account-a', snapshot('guest'));
     a.journey.records['unsynced-a'] = record(3, 99);
+    a.journey.subjectGames = { maths: { level: '51', best: { '16': 4 }, updatedAt: 1 } };
     const b = account.prepareLocalProgressForUser('account-b', a);
     expect(b.legacy).toEqual({});
     expect(b.journey.records).toEqual({});
+    expect(b.journey.subjectGames?.maths).toBeUndefined();
     b.journey.records['only-b'] = record(2);
+    b.journey.subjectGames = { maths: { level: '2', best: { '1': 5 }, updatedAt: 2 } };
     const restoredA = account.prepareLocalProgressForUser('account-a', b);
     expect(restoredA.journey.records['unsynced-a'].xp).toBe(99);
     expect(restoredA.journey.records.guest).toBeDefined();
     expect(restoredA.journey.records['only-b']).toBeUndefined();
+    expect(restoredA.journey.subjectGames?.maths).toMatchObject({ level: '51', best: { '16': 4 } });
     const restoredB = account.prepareLocalProgressForUser('account-b', restoredA);
     expect(Object.keys(restoredB.journey.records)).toEqual(['only-b']);
+    expect(restoredB.journey.subjectGames?.maths).toMatchObject({ level: '2', best: { '1': 5 } });
     expect(localStorage.getItem(account.PROGRESS_OWNER_KEY)).toBe('account-b');
   });
 });

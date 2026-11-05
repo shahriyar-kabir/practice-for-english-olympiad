@@ -9,17 +9,17 @@ import { LearnerAvatar } from './LearnerAvatar';
 import { appHref } from './routes';
 
 type Props = {
-  signedIn: boolean; loading: boolean; profile: LearnerProfile | null; isHome: boolean; streak: number; completedToday?: boolean; reserveSignedIn?: boolean;
+  signedIn: boolean; loading: boolean; profile: LearnerProfile | null; isHome: boolean; gamesActive?: boolean; streak: number; completedToday?: boolean; reserveSignedIn?: boolean;
   onHome:()=>void; onSubjects:()=>void; onGames:()=>void; onInfo:(page:InfoPageId)=>void;
   onContact:()=>void; onSignIn:()=>void; onHub:(page:LearnerPage)=>void; onSignOut:()=>void; onSearch:(query:string)=>void;
 };
 const menu = [
   {id:'profile',label:'My Profile',Icon:UserRound},{id:'progress',label:'My Progress',Icon:TrendingUp},
-  {id:'achievements',label:'My Achievements',Icon:Award},{id:'streak',label:'My Learning Streak',Icon:Flame},
+  {id:'achievements',label:'My Achievements',Icon:Award},{id:'certificates',label:'My Certificates',Icon:Award},{id:'streak',label:'My Learning Streak',Icon:Flame},
   {id:'preferences',label:'Learning Preferences',Icon:Settings2},{id:'help',label:'Help & Support',Icon:HelpCircle},
 ] as const;
 
-export default function SiteHeader({signedIn,loading,profile,isHome,streak,completedToday=false,reserveSignedIn=false,onHome,onSubjects,onGames,onInfo,onContact,onSignIn,onHub,onSignOut,onSearch}:Props) {
+export default function SiteHeader({signedIn,loading,profile,isHome,gamesActive=false,streak,completedToday=false,reserveSignedIn=false,onHome,onSubjects,onGames,onInfo,onContact,onSignIn,onHub,onSignOut,onSearch}:Props) {
   const [searchOpen,setSearchOpen]=useState(false);
   const [query,setQuery]=useState('');
   const [avatarOpen,setAvatarOpen]=useState(false);
@@ -59,7 +59,7 @@ export default function SiteHeader({signedIn,loading,profile,isHome,streak,compl
     <nav id="wz-main-nav" className={`wz-header-nav${mobileOpen?' is-open':''}`} aria-label="Main navigation">
       <button className={isHome?'active':''} type="button" onClick={()=>navigate(onHome)}>Home</button>
       <button type="button" onClick={()=>navigate(onSubjects)}>Subjects <ChevronDown className="wz-subject-chevron" size={15} aria-hidden="true"/></button>
-      <button type="button" onClick={()=>navigate(onGames)}>Games</button>
+      <button className={gamesActive?'active':''} type="button" onClick={()=>navigate(onGames)}>Games</button>
       {(signedIn||loading)&&<button type="button" disabled={loading} className={loading?'wz-loading-nav':''} aria-hidden={loading||undefined} onClick={()=>navigate(()=>onHub('progress'))}>My Learning</button>}
       <a href={appHref('/about-us')} onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(()=>onInfo('about'));}}}>About Us</a>
       <a href={appHref('/contact-us')} onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(onContact);}}}>Contact Us</a>

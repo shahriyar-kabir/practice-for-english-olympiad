@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { GameSession, JourneyProgress } from './journey';
+import { mergeSubjectGames } from './subjectGameProgress';
+import { mergeSkillDrafts } from './skillProgress';
 import { validateSignup } from './learnerData';
 import type { LearnerProfile } from './learnerData';
 import type { AcademyProgress, LearningEvent, LessonResult } from './learningTypes';
@@ -162,6 +164,8 @@ export function mergeJourney(local: JourneyProgress, cloud: JourneyProgress): Jo
     earnedBadges,
     streakRecord: Math.max(local.streakRecord || 0, cloud.streakRecord || 0),
     completionIds,
+    subjectGames: mergeSubjectGames(local.subjectGames, cloud.subjectGames, new Set(completionIds)),
+    skillDrafts: mergeSkillDrafts(local.skillDrafts, cloud.skillDrafts, new Set(completionIds)),
   };
 }
 export function mergeSnapshots(local: Snapshot, cloud: Snapshot): Snapshot {
@@ -230,6 +234,14 @@ export async function authenticateLearner(email: string, password: string): Prom
     if (!await accountExists(address)) throw new AccountActionError('account_not_found', ACCOUNT_NOT_FOUND_MESSAGE);
     throw new AccountActionError('invalid_credentials', 'The password is incorrect. Please try again.');
   }
+}
+/** Reuse refresh and reject requests that finish after an account switch. */
+export async function learningRequestSession(): Promise<Session> {
+  const current = readStoredSession();
+  if (!current) throw new Error('Please sign in to use your learning profile.');
+  const session = await validSession(current);
+  if (readStoredSession()?.refresh_token !== session.refresh_token) throw new Error('Your account changed. Please open this page again.');
+  return session;
 }
 export async function requestPasswordReset(email: string): Promise<string> {
   if (!configured) throw new AccountActionError('service_unavailable', 'Supabase account settings are missing from this build.');

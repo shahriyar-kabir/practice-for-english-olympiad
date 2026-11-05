@@ -45,8 +45,8 @@ export const supportFaqs: readonly {
     id: 'start-learning',
     question: 'How do I start an activity?',
     answer: [
-      'Choose English Practice, select a comfortable ability level and explore a skill. Open a short lesson, learn from its examples, then practise and review your answers. Sign in to start and keep your learning connected to your account.',
-      'You can browse the homepage, subjects and activity cards before signing in. English activities are available now; other subjects are marked Coming soon.',
+      'Choose English Practice or Mathematics, select a comfortable ability level and explore a skill. Open a short lesson, learn from its examples, then practise and review your answers. Sign in to start and keep your learning connected to your account.',
+      'You can browse the homepage, subjects and activity cards before signing in. English and Maths activities are available now; planned subjects have their own information pages.',
     ],
     link: { label: 'Read the Account Guide', target: 'account-guide' },
   },
@@ -123,7 +123,7 @@ export const infoPages: Record<InfoPageId, InfoPageCopy> = {
         id: 'find-your-way',
         title: 'Find your way around',
         paragraphs: [
-          'The homepage is a place to explore subjects and choose a learning stage. English Practice has short lessons in sounds, vocabulary, grammar, reading, listening and writing. Crosswords and multiple-choice games are also available. Other subjects will show Coming soon until they are available.',
+          'The homepage is a place to explore subjects and choose a learning stage. English Practice explores sounds, vocabulary, grammar, reading, listening and writing. Mathematics covers numbers, fractions, algebra, geometry, data and reasoning. Both subjects have lessons and games. Planned subjects have information pages to help you discover what is coming.',
           'Sign in when you are ready to start an activity. For a step-by-step introduction to creating an account, confirming your email and finding your saved learning, open the Account Guide.',
         ],
         links: [{ label: 'Open the Account Guide', target: 'account-guide' }],
@@ -158,7 +158,7 @@ export const infoPages: Record<InfoPageId, InfoPageCopy> = {
         title: '3. Choose your first activity',
         paragraphs: [
           'You can browse subjects, stages and activity cards before signing in. A signed-in account is required to start a learning activity.',
-          'Choose English Practice and explore Starter, Beginner, Intermediate or Advanced lessons. Select a skill, read the teaching examples, practise and review the feedback. Learning stages are starting suggestions. The basics are open to adults as well as younger learners, and new Wizpiko word puzzles and short practice sets are available.',
+          'Choose English Practice or Mathematics and explore Starter, Beginner, Intermediate or Advanced lessons. Select a skill, read the teaching examples, then answer 20 questions in four small sets and review the feedback. There is no timer. Learning stages are starting suggestions, and the basics are open to adults as well as younger learners. The Games section offers English word games and Mental Maths Trail.',
         ],
         links: [{ label: 'Sign In', target: 'sign-in' }],
       },
@@ -176,6 +176,7 @@ export const infoPages: Record<InfoPageId, InfoPageCopy> = {
         paragraphs: [
           'Open My Progress to review your learning. Achievements celebrate completed activities and milestones, while your learning streak shows active learning days.',
           'Completing an activity counts towards your streak; signing in does not. There is a two-missed-day grace period to return. A broken streak does not take away earned XP or badges.',
+          'My Certificates shows your progress towards each subject and level. Complete all 20 questions in every skill and earn at least 80% in each skill to qualify. Before issuing a certificate, we ask for your full name and show a preview. You can download a PDF or image, then choose whether to enable a public sharing link.',
           'Read any save or connection message on the page before leaving. If progress looks different on another device, make sure you are signed in to the same account.',
         ],
       },
@@ -211,6 +212,14 @@ export const infoPages: Record<InfoPageId, InfoPageCopy> = {
         paragraphs: [
           'Signed-in activity records support the progress shown in your account. Depending on the activity, these records include completed words or questions, scores, XP, unlocked levels and activity dates.',
           'The website uses those records to show progress, streaks and earned achievements. Completing an activity contributes to your streak; simply signing in does not. Earned XP and badges remain when a streak breaks.',
+        ],
+      },
+      {
+        id: 'certificates',
+        title: 'Certificates and optional sharing',
+        paragraphs: [
+          'We ask for your full name before issuing an earned certificate. That name, the subject, level, issue date and achievement requirements are saved with the certificate in your account. Certificates start private.',
+          'If you enable public sharing, anyone with the link can view and download that certificate. Its full name, subject, level and issue date become visible. Your email address, date of birth, answers and other account details are not included. You can disable the public link from My Certificates. Copies someone has already downloaded or shared may remain with them.',
         ],
       },
       {
@@ -281,7 +290,7 @@ export const infoPages: Record<InfoPageId, InfoPageCopy> = {
         title: 'Learning you can play',
         paragraphs: [
           'English Practice brings together 24 short lessons across four ability levels, with teaching examples, varied practice and useful explanations. Explore sounds, vocabulary, grammar, reading, listening and writing. Crosswords and multiple-choice challenges, including ten newly written Wizpiko word puzzles, are part of the experience.',
-          'English activities are available now. Mathematics, science and other subjects are shown as Coming soon while they are being prepared.',
+          'English and Mathematics each offer four ability levels, with six skills and 20 questions per skill. Lessons have no timer, and both subjects also have a Games branch. Science and other planned subjects have information pages while they are being prepared.',
         ],
       },
       {
@@ -337,7 +346,7 @@ export const infoPages: Record<InfoPageId, InfoPageCopy> = {
         id: 'possibilities',
         title: 'More ways to discover',
         paragraphs: [
-          'English Practice is the first place to explore. More subjects are planned, with the same goal: useful practice that feels welcoming across different stages of life.',
+          'English Practice and Mathematics offer different ways to explore. More subjects are planned, with the same goal: useful practice that feels welcoming across different stages of life.',
           'We want to build on what helps learners, improve what feels confusing and keep curiosity at the centre of the experience.',
         ],
         links: [{ label: 'Help shape what comes next', target: 'contact' }, { label: 'Learn about Wizpiko', target: 'about' }],

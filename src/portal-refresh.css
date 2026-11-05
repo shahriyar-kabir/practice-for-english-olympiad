@@ -281,3 +281,31 @@
 .wz-account-placeholder { display: block; height: 47px; border-radius: 28px; background: #eaf3ff; }
 .wz-loading-nav { visibility: hidden; }
 @media(max-width:760px) { .wz-site-header .wz-avatar-button, .wz-account-placeholder { width: 66px; } .wz-site-header .wz-avatar-button > span:nth-child(2) { display: none; } }
+
+/* A shared, readable type scale across the upper and lower homepage. */
+.wp-portal .wp-section-heading h2 { font-size: 25px; }
+.wp-portal .wp-section-heading p { font-size: 15px; }
+.wp-portal .wp-section-heading > button { font-size: 14px; min-height: 42px; }
+.wp-portal .wp-home-panel .wp-section-heading h2 { font-size: 22px; }
+.wp-portal .wp-home-panel .wp-section-heading p { font-size: 14px; }
+.wp-portal .wp-subjects .wz-subject-card { min-height: 226px; padding: 20px 12px 15px; }
+.wp-portal .wp-subjects .wz-subject-card strong { font-size: 16px; line-height: 1.35; min-height: 43px; }
+.wp-portal .wp-subjects .wz-subject-description { font-size: 14px; line-height: 1.55; min-height: 66px; }
+.wp-portal .wp-subjects .wz-subject-status { font-size: 12px; line-height: 1.4; padding: 6px 9px; }
+.wp-portal .wp-resume-lesson h3 { font-size: 17px; }
+.wp-portal .wp-small-label, .wp-portal .wp-resume-lesson small, .wp-portal .wp-inline-progress > span { font-size: 13px; }
+.wp-portal .wp-resume-lesson .wp-blue-button { font-size: 14px; min-height: 42px; }
+.wp-portal .wp-game-links strong { font-size: 14px; }
+.wp-portal .wp-game-links small { font-size: 13px; line-height: 1.5; }
+.wp-portal .wp-recommendation > strong { font-size: 14px; line-height: 1.4; }
+.wp-portal .wp-recommendation > span:not(.wp-recommendation-art) { font-size: 12px; }
+.wp-portal .wp-recommendation > small { font-size: 11px; }
+.wp-portal .wp-panel-note, .wp-portal .wp-achievement-preview small { font-size: 13px; }
+.wp-portal .wp-achievement-preview strong, .wp-portal .wp-streak-note strong { font-size: 14px; }
+.wp-portal .wp-streak-note small, .wp-portal .wp-learning-tip { font-size: 13px; }
+@media(max-width: 600px) {
+  .wp-portal .wp-section-heading { flex-wrap: wrap; gap: 4px; }
+  .wp-portal .wp-section-heading h2 { font-size: 24px; }
+  .wp-portal .wp-home-panel .wp-section-heading h2 { font-size: 22px; }
+  .wp-portal .wp-subjects .wz-subject-card { padding-inline: 10px; }
+}

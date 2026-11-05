@@ -16,30 +16,42 @@ import { lessonCatalog } from './academy/catalog';
 import { learningSummary, recordLearningCompletion } from './learningMetrics';
 import { WizpikoPortal } from './WizpikoPortal';
 import type { LearningStageId } from './LearningStages';
-import type { CategoryId } from './englishContent';
+import { learningStages } from './learningStagesContent';
+import { findSubject, subjectInfoPath } from './subjects';
+import type { SubjectId } from './subjects';
+import { isCurriculumSubject } from '../supabase/functions/_shared/curriculum/programs.ts';
+import type { CurriculumSubject } from '../supabase/functions/_shared/curriculum/programs.ts';
+import { isGameSubject } from './gameSubjects';
+import type { GameSubjectId } from './gameSubjects';
 
 import type { LearnerPage } from './LearnerHub';
 import { ageFromBirthdate } from './learnerData';
-import { INFO_ROUTES, HUB_ROUTES, appHref, appPath, readAppRoute, routePath } from './routes';
+import { INFO_ROUTES, HUB_ROUTES, appHref, appPath, readAppRoute, routePath, academyPath } from './routes';
 import type { RouteView } from './routes';
 
 
 
-const EnglishAcademy = lazy(() => import('./academy/EnglishAcademy'));
-const EnglishJourney = lazy(() => import('./EnglishJourney').then(module => ({ default: module.EnglishJourney })));
+const LearningAcademy = lazy(() => import('./academy/LearningAcademy'));
+const PublicCertificatePage = lazy(() => import('./certificates/PublicCertificatePage'));
+const GamesHub = lazy(() => import('./GamesHub'));
+const SubjectGames = lazy(() => import('./SubjectGames'));
 const LearnerHub = lazy(() => import('./LearnerHub').then(module => ({ default: module.LearnerHub })));
 const AccountDialog = lazy(() => import('./AccountDialog').then(module => ({ default: module.AccountDialog })));
 const InfoPages = lazy(() => import('./InfoPages'));
 const ContactPage = lazy(() => import('./ContactPage'));
+const SubjectInfo = lazy(() => import('./SubjectInfo'));
 
-type Destination = { kind: 'english'; level?: AcademyLevel; lessonId?: string } | { kind: 'games' } | { kind: 'classic' } | { kind: 'hub'; page: LearnerPage } | { kind: 'coming'; subject: string };
+type Destination = {kind:'academy';subject:CurriculumSubject;level?:AcademyLevel;lessonId?:string} | { kind: 'english'; level?: AcademyLevel; lessonId?: string } | { kind: 'maths'; level?: AcademyLevel } | { kind: 'games' } | { kind: 'subject-games'; subject: GameSubjectId } | { kind: 'classic' } | { kind: 'hub'; page: LearnerPage } | { kind: 'coming'; subject: string };
 const INTENT_KEY='wizpiko-return-to';
 function readIntent():Destination|null {
  try {
   const value=JSON.parse(sessionStorage.getItem(INTENT_KEY)||'null');
   if(!value||typeof value!=='object')return null;
+  if(value.kind==='academy'&&isCurriculumSubject(value.subject))return {kind:'academy',subject:value.subject,level:['starter','beginner','intermediate','advanced'].includes(value.level)?value.level:undefined,lessonId:typeof value.lessonId==='string'&&/^[a-z0-9-]{1,100}$/.test(value.lessonId)?value.lessonId:undefined};
+  if(value.kind==='maths')return {kind:'maths',level:['starter','beginner','intermediate','advanced'].includes(value.level)?value.level:undefined};
   if(value.kind==='classic'||value.kind==='games')return {kind:value.kind};
-  if(value.kind==='hub'&&['profile','progress','achievements','streak','preferences','help'].includes(value.page))return {kind:'hub',page:value.page};
+  if(value.kind==='subject-games'&&isGameSubject(value.subject))return {kind:'subject-games',subject:value.subject};
+  if(value.kind==='hub'&&['profile','progress','achievements','streak','preferences','certificates','help'].includes(value.page))return {kind:'hub',page:value.page};
   if(value.kind==='coming'&&typeof value.subject==='string')return {kind:'coming',subject:value.subject.slice(0,80)};
   if(value.kind==='english')return {kind:'english',level:['starter','beginner','intermediate','advanced'].includes(value.level)?value.level:undefined,lessonId:typeof value.lessonId==='string'&&lessonCatalog.some(item=>item.id===value.lessonId)?value.lessonId:undefined};
  }catch{ /* A fresh sign-in can proceed without a stored destination. */ }
@@ -93,12 +105,14 @@ export default function App() {
   const [returningAccount] = useState(() => Boolean(readStoredSession()));
   const [view, setView] = useState<RouteView>(() => readAppRoute().view);
   const [infoPage,setInfoPage] = useState<InfoPageId>(() => readAppRoute().infoPage || 'about');
-  const [startingCategory] = useState<CategoryId | null>(null);
+  const [gameSubject,setGameSubject] = useState<GameSubjectId>(() => readAppRoute().gameSubject || 'english');
+  const [academySubject,setAcademySubject] = useState<CurriculumSubject>(()=>readAppRoute().academySubject || 'english');
+  const [certificateToken,setCertificateToken] = useState(()=>readAppRoute().certificateToken || '');
   const [academyLevel,setAcademyLevel] = useState<AcademyLevel>('starter');
   const [academyLesson,setAcademyLesson] = useState<string | undefined>();
   const [hubPage,setHubPage]=useState<LearnerPage>(() => readAppRoute().hubPage || 'profile');
   const [comingSubject,setComingSubject]=useState(() => readAppRoute().subject || '');
-  const [pendingDestination,setPendingDestination]=useState<Destination | null>(readIntent);
+  const [pendingDestination,setPendingDestination]=useState<Destination | null>(()=>readAppRoute().view === 'certificate' ? null : readIntent());
   const account = useWizpikoAccount({ legacy: progress, journey }, restored => { setProgress(restored.legacy); setJourney(restored.journey); });
 
   const accountLayout = !!account.auth.user || (account.auth.loading && returningAccount);
@@ -116,14 +130,17 @@ export default function App() {
   function goSubjects() {goHome();window.requestAnimationFrame(()=>document.getElementById('wiz-subjects')?.scrollIntoView({behavior:'smooth',block:'start'}));}
   function applyDestination(destination:Destination) {
     setDialog(null);
-    if(destination.kind==='english'){
-      setAcademyLevel(destination.level||account.auth.profile?.preferences?.learning_level||'starter');
+    if(destination.kind==='academy'){setAcademySubject(destination.subject);setAcademyLevel(destination.level||'starter');setAcademyLesson(destination.lessonId);setView('categories');changeURL(academyPath(destination.subject));}
+    else if(destination.kind==='english'){
+      setAcademySubject('english');setAcademyLevel(destination.level||account.auth.profile?.preferences?.learning_level||'starter');
       setAcademyLesson(destination.lessonId);setView('categories');changeURL('/english-academy');
     }
+    else if(destination.kind==='maths'){setAcademySubject('maths');setAcademyLevel(destination.level||'starter');setAcademyLesson(undefined);setView('categories');changeURL('/maths-academy');}
+    else if(destination.kind==='subject-games'){setGameSubject(destination.subject);setView('subject-games');changeURL('/games/'+destination.subject);}
     else if(destination.kind==='hub'){setHubPage(destination.page);setView('hub');changeURL(HUB_ROUTES[destination.page]);}
     else if(destination.kind==='coming'){
       setComingSubject(destination.subject);setView('coming');
-      changeURL('/coming-soon?subject='+encodeURIComponent(destination.subject));
+      changeURL(subjectInfoPath(destination.subject));
     }
     else {setView(destination.kind);changeURL(destination.kind==='games'?'/games':'/word-puzzles');}
     window.scrollTo(0,0);
@@ -133,19 +150,27 @@ export default function App() {
     else {saveIntent(destination);setPendingDestination(destination);if(!account.auth.loading)setAccountOpen(true);}
   }
   function goPractice(){requestDestination({kind:'english'});}
-  function goPracticeGames(){requestDestination({kind:'games'});}
+  function goPracticeGames(){saveIntent(null);setPendingDestination(null);setAccountOpen(false);applyDestination({kind:'games'});}
+  function goSubjectGames(subject:GameSubjectId){requestDestination({kind:'subject-games',subject});}
+  function goEnglishGames(){goSubjectGames('english');}
+  function goMathsGames(){goSubjectGames('maths');}
   function goClassic(){requestDestination({kind:'classic'});}
   function goHub(page:LearnerPage){requestDestination({kind:'hub',page});}
-  function goComing(subject:string){requestDestination({kind:'coming',subject});}
+  function goComing(subject:string){setDialog(null);setComingSubject(subject);setView('coming');changeURL(subjectInfoPath(subject));window.scrollTo(0,0);}
   function goLesson(lessonId:string){const lesson=lessonCatalog.find(item=>item.id===lessonId);requestDestination({kind:'english',lessonId,level:lesson?.level});}
-  function goLearningStage(id:LearningStageId) {
-    const levels:Record<LearningStageId,AcademyLevel>={'early-years':'starter',primary:'beginner','middle-school':'intermediate',secondary:'intermediate','college-university':'advanced','lifelong-learners':'starter'};
-    requestDestination({kind:'english',level:levels[id]});
+  function goSubject(id:SubjectId, stage?:LearningStageId) {
+    const subject=findSubject(id);
+    if(subject&&isCurriculumSubject(subject.id))requestDestination({kind:'academy',subject:subject.id,level:stage?learningStages.find(item=>item.id===stage)?.recommendedLevel:undefined});
+    else goComing(id);
   }
+  function goCourse(subject:CurriculumSubject, level:AcademyLevel){requestDestination({kind:'academy',subject,level});}
+
   function search(query:string) {
     if(/contact|suggestion/i.test(query))openContact();
     else if(/privacy|safety/i.test(query))openInfo('privacy');
     else if(/help|support/i.test(query))openInfo('help');
+    else if(/math|mental|arithmetic/i.test(query))goMathsGames();
+    else if(/english/i.test(query)&&/game|quiz|mcq|crossword/i.test(query))goEnglishGames();
     else if(/crossword|quiz|mcq|game/i.test(query))goPracticeGames();
     else if(/english|word|read|spell|gramm|listen|writ|lesson/i.test(query))goPractice();
     else goComing(query.slice(0,80));
@@ -168,6 +193,9 @@ export default function App() {
       setView(route.view);
       if(route.infoPage)setInfoPage(route.infoPage);
       if(route.hubPage)setHubPage(route.hubPage);
+      if(route.gameSubject)setGameSubject(route.gameSubject);
+      if(route.certificateToken)setCertificateToken(route.certificateToken);
+      if(route.academySubject)setAcademySubject(route.academySubject);
       if(route.subject!==undefined)setComingSubject(route.subject);
       if(route.view==='categories'){setAcademyLevel('starter');setAcademyLesson(undefined);}
       window.scrollTo(0,0);
@@ -208,7 +236,7 @@ export default function App() {
   const academyRecords = Object.values(journey.records);
   const learningStats = learningSummary(journey,new Date(),{solvedTotal,completedTotal,retiredSolvedTotal:archivedClassic.solvedWords,retiredCompletedTotal:archivedClassic.completedPuzzles});
   const academyXP = learningStats.xp;
-  const unlockedLevels = academyRecords.reduce((sum, item) => sum + Math.max(0, item.unlocked - 1), 0);
+  const unlockedLevels = academyRecords.reduce((sum, item) => sum + Math.max(0, item.unlocked - 1), 0) + learningStats.subjectLevelsPassed;
 
   useEffect(() => { setStorageWarning(!saveProgress(progress)); }, [progress]);
   useEffect(() => () => { if (noticeTimer.current) clearTimeout(noticeTimer.current); }, []);
@@ -296,10 +324,10 @@ export default function App() {
   ];
 
   return <>
-    <SiteHeader signedIn={!!account.auth.user} loading={account.auth.loading} reserveSignedIn={account.auth.loading && returningAccount} profile={account.auth.profile} isHome={view==='home'} streak={learningStats.streak.current} completedToday={learningStats.streak.todayCompleted} onHome={goHome} onSubjects={goSubjects} onGames={goPracticeGames} onInfo={openInfo} onContact={openContact} onSignIn={()=>setAccountOpen(true)} onHub={goHub} onSignOut={()=>setDialog('signout')} onSearch={search}/>
+    <SiteHeader signedIn={!!account.auth.user} loading={account.auth.loading} reserveSignedIn={account.auth.loading && returningAccount} profile={account.auth.profile} isHome={view==='home'} gamesActive={view==='games'||view==='subject-games'} streak={learningStats.streak.current} completedToday={learningStats.streak.todayCompleted} onHome={goHome} onSubjects={goSubjects} onGames={goPracticeGames} onInfo={openInfo} onContact={openContact} onSignIn={()=>setAccountOpen(true)} onHub={goHub} onSignOut={()=>setDialog('signout')} onSearch={search}/>
     <main className={`page-wrap${view==='home'&&accountLayout?' wp-home-shell':''}`}>
       <Suspense fallback={<PageLoading/>}>
-      {account.auth.loading&&view!=='info'&&view!=='contact'?<PageLoading session/>:view==='info'?<InfoPages page={infoPage} onNavigate={openInfo} onHome={goHome} onContact={openContact} onSignIn={()=>setAccountOpen(true)}/>:view==='contact'?<ContactPage onHome={goHome} onPrivacy={()=>openInfo('privacy')}/>:view!=='home'&&view!=='not-found'&&!account.auth.user?<section className="wz-login-gate"><LockKeyhole size={35}/><h1>Your learning space is waiting</h1><p>Sign in to open lessons, activities and your saved progress.</p><button className="wz-action-button" onClick={()=>setAccountOpen(true)}>Sign In</button><button className="wz-secondary-link" onClick={goHome}>Back to Home</button></section>:view==='home'?<WizpikoPortal onPractice={goPractice} onChooseStage={goLearningStage} onComingSoon={goComing} signedIn={!!account.auth.user} nickname={account.auth.profile?.display_name} avatar={account.auth.profile?.avatar} learnerAge={ageFromBirthdate(account.auth.profile?.birth_date||'')} onProgress={()=>goHub('progress')} onStreak={()=>goHub('streak')} onAchievements={()=>goHub('achievements')} xp={academyXP} streak={learningStats.streak.current} solvedTotal={solvedTotal} completedTotal={completedTotal} journey={journey} preferences={account.auth.profile?.preferences} onLesson={goLesson} onClassic={goClassic} onGames={goPracticeGames} archivedClassic={archivedClassic}/>:view==='hub'&&account.auth.user?<LearnerHub page={hubPage} profile={account.auth.profile} email={account.auth.user.email||''} journey={journey} solvedTotal={solvedTotal} completedTotal={completedTotal} totalWords={totalWords} onPage={goHub} onHome={goHome} onPractice={goPractice} onSignOut={()=>setDialog('signout')} onSaveProfile={account.updateProfile} onContact={openContact} onLesson={goLesson} onClassic={goClassic} archivedClassic={archivedClassic}/>:view==='coming'?<section className="wz-coming-page"><Sparkles size={42}/><h1>{comingSubject}</h1><p>Something wonderful is coming soon! For now, enjoy English Practice.</p><button className="wz-action-button" onClick={goPractice}>Explore English Practice <ArrowRight size={17}/></button><button className="wz-secondary-link" onClick={goHome}>Back home</button></section>:view==='not-found'?<section className="wz-coming-page"><h1>Page not found</h1><p>That page does not exist. Return to Wizpiko to continue learning.</p><button className="wz-action-button" onClick={goHome}>Back to Home <ArrowRight size={17}/></button></section>:view==='categories'?<EnglishAcademy key={academyLesson||academyLevel} initialLevel={academyLevel} initialLessonId={academyLesson} journey={journey} onJourney={setJourney} onHome={goHome} onClassic={goClassic} onPracticeGames={goPracticeGames}/>:view==='games'?<EnglishJourney key={startingCategory??'all'} initialCategory={startingCategory} onHome={goPractice} onLegacy={goClassic} journey={journey} onJourney={setJourney}/>
+      {account.auth.loading&&view!=='info'&&view!=='contact'&&view!=='certificate'?<PageLoading session/>:view==='info'?<InfoPages page={infoPage} onNavigate={openInfo} onHome={goHome} onContact={openContact} onSignIn={()=>setAccountOpen(true)}/>:view==='contact'?<ContactPage onHome={goHome} onPrivacy={()=>openInfo('privacy')}/>:view!=='home'&&view!=='games'&&view!=='coming'&&view!=='certificate'&&view!=='not-found'&&!account.auth.user?<section className="wz-login-gate"><LockKeyhole size={35}/><h1>Your learning space is waiting</h1><p>Sign in to open lessons, activities and your saved progress.</p><button className="wz-action-button" onClick={()=>setAccountOpen(true)}>Sign In</button><button className="wz-secondary-link" onClick={goHome}>Back to Home</button></section>:view==='home'?<WizpikoPortal onPractice={goPractice} onChooseSubject={goSubject} onExploreSubjects={goSubjects} signedIn={!!account.auth.user} nickname={account.auth.profile?.display_name} avatar={account.auth.profile?.avatar} learnerAge={ageFromBirthdate(account.auth.profile?.birth_date||'')} onProgress={()=>goHub('progress')} onStreak={()=>goHub('streak')} onAchievements={()=>goHub('achievements')} xp={academyXP} streak={learningStats.streak.current} solvedTotal={solvedTotal} completedTotal={completedTotal} journey={journey} preferences={account.auth.profile?.preferences} onLesson={goLesson} onClassic={goClassic} onGames={goPracticeGames} archivedClassic={archivedClassic}/>:view==='hub'&&account.auth.user?<LearnerHub key={account.auth.user.id} page={hubPage} profile={account.auth.profile} email={account.auth.user.email||''} journey={journey} solvedTotal={solvedTotal} completedTotal={completedTotal} totalWords={totalWords} onPage={goHub} onHome={goHome} onPractice={goPractice} onSignOut={()=>setDialog('signout')} onSaveProfile={account.updateProfile} onContact={openContact} onLesson={goLesson} onClassic={goClassic} onMathsGames={goMathsGames} onCourse={goCourse} archivedClassic={archivedClassic}/>:view==='coming'?<SubjectInfo subject={comingSubject} onSubjects={goSubjects} onHome={goHome} onContact={openContact} onOpen={goSubject}/>:view==='not-found'?<section className="wz-coming-page"><h1>Page not found</h1><p>That page does not exist. Return to Wizpiko to continue learning.</p><button className="wz-action-button" onClick={goHome}>Back to Home <ArrowRight size={17}/></button></section>:view==='categories'?<LearningAcademy key={`${account.auth.user?.id}:${academySubject}:${academyLesson||academyLevel}`} subject={academySubject} initialLevel={academyLevel} initialLessonId={academyLesson} journey={journey} onJourney={setJourney} onHome={goSubjects} onGames={goPracticeGames} onCertificates={()=>goHub('certificates')}/>:view==='certificate'?<PublicCertificatePage token={certificateToken} onHome={goHome}/>:view==='games'?<GamesHub journey={journey} signedIn={!!account.auth.user} onChoose={goSubjectGames} onHome={goHome}/>:view==='subject-games'?<SubjectGames key={gameSubject} subject={gameSubject} onHome={goPracticeGames} onLegacy={goClassic} journey={journey} onJourney={setJourney}/>
 :<><div className="wiz-back-line"><button onClick={goPractice}><ArrowLeft size={17}/> Back to English learning</button><span>English Practice • Wizpiko Word Puzzles</span></div><section className="wiz-classic-heading" aria-labelledby="page-heading"><div><span className="wiz-kicker">ENGLISH PRACTICE • NEW WORD DISCOVERIES</span><h1 id="page-heading">Word adventures with <span>Wizpiko!</span></h1><p>Choose a clue, tap a word, and earn your stars. Explore ten newly written Wizpiko puzzles at your own pace.</p></div><img src={import.meta.env.BASE_URL + 'wizpiko-icon.webp'} alt="" /></section>
 
       {(archivedClassic.solvedWords > 0 || archivedClassic.completedPuzzles > 0) && <p className="wz-history-note">Your earlier collection is saved: {archivedClassic.solvedWords} words discovered and {archivedClassic.completedPuzzles} puzzles completed. These new puzzles start fresh.</p>}
