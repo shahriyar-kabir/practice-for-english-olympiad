@@ -22,4 +22,6 @@ export type LearningEvent = {
   xp: number;
   correct?: number;
   total?: number;
+  subject?: string;
+  level?: string;
 };

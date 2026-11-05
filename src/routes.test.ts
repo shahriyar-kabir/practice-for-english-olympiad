@@ -55,7 +55,32 @@ describe('Wizpiko page URLs', () => {
     expect(routePath(route)).toBe('/coming-soon?subject=Mathematics%20%26%20Science');
   });
 
+  it.each(['english', 'maths'] as const)('opens the %s game branch at either deployment base', subject => {
+    for (const base of ['/', '/practice-for-english-olympiad/']) {
+      const route = readAppRoute(appHref('/games/' + subject, base) + '/', '', base);
+      expect(route).toEqual({ view: 'subject-games', gameSubject: subject });
+      expect(routePath(route)).toBe('/games/' + subject);
+    }
+  });
+  it('does not expose unfinished subject branches', () => {
+    expect(readAppRoute('/games/science', '', '/')).toEqual({ view: 'not-found' });
+    expect(readAppRoute('/games/maths/extra', '', '/')).toEqual({ view: 'not-found' });
+  });
+
   it('does not silently render the original crossword for unknown URLs', () => {
     expect(readAppRoute('/nonexistent', '', '/').view).toBe('not-found');
+  });
+  it('opens both course libraries and keeps unpublished subjects as information pages',()=>{
+    expect(readAppRoute('/maths-academy','','/')).toMatchObject({view:'categories',academySubject:'maths'});
+    expect(readAppRoute('/learn/english','','/')).toMatchObject({view:'categories',academySubject:'english'});
+    expect(readAppRoute('/subjects/physics','','/')).toEqual({view:'coming',subject:'physics'});
+    expect(readAppRoute('/learn/physics','','/')).toEqual({view:'not-found'});
+    expect(readAppRoute('/subjects/unknown','','/')).toEqual({view:'not-found'});
+  });
+  it('uses an HTTP-200 root URL for publicly shared certificates on static hosting',()=>{
+    const token='11111111-1111-4111-8111-111111111111';
+    const route=readAppRoute('/','?certificate='+token,'/');expect(route).toEqual({view:'certificate',certificateToken:token});expect(routePath(route)).toBe('/?certificate='+token);
+    expect(readAppRoute('/','?certificate=invalid','/')).toEqual({view:'not-found'});
+    expect(readAppRoute('/certificates/'+token,'','/')).toEqual(route);
   });
 });

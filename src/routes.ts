@@ -1,8 +1,13 @@
 import type { InfoPageId } from './content/siteCopy';
+import { isCurriculumSubject } from '../supabase/functions/_shared/curriculum/programs.ts';
+import type { CurriculumSubject } from '../supabase/functions/_shared/curriculum/programs.ts';
 import type { LearnerPage } from './LearnerHub';
+import { isGameSubject } from './gameSubjects';
+import type { GameSubjectId } from './gameSubjects';
+import { isSubjectId, subjectInfoPath } from './subjects';
 
-export type RouteView = 'home' | 'categories' | 'games' | 'classic' | 'hub' | 'coming' | 'info' | 'contact' | 'not-found';
-export type AppRoute = { view: RouteView; infoPage?: InfoPageId; hubPage?: LearnerPage; subject?: string };
+export type RouteView = 'home' | 'categories' | 'games' | 'subject-games' | 'classic' | 'hub' | 'coming' | 'info' | 'contact' | 'certificate' | 'not-found';
+export type AppRoute = { view: RouteView; infoPage?: InfoPageId; hubPage?: LearnerPage; subject?: string; gameSubject?: GameSubjectId; academySubject?: CurriculumSubject; certificateToken?: string };
 
 export const INFO_ROUTES: Record<InfoPageId, string> = {
   about: '/about-us',
@@ -14,6 +19,7 @@ export const INFO_ROUTES: Record<InfoPageId, string> = {
 
 export const HUB_ROUTES: Record<LearnerPage, string> = {
   profile: '/my-profile',
+  certificates: '/my-certificates',
   progress: '/my-progress',
   achievements: '/my-achievements',
   streak: '/streak',
@@ -44,6 +50,8 @@ export function readAppRoute(
 ): AppRoute {
   const path = appPath(pathname, base);
   const query = new URLSearchParams(search);
+  const publicToken = query.get('certificate');
+  if (path === '/' && query.has('certificate')) return publicToken && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(publicToken) ? {view:'certificate',certificateToken:publicToken} : {view:'not-found'};
 
   // Preserve older links of the form /?page=privacy or /?page=contact.
   if (path === '/' && query.has('page')) {
@@ -57,9 +65,14 @@ export function readAppRoute(
   if (infoPage) return { view: 'info', infoPage };
   const hubPage = hubByPath.get(path);
   if (hubPage) return { view: 'hub', hubPage };
+  if (path.startsWith('/subjects/') && isSubjectId(path.slice(10))) return { view: 'coming', subject: path.slice(10) };
   if (path === '/contact-us') return { view: 'contact' };
-  if (path === '/english-academy') return { view: 'categories' };
+  if (path === '/english-academy') return { view: 'categories', academySubject: 'english' };
+  if (path.startsWith('/learn/') && isCurriculumSubject(path.slice(7))) return { view: 'categories', academySubject: path.slice(7) as CurriculumSubject };
+  if (path === '/maths-academy') return { view: 'categories', academySubject: 'maths' };
+  if (/^\/certificates\/[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(path)) return { view: 'certificate', certificateToken: path.slice(14) };
   if (path === '/games') return { view: 'games' };
+  if (path.startsWith('/games/') && isGameSubject(path.slice(7))) return { view: 'subject-games', gameSubject: path.slice(7) as GameSubjectId };
   if (path === '/word-puzzles') return { view: 'classic' };
   if (path === '/coming-soon') return { view: 'coming', subject: (query.get('subject') || '').slice(0, 80) };
   return { view: 'not-found' };
@@ -69,9 +82,13 @@ export function routePath(route: AppRoute): string {
   if (route.view === 'info') return INFO_ROUTES[route.infoPage || 'about'];
   if (route.view === 'hub') return HUB_ROUTES[route.hubPage || 'profile'];
   if (route.view === 'contact') return '/contact-us';
-  if (route.view === 'categories') return '/english-academy';
+  if (route.view === 'categories') return academyPath(route.academySubject||'english');
+  if (route.view === 'certificate') return '/?certificate=' + encodeURIComponent(route.certificateToken || '');
   if (route.view === 'games') return '/games';
+  if (route.view === 'subject-games') return isGameSubject(route.gameSubject) ? '/games/' + route.gameSubject : '/games';
   if (route.view === 'classic') return '/word-puzzles';
-  if (route.view === 'coming') return '/coming-soon?subject=' + encodeURIComponent(route.subject || '');
+  if (route.view === 'coming') return subjectInfoPath(route.subject || '');
   return '/';
 }
+
+export function academyPath(subject:CurriculumSubject):string { return subject==='english'?'/english-academy':subject==='maths'?'/maths-academy':'/learn/'+subject; }

@@ -19,8 +19,9 @@ type Props = {
   journey: JourneyProgress;
   onJourney: (value: JourneyProgress) => void;
   initialCategory?: CategoryId | null;
+  homeLabel?: string;
 };
-export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCategory = null }: Props) {
+export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCategory = null, homeLabel = 'English learning' }: Props) {
   const [categoryId, setCategoryId] = useState<CategoryId | null>(initialCategory);
   const [mode, setMode] = useState<GameMode | null>(null);
   const [level, setLevel] = useState<number | null>(null);
@@ -108,7 +109,7 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCa
     setSelectedWord(next?.id || '');
   }
   if (!categoryId) return <section className="ej-page wp-playground">
-    <div className="ej-topbar"><button onClick={onHome}><ArrowLeft size={17} /> English learning</button><span>Wizpiko Playroom</span></div>
+    <div className="ej-topbar"><button onClick={onHome}><ArrowLeft size={17} /> {homeLabel}</button><span>Wizpiko Playroom · English</span></div>
     <header className="wp-welcome"><div><span className="wiz-kicker">A LITTLE PLAY. A LITTLE PROGRESS.</span><h1>Find your next <span>word discovery.</span></h1><p>Follow your curiosity through everyday English, tiny stories and useful conversations. Pick a path, then choose a word puzzle or a five-question set.</p><div className="wp-promises"><span>5 questions per set</span><span>Learn at your own pace</span><span>Every path is open</span></div></div><span className="wpg-welcome-art" aria-hidden="true">📚</span></header>
     <div className="wp-playroom-layout"><section className="wp-path-section"><h2>What sounds interesting today?</h2><p>Choose by your interests and confidence. You can change paths whenever you like.</p><div className="wp-path-grid">{categories.map(cat => {
       const rec = journey.records[recordKey(cat.id, 'mcq')] || defaults();

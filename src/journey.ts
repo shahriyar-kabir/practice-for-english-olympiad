@@ -1,4 +1,6 @@
 import type { AcademyProgress, LearningEvent } from './learningTypes';
+import type { SubjectGamesProgress } from './subjectGameProgress';
+import type { SkillDrafts } from './skillProgress';
 
 export type GameMode = 'crossword' | 'mcq';
 export type LevelRecord = { unlocked: number; completed: number; bestScore: number; xp: number };
@@ -26,6 +28,9 @@ export type JourneyProgress = {
   earnedBadges?: Record<string, string>;
   streakRecord?: number;
   completionIds?: string[];
+  /** Each subject keeps its own untimed game drafts and best level results. */
+  subjectGames?: SubjectGamesProgress;
+  skillDrafts?: SkillDrafts;
 };
 export const JOURNEY_STORAGE = 'wizpiko-english-journey-v1';
 export const emptyJourney = (): JourneyProgress => ({ records: {} });

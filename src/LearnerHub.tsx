@@ -1,20 +1,24 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import type { JourneyProgress } from './journey';
 import type { LearnerProfile } from './learnerData';
 import { ageFromBirthdate, ageLabel, dayKey } from './learnerData';
-import { completedLessonResults, learningAchievements, learningSummary } from './learningMetrics';
+import { learningAchievements, learningSummary } from './learningMetrics';
 import { lessonCatalog, levelLabels, skillLabels } from './academy/catalog';
+import type { CurriculumSubject } from '../supabase/functions/_shared/curriculum/programs.ts';
 import type { AcademyLevel, AcademySkill } from './learningTypes';
 import { supportFaqs } from './content/siteCopy';
 import { Award, ArrowLeft, ArrowRight, BookOpen, Check, ChevronLeft, ChevronRight, Flame, HelpCircle, Lock, LogOut, Mail, Search, Settings2, Star, TrendingUp, UserRound } from 'lucide-react';
 import './dashboard.css';
 import { LearnerAvatar, learnerAvatars } from './LearnerAvatar';
+import { formatGameLevel, subjectGameStats } from './subjectGameProgress';
+import { subjectSkillResults } from './skillProgress';
 
-export type LearnerPage = 'profile' | 'progress' | 'achievements' | 'streak' | 'preferences' | 'help';
+export type LearnerPage = 'profile' | 'progress' | 'achievements' | 'streak' | 'preferences' | 'certificates' | 'help';
 export const learnerMenu: { id: LearnerPage; label: string; icon: typeof UserRound }[] = [
   { id: 'profile', label: 'My Profile', icon: UserRound },
   { id: 'progress', label: 'My Progress', icon: TrendingUp },
   { id: 'achievements', label: 'My Achievements', icon: Award },
+  { id: 'certificates', label: 'My Certificates', icon: Award },
   { id: 'streak', label: 'My Learning Streak', icon: Flame },
   { id: 'preferences', label: 'Learning Preferences', icon: Settings2 },
   { id: 'help', label: 'Help & Support', icon: HelpCircle },
@@ -36,14 +40,18 @@ type Props = {
   onContact?: () => void;
   onLesson?: (lessonId: string) => void;
   onClassic?: () => void;
+  onMathsGames?: () => void;
+  onCourse?: (subject:CurriculumSubject,level:AcademyLevel) => void;
   archivedClassic?: { solvedWords: number; completedPuzzles: number };
 };
 
 
+const CertificatesPage = lazy(()=>import('./certificates/CertificatesPage'));
 const skills: AcademySkill[] = ['sounds', 'vocabulary', 'grammar', 'reading', 'listening', 'writing'];
 const levels: AcademyLevel[] = ['starter', 'beginner', 'intermediate', 'advanced'];
 const pageIntro: Record<LearnerPage, string> = {
   profile: 'A little about you and the way you like to learn.',
+  certificates: 'Your achievements, ready to keep and share.',
   progress: 'Every lesson and every small discovery adds up.',
   achievements: 'Celebrate the milestones you have really earned.',
   streak: 'A little practice, a growing habit. Keep your spark alive.',
@@ -59,7 +67,7 @@ function dateLabel(value: string) {
   return Number.isFinite(date.getTime()) ? date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
 }
 
-export function LearnerHub({ page, profile, email, journey, solvedTotal, completedTotal, totalWords, onPage, onHome, onPractice, onSignOut, onSaveProfile, onContact, onLesson, onClassic, archivedClassic }: Props) {
+export function LearnerHub({ page, profile, email, journey, solvedTotal, completedTotal, totalWords, onPage, onHome, onPractice, onSignOut, onSaveProfile, onContact, onLesson, onClassic, onMathsGames, onCourse, archivedClassic }: Props) {
   const [name, setName] = useState(profile?.display_name || '');
   const [preferences, setPreferences] = useState<LearnerProfile['preferences']>(profile?.preferences || {});
   const [feedback, setFeedback] = useState('');
@@ -69,6 +77,7 @@ export function LearnerHub({ page, profile, email, journey, solvedTotal, complet
   useEffect(() => { setName(profile?.display_name || ''); }, [profile?.display_name]);
   useEffect(() => { setPreferences(profile?.preferences || {}); }, [profile?.preferences]);
   useEffect(() => { setFeedback(''); }, [page]);
+  const mathsGames = subjectGameStats(journey.subjectGames?.maths);
   const summary = learningSummary(journey, new Date(), { solvedTotal, completedTotal, retiredSolvedTotal: archivedClassic?.solvedWords, retiredCompletedTotal: archivedClassic?.completedPuzzles });
   const streak = summary.streak;
   const achievements = learningAchievements(journey, new Date(), { solvedTotal, completedTotal, retiredSolvedTotal: archivedClassic?.solvedWords, retiredCompletedTotal: archivedClassic?.completedPuzzles });
@@ -76,7 +85,7 @@ export function LearnerHub({ page, profile, email, journey, solvedTotal, complet
   const age = ageFromBirthdate(profile?.birth_date || '');
   const displayName = profile?.display_name || email.split('@')[0] || 'Learner';
   const title = learnerMenu.find(item => item.id === page)?.label || 'My Learning';
-  const results = completedLessonResults(journey);
+  const results = subjectSkillResults(journey,'english');
   const recentLessons = Object.entries(results).sort((a, b) => b[1].completedAt.localeCompare(a[1].completedAt)).slice(0, 4);
   const recentActivity = [...(journey.activityLog || [])].sort((a, b) => b.completedAt.localeCompare(a.completedAt)).slice(0, 5);
   const dates = new Set(summary.activityDates);
@@ -133,6 +142,8 @@ export function LearnerHub({ page, profile, email, journey, solvedTotal, complet
         </div>
       </>}
 
+      {page === 'certificates' && <Suspense fallback={<div className="wd-card" role="status">Opening your certificates…</div>}><CertificatesPage onStudy={onCourse || (()=>onPractice())}/></Suspense>}
+
       {page === 'progress' && <>
         <div className="wd-metrics"><Metric icon="📚" value={summary.activitiesCompleted} label="Activities completed" color="blue" /><Metric icon="🎯" value={lessonAccuracy} label="Lesson accuracy" color="green" /><Metric icon="🔥" value={streak.current} label="Active-day streak" color="orange" /><Metric icon="⭐" value={summary.xp} label="XP earned" color="purple" /></div>
         <section className="wd-card wp-learning-journey"><div className="wp-section-heading"><div><h2>Your learning journey</h2><p>Recorded activities this week</p></div><span className="wp-small-label">This week</span></div><div className="wp-weekly-chart" role="img" aria-label={weeklyDays.map(day => `${day.label}: ${day.completed} completed activities`).join(', ')}>{weeklyDays.map(day => <div key={day.key} className={day.key === todayKey ? 'is-today' : ''}><strong>{day.completed}</strong><span className="wp-chart-column"><span style={{ height: `${day.completed / weeklyMax * 100}%` }} /></span><small>{day.label}</small></div>)}</div><p className="wp-chart-note">{weeklyDays.some(day => day.completed) ? 'Each bar uses the activities saved for that day.' : 'Your first completed activity will appear here. Every small step counts!'}</p></section>
@@ -142,7 +153,8 @@ export function LearnerHub({ page, profile, email, journey, solvedTotal, complet
           return <div key={skill}><div><strong>{skillLabels[skill]}</strong><span>{completed.length ? `${score}% average` : 'Ready to explore'}</span></div><div className="wd-progress-track" role="progressbar" aria-label={`${skillLabels[skill]} average lesson score`} aria-valuenow={score} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${score}%` }} /></div></div>;
         })}</div><button type="button" className="wd-text-button" onClick={onPractice}>Explore English <ArrowRight size={16} /></button></section>
         <section className="wd-card wd-classic-progress"><span className="wd-card-illustration" aria-hidden="true">🧩</span><h2>Your word puzzle progress</h2><p className="wd-muted">Keep exploring your word puzzles at your own pace.</p><strong className="wd-big-number">{solvedTotal}<small> / {totalWords} words</small></strong><div className="wd-progress-track" role="progressbar" aria-label="Wizpiko word puzzle words completed" aria-valuenow={solvedTotal} aria-valuemin={0} aria-valuemax={totalWords}><span style={{ width: `${finishedWordsPercent}%` }} /></div><p>{completedTotal} of 10 new puzzles completed</p>{archivedClassic && (archivedClassic.solvedWords > 0 || archivedClassic.completedPuzzles > 0) && <p className="wp-panel-note">Earlier collection: {archivedClassic.solvedWords} words / {archivedClassic.completedPuzzles} puzzles saved</p>}<button type="button" className="wd-primary" onClick={onClassic || onPractice}>Continue practice <ArrowRight size={17} /></button></section></div>
-        <section className="wd-card"><div className="wd-card-heading"><TrendingUp size={21} /><h2>Recent learning</h2></div>{recentActivity.length ? <div className="wd-activity-list">{recentActivity.map(event => <div key={event.id}><span className="wd-activity-icon" aria-hidden="true">{event.kind === 'lesson' ? '📖' : '🧩'}</span><div><strong>{event.title}</strong><small>{dateLabel(event.completedAt)}{event.total ? event.kind === 'classic' ? ` · ${event.total} words discovered` : event.correct !== undefined ? ` · ${event.correct}/${event.total} correct` : '' : ''}</small></div><span className="wd-complete-label"><Check size={14} /> Completed</span></div>)}</div> : recentLessons.length ? <div className="wd-activity-list">{recentLessons.map(([id, result]) => <div key={id}><span className="wd-activity-icon" aria-hidden="true">📖</span><div><strong>{lessonCatalog.find(lesson => lesson.id === id)?.title || 'English lesson'}</strong><small>{dateLabel(result.completedAt)} · {result.score}%</small></div>{onLesson && <button type="button" className="wd-text-button" onClick={() => onLesson(id)}>Revisit <ArrowRight size={15} /></button>}</div>)}</div> : <div className="wd-empty"><span aria-hidden="true">🌱</span><h3>Your story starts here</h3><p>Finish a lesson or a practice game and see your real progress grow.</p><button type="button" className="wd-primary" onClick={onPractice}>Start learning <ArrowRight size={17} /></button></div>}</section>
+        {onMathsGames && <section className="wd-card"><div className="wp-section-heading"><div><h2>Your Maths games</h2><p>Mental Maths Trail · Level {formatGameLevel(mathsGames.level)}</p></div><span className="wp-status-pill">{mathsGames.xp} XP</span></div><p className="wd-muted">{mathsGames.passed} levels passed · {mathsGames.practised} levels practised. There is no final level — keep discovering at your own pace.</p>{journey.subjectGames?.maths?.session && <p className="wd-soft-note">Your unfinished five-question round is saved.</p>}<button type="button" className="wd-primary" onClick={onMathsGames}>Continue Maths games <ArrowRight size={17} /></button></section>}
+        <section className="wd-card"><div className="wd-card-heading"><TrendingUp size={21} /><h2>Recent learning</h2></div>{recentActivity.length ? <div className="wd-activity-list">{recentActivity.map(event => <div key={event.id}><span className="wd-activity-icon" aria-hidden="true">{event.subject === 'maths' ? '🔢' : event.kind === 'lesson' ? '📖' : '🧩'}</span><div><strong>{event.title}</strong><small>{dateLabel(event.completedAt)}{event.total ? event.kind === 'classic' ? ` · ${event.total} words discovered` : event.correct !== undefined ? ` · ${event.correct}/${event.total} correct` : '' : ''}</small></div><span className="wd-complete-label"><Check size={14} /> Completed</span></div>)}</div> : recentLessons.length ? <div className="wd-activity-list">{recentLessons.map(([id, result]) => <div key={id}><span className="wd-activity-icon" aria-hidden="true">📖</span><div><strong>{lessonCatalog.find(lesson => lesson.id === id)?.title || 'English lesson'}</strong><small>{dateLabel(result.completedAt)} · {result.score}%</small></div>{onLesson && <button type="button" className="wd-text-button" onClick={() => onLesson(id)}>Revisit <ArrowRight size={15} /></button>}</div>)}</div> : <div className="wd-empty"><span aria-hidden="true">🌱</span><h3>Your story starts here</h3><p>Finish a lesson or a practice game and see your real progress grow.</p><button type="button" className="wd-primary" onClick={onPractice}>Start learning <ArrowRight size={17} /></button></div>}</section>
       </>}
 
       {page === 'achievements' && <>

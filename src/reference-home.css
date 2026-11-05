@@ -11,12 +11,12 @@
   justify-content: center; height: 100%; width: 48%; padding: 22px 0 26px clamp(36px, 8.2vw, 170px);
 }
 .wp-signed-in .wp-welcome-copy h1 {
-  margin: 0; max-width: 100%; font-size: clamp(28px, 2.18vw, 45px); font-weight: 900; line-height: 1.14;
+  margin: 0; max-width: 100%; font-size: clamp(30px, 2.4vw, 42px); font-weight: 900; line-height: 1.14;
   letter-spacing: -.8px; color: #0b124e;
 }
 .wp-signed-in .wp-welcome-copy h1 > .wp-hero-name {
   position: relative; display: block; width: fit-content; max-width: 100%; margin-top: 0;
-  font-size: min(clamp(78px, 7.8vw, 160px), var(--name-fit)); line-height: 1.04; letter-spacing: -3.3px;
+  font-size: min(clamp(65px, 6.2vw, 116px), var(--name-fit)); line-height: 1.04; letter-spacing: -3.3px;
   background: linear-gradient(100deg, #0879ff 5%, #0359ff 28%, #7233ff 53%, #c625e7 78%, #e831ce 97%);
   background-clip: text; color: transparent; overflow-wrap: anywhere;
 }
@@ -24,7 +24,7 @@
 .wp-name-rays { position: absolute; top: 15%; left: 80%; width: .34em; height: .6em; overflow: visible; }
 .wp-name-rays path { fill: none; stroke: #ffc728; stroke-width: 7; stroke-linecap: round; }
 .wp-signed-in .wp-welcome-copy > p {
-  margin: 6px 0 22px; font-size: clamp(16px, 1.27vw, 26px); font-weight: 800;
+  margin: 6px 0 22px; font-size: clamp(17px, 1.3vw, 23px); font-weight: 800;
   color: #4e5c94; line-height: 1.4; letter-spacing: -.2px;
 }
 .wp-signed-in .wp-welcome-copy .wp-blue-button {
@@ -60,8 +60,8 @@
 .wp-signed-in .wp-benefit-strip > button { padding: 0 22px; gap: 18px; align-items: center; min-width: 0; }
 .wp-signed-in .wp-benefit-strip > button:first-child { padding-left: 0; }
 .wp-signed-in .wp-benefit-strip > button:last-child { padding-right: 0; }
-.wp-signed-in .wp-benefit-strip strong { font-size: clamp(13px, 1.02vw, 20px); font-weight: 900; color: #11134e; }
-.wp-signed-in .wp-benefit-strip small { font-size: clamp(11px, .82vw, 16px); line-height: 1.4; margin-top: 6px; color: #4c5f92; }
+.wp-signed-in .wp-benefit-strip strong { font-size: clamp(15px, 1.08vw, 19px); font-weight: 900; color: #11134e; }
+.wp-signed-in .wp-benefit-strip small { font-size: clamp(13px, .9vw, 16px); line-height: 1.4; margin-top: 6px; color: #4c5f92; }
 .wp-signed-in .wp-shortcut-icon { width: clamp(60px, 4.15vw, 85px); height: clamp(60px, 4.15vw, 85px); }
 .wp-signed-in .wp-shortcut-icon svg { width: 56%; height: 56%; filter: drop-shadow(0 2px 1px #fff8); }
 .wp-signed-in .wp-pink { background: linear-gradient(135deg, #ffe0eb, #ffbed5); }
@@ -150,8 +150,8 @@
   .wp-signed-in .wp-benefit-strip { padding-inline: 28px; }
   .wp-signed-in .wp-benefit-strip > button { padding-inline: 14px; gap: 12px; }
   .wp-signed-in .wp-shortcut-icon { width: 48px; height: 48px; }
-  .wp-signed-in .wp-benefit-strip strong { font-size: 12px; }
-  .wp-signed-in .wp-benefit-strip small { font-size: 10px; }
+  .wp-signed-in .wp-benefit-strip strong { font-size: 14px; }
+  .wp-signed-in .wp-benefit-strip small { font-size: 12px; }
 }
 @media(max-width:800px) {
   .wp-signed-in { --welcome-height: 290px; }
@@ -197,8 +197,8 @@
   .wp-signed-in .wp-benefit-strip > button:nth-child(odd) { padding-left: 0; }
   .wp-signed-in .wp-benefit-strip > button:nth-child(even) { padding-right: 0; }
   .wp-signed-in .wp-shortcut-icon { width: 42px; height: 42px; }
-  .wp-signed-in .wp-benefit-strip strong { font-size: 10px; }
-  .wp-signed-in .wp-benefit-strip small { font-size: 9px; }
+  .wp-signed-in .wp-benefit-strip strong { font-size: 14px; }
+  .wp-signed-in .wp-benefit-strip small { font-size: 12px; }
   .wp-home-content { padding-inline: 12px; margin-top: 20px; }
 }
 @media(max-width:350px) {
