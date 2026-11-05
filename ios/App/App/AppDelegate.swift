@@ -47,9 +47,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 // This stays in the app target; no third-party storage SDK is required.
 import Security
 
+#if DEBUG
+private func writeStartupMarker(state: String, phase: String = "", code: String = "") throws {
+    let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Wizpiko", isDirectory: true)
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    let data = try JSONSerialization.data(withJSONObject: ["state": state, "phase": phase, "code": code])
+    try data.write(to: directory.appendingPathComponent("startup.json"), options: .atomic)
+}
+#endif
+
 final class WizpikoViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         bridge?.registerPluginInstance(WizpikoDevicePlugin())
+        #if DEBUG
+        try? writeStartupMarker(state: "opening", phase: "native-bridge")
+        #endif
     }
 }
 
@@ -124,10 +136,7 @@ public final class WizpikoDevicePlugin: CAPPlugin, CAPBridgedPlugin {
         let phase = String((call.getString("phase") ?? "").prefix(64))
         let code = String((call.getString("code") ?? "").prefix(64))
         do {
-            let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Wizpiko", isDirectory: true)
-            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            let data = try JSONSerialization.data(withJSONObject: ["state": state, "phase": phase, "code": code])
-            try data.write(to: directory.appendingPathComponent("startup.json"), options: .atomic)
+            try writeStartupMarker(state: state, phase: phase, code: code)
         } catch { call.reject("Startup check unavailable"); return }
         #endif
         call.resolve()
