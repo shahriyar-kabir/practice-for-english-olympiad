@@ -9,6 +9,7 @@ import { saveJourney } from './journey';
 import type { Progress } from './game';
 import { saveProgress } from './game';
 import { AccountActionError, ACCOUNT_NOT_FOUND_MESSAGE, accountExists, normalizeAccountEmail } from './supportApi';
+import { authRedirectURL, platformIntegration } from './platform/integration';
 
 export type Session = { access_token: string; refresh_token: string; expires_at: number; remember?: boolean };
 type User = { id: string; email?: string };
@@ -18,6 +19,7 @@ export type Snapshot = { legacy: Progress; journey: JourneyProgress };
 export const SESSION_STORAGE_KEY = 'wizpiko-cloud-session-v1';
 export const PROGRESS_OWNER_KEY = 'wizpiko-progress-owner-v1';
 const CACHE_PREFIX = 'wizpiko-account-progress-v1:';
+export function forgetDeletedAccount(userId: string) { try { localStorage.removeItem(CACHE_PREFIX + userId); } catch { /* Account data is already removed from the service. */ } }
 export const SIGNUP_CONFIRMATION_MESSAGE = 'Check your email for a confirmation link. After confirming, sign in with your password.';
 const URL = (import.meta.env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
 const KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -26,6 +28,12 @@ const blankSnapshot = (): Snapshot => ({ legacy: {}, journey: { records: {} } })
 let memoryOwner: string | null = null;
 
 export function readStoredSession(): Session | null {
+  const native = platformIntegration();
+  if (native) {
+    try { const value = JSON.parse(native.session.read() || 'null') as Session | null;
+      return value && typeof value.access_token === 'string' && typeof value.refresh_token === 'string' && Number.isFinite(value.expires_at) ? value : null;
+    } catch { return null; }
+  }
   for (const remember of [false, true]) {
     try {
       const storage = remember ? localStorage : sessionStorage;
@@ -40,6 +48,13 @@ export function readStoredSession(): Session | null {
   return null;
 }
 export function persistSession(session: Session | null, remember = session?.remember !== false): boolean {
+  const native = platformIntegration();
+  if (native) {
+    // Native tokens never enter WebKit's persistent browser storage.
+    try { localStorage.removeItem(SESSION_STORAGE_KEY); sessionStorage.removeItem(SESSION_STORAGE_KEY); } catch { /* Keychain is authoritative. */ }
+    native.session.write(session ? JSON.stringify({ ...session, remember }) : null);
+    return true;
+  }
   let cleared = true;
   try { localStorage.removeItem(SESSION_STORAGE_KEY); } catch { cleared = false; }
   try { sessionStorage.removeItem(SESSION_STORAGE_KEY); } catch { cleared = false; }
@@ -220,6 +235,7 @@ async function validSession(input: Session): Promise<Session> {
   const next: Session = { access_token: result.access_token, refresh_token: result.refresh_token, expires_at: Date.now() + (result.expires_in || 3600) * 1000, remember: input.remember !== false };
   // A refresh finishing after sign-out/account-switch must not restore that session.
   if (readStoredSession()?.refresh_token === input.refresh_token) persistSession(next);
+  await platformIntegration()?.session.flush();
   return next;
 }
 export async function authenticateLearner(email: string, password: string): Promise<AuthReply> {
@@ -247,13 +263,13 @@ export async function requestPasswordReset(email: string): Promise<string> {
   if (!configured) throw new AccountActionError('service_unavailable', 'Supabase account settings are missing from this build.');
   const address = normalizeAccountEmail(email);
   if (!await accountExists(address)) throw new AccountActionError('account_not_found', ACCOUNT_NOT_FOUND_MESSAGE);
-  const redirect = window.location.origin + window.location.pathname;
+  const redirect = authRedirectURL();
   await authRequest('recover?redirect_to=' + encodeURIComponent(redirect), { email: address });
   return 'Check your email for a password-reset link.';
 }
 export async function resendSignupConfirmation(email: string): Promise<string> {
   if (!configured) throw new AccountActionError('service_unavailable', 'Supabase account settings are missing from this build.');
-  const redirect = window.location.origin + window.location.pathname;
+  const redirect = authRedirectURL();
   await authRequest('resend?redirect_to=' + encodeURIComponent(redirect), {
     type: 'signup',
     email: normalizeAccountEmail(email),
@@ -431,7 +447,7 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
     return () => window.clearTimeout(id);
   }, [snapshot.legacy, snapshot.journey, auth.user?.id, session?.access_token]);
 
-  function acceptCredentials(response: AuthReply, remember: boolean) {
+  async function acceptCredentials(response: AuthReply, remember: boolean) {
     if (!response.access_token || !response.refresh_token) {
       throw new Error('No session was created. Confirm your account email, then sign in again.');
     }
@@ -450,10 +466,12 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
     const protectedPaths = ['/home', '/my-profile', '/my-progress', '/my-achievements', '/streak',
       '/learning-preferences', '/help-support', '/english-academy', '/games', '/word-puzzles'];
     const nextPath = protectedPaths.includes(relativePath) ? currentPath : base + '/home';
-    window.location.assign(window.location.origin + nextPath);
+    const native = platformIntegration();
+    if (native) { await native.session.flush(); native.credentialsAccepted(nextPath); }
+    else window.location.assign(window.location.origin + nextPath);
   }
   async function signIn(email: string, password: string, remember = true) {
-    acceptCredentials(await authenticateLearner(email, password), remember);
+    await acceptCredentials(await authenticateLearner(email, password), remember);
   }
   async function updatePassword(password: string): Promise<void> {
     if (!session) throw new Error('Open your password-reset link first.');
@@ -491,6 +509,7 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
     latest.current = empty;
     restoreRef.current(empty);
     setAuth({ user: null, profile: null, loading: false, configured, status: 'Signed out. Sign in when you are ready to continue.' });
+    await platformIntegration()?.session.flush();
   }
   return {
     auth,

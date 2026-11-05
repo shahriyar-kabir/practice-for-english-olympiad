@@ -2,8 +2,9 @@ import { appHref } from '../routes';
 import { learningPrograms, levelLabels } from '../../supabase/functions/_shared/curriculum/programs.ts';
 import type { Certificate } from './types';
 import type { CertificateDesignData } from './design';
+import { platformIntegration } from '../platform/integration';
 // GitHub Pages serves its root with HTTP 200, including for social link crawlers.
-export function publicCertificateURL(token: string) { return window.location.origin + appHref('/') + '?certificate=' + encodeURIComponent(token); }
+export function publicCertificateURL(token: string) { return (platformIntegration()?.siteOrigin || window.location.origin) + appHref('/') + '?certificate=' + encodeURIComponent(token); }
 export function certificatePresentation(certificate: Certificate): CertificateDesignData {
   return {
     fullName: certificate.full_name,

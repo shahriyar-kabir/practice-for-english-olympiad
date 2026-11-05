@@ -71,8 +71,12 @@ export async function certificateBlob(data: CertificateDesignData, format: 'pdf'
   return new Blob([jpegToCertificatePDF(jpeg, canvas.width, canvas.height)], { type: 'application/pdf' });
 }
 export async function downloadCertificate(data: CertificateDesignData, format: 'pdf' | 'png' = 'pdf') {
-  const blob = await certificateBlob(data, format), url = URL.createObjectURL(blob), anchor = document.createElement('a');
-  anchor.href = url; anchor.download = `Wizpiko-${data.subject}-${data.level}-certificate.${format}`.replace(/[^a-zA-Z0-9.\-]/g, '-');
+  const blob = await certificateBlob(data, format);
+  const filename = `Wizpiko-${data.subject}-${data.level}-certificate.${format}`.replace(/[^a-zA-Z0-9.\-]/g, '-');
+  const native = (await import('../platform/integration')).platformIntegration();
+  if (native) { await native.saveFile(blob, filename); return; }
+  const url = URL.createObjectURL(blob), anchor = document.createElement('a');
+  anchor.href = url; anchor.download = filename;
   document.body.append(anchor); anchor.click(); anchor.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30_000);
 }

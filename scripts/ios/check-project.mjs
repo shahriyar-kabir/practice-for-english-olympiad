@@ -1,0 +1,17 @@
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import assert from 'node:assert/strict';
+const read = path => readFileSync(path, 'utf8');
+for (const path of ['dist-ios/index.html','ios/App/App.xcodeproj/project.pbxproj','ios/App/App/Info.plist','ios/App/App/AppDelegate.swift','ios/App/App/SceneDelegate.swift','ios/App/App/PrivacyInfo.xcprivacy','ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png']) assert.ok(existsSync(path),`Missing ${path}`);
+const config = read('capacitor.config.ts');
+assert.ok(!/\burl\s*:/.test(config),'The app must ship bundled screens, without a remote server URL');
+assert.ok(!/cleartext\s*:\s*true|allowNavigation\s*:/.test(config),'Do not widen transport or WebView navigation');
+assert.match(read('ios/App/App/SceneDelegate.swift'),/WizpikoViewController\(\)/);
+assert.match(read('ios/App/App/AppDelegate.swift'),/registerPluginInstance\(WizpikoDevicePlugin\(\)\)/);
+assert.match(read('ios/App/App/AppDelegate.swift'),/kSecAttrAccessibleWhenUnlockedThisDeviceOnly/);
+assert.match(read('ios/App/App/Info.plist'),/<string>com\.wizpiko\.app\.navigation<\/string>/);
+assert.ok(!read('ios/App/App/Info.plist').includes('NSAllowsArbitraryLoads'),'Arbitrary HTTP is not enabled');
+assert.match(read('ios/App/App.xcodeproj/project.pbxproj'),/PrivacyInfo\.xcprivacy in Resources/);
+assert.ok(statSync('ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png').size>1000,'Brand icon must be present');
+assert.match(read('dist-ios/index.html'),/viewport-fit=cover/);
+assert.ok(!read('dist-ios/index.html').includes('/src/'),'The app must contain built assets');
+console.log('PASS bundled app, native bridge registration, Keychain, TLS, privacy manifest and iOS assets');
