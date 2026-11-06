@@ -58,6 +58,7 @@ jobs:
       - name: Explain build outputs
         if: always()
         run: |
+          mkdir -p ios-build
           printf '%s\n' 'Wizpiko iOS build' 'Simulator .app: for an iOS simulator on a Mac.' 'Unsigned archive: native iPhone/iPad app compiled successfully, not installable until signed.' 'TestFlight requires an Apple Developer membership and signing configuration.' 'This workflow does not publish the website or submit an app to Apple.' > ios-build/READ-ME.txt
       - uses: actions/upload-artifact@v4
         if: always()
