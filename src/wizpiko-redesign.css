@@ -108,3 +108,11 @@ html{scroll-behavior:smooth}body{background:#f6fbff;color:#122757}
 .wz-recommendations{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.wz-recommendations button{background:#f3f7ff;border:1px solid #e2eafa;border-radius:16px;text-align:center;padding:15px 5px;display:flex;flex-direction:column;align-items:center;gap:5px}.wz-recommendations button:hover{background:#e8f2ff}.wz-recommendations button span{font-size:35px}.wz-recommendations strong,.wz-achievement-preview strong{color:#203b75;font-size:12px;font-weight:900}.wz-recommendations small,.wz-achievement-preview small{font-size:10px;color:#7d8dac}
 .wz-achievement-preview{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.wz-achievement-preview>div{display:flex;align-items:center;text-align:center;flex-direction:column;gap:6px;padding:11px 3px;background:#f5f8ff;border-radius:13px}.wz-achievement-preview span{font-size:29px}
 @media(max-width:950px){.wz-dashboard-extras{grid-template-columns:1fr}}@media(max-width:510px){.wz-recommendations{gap:5px}.wz-recommendations button span{font-size:28px}.wz-recommendations strong,.wz-achievement-preview strong{font-size:10px}.wz-achievement-preview{grid-template-columns:repeat(2,1fr)}}
+/* Release 2026-11-07: consistent signed-out feature positioning and disabled planned cards. */
+.wz-features { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.wz-features > .wz-feature,
+.wz-features > .wz-feature:nth-child(2),
+.wz-features > .wz-feature:nth-child(3) { justify-content:center; text-align:left; }
+@media(max-width:780px){.wz-features > .wz-feature{justify-content:flex-start!important;}}
+.wz-subject-card:is(button):hover{transform:translateY(-3px);box-shadow:0 9px 25px #467ac122}
+.wz-subject-card.wz-planned:hover{transform:none;box-shadow:none;}
