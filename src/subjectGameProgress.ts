@@ -9,7 +9,9 @@ export type SubjectGameSession = {
   startedAt: number; updatedAt: number;
 };
 export type SubjectGameProgress = {
-  level: string; best: Record<string, number>; session?: SubjectGameSession; updatedAt: number;
+  level: string; best: Record<string, number>; session?: SubjectGameSession;
+  /** Paused, unfinished rounds by level. The active round remains in session. */
+  pausedSessions?: Record<string, SubjectGameSession>; updatedAt: number;
 };
 export type SubjectGamesProgress = Record<string, SubjectGameProgress>;
 export const SUBJECT_ROUND_SIZE = 5;
@@ -71,7 +73,15 @@ export function readSubjectGame(value: unknown): SubjectGameProgress {
     const key = gameLevel(level);
     best[key] = Math.max(best[key] ?? 0, score);
   }
-  return { level: gameLevel(value.level), best, session: readSession(value.session), updatedAt: stamp(value.updatedAt) };
+  const session=readSession(value.session);
+  const pausedSessions: Record<string,SubjectGameSession>={};
+  if(object(value.pausedSessions)) for(const [key,raw] of Object.entries(value.pausedSessions)){
+    if(!/^[1-9]\\d*$/.test(key))continue;
+    const candidate=readSession(raw);
+    if(!candidate||candidate.level!==key||candidate.id===session?.id)continue;
+    pausedSessions[key]=candidate;
+  }
+  return { level: gameLevel(value.level), best, session, pausedSessions, updatedAt: stamp(value.updatedAt) };
 }
 export function subjectGameStats(value: unknown) {
   const progress = readSubjectGame(value), scores = Object.values(progress.best);
@@ -87,11 +97,18 @@ export function allSubjectGameStats(value: unknown) {
 }
 export function startSubjectRound(value: unknown, level: string, questions: SubjectGameQuestion[], now = Date.now(), id?: string): SubjectGameProgress {
   const progress = readSubjectGame(value), target = gameLevel(level);
-  if (progress.session?.level === target) return progress;
+  if(progress.session?.level===target)return progress;
   const attempt = id || globalThis.crypto?.randomUUID?.() || `${now}-${Math.random().toString(36).slice(2)}`;
-  const session = readSession({ id: attempt, level: target, questions, answers: {}, hints: [], index: 0, startedAt: now, updatedAt: now });
-  if (!session) throw new Error('This round could not be prepared. Please try again.');
-  return { ...progress, level: target, session, updatedAt: now };
+  // Reopening a paused level restores its exact generated questions and checked answers.
+  const resumed=progress.pausedSessions?.[target];
+  const session=resumed||readSession({id:attempt,level:target,questions,answers:{},hints:[],index:0,startedAt:now,updatedAt:now});
+  if(!session)throw new Error('This round could not be prepared. Please try again.');
+  const pausedSessions={...progress.pausedSessions};
+  if(progress.session)pausedSessions[progress.session.level]=progress.session;
+  delete pausedSessions[target];
+  // Exploring an earlier level must never reset the learner's highest unlocked level.
+  const highest=compareGameLevels(progress.level,target)>=0?progress.level:target;
+  return {...progress,level:highest,session,pausedSessions,updatedAt:now};
 }
 export function answerSubjectRound(value: SubjectGameProgress, choice: string, now = Date.now()): SubjectGameProgress {
   const session = value.session;
@@ -112,8 +129,12 @@ export function finishSubjectRound(value: SubjectGameProgress, now = Date.now())
   const result = { level: session.level, correct, total: SUBJECT_ROUND_SIZE,
     xp: (best - previous) * 2, passed: correct >= SUBJECT_PASS_CORRECT, attempt: session.id,
     questions: session.questions, answers: session.answers };
-  const progress: SubjectGameProgress = { level: result.passed ? nextGameLevel(session.level) : session.level,
-    best: { ...value.best, [session.level]: best }, updatedAt: now };
+  const advanced=result.passed?nextGameLevel(session.level):session.level;
+  const highest=compareGameLevels(value.level,advanced)>=0?value.level:advanced;
+  const pausedSessions={...value.pausedSessions};
+  delete pausedSessions[session.level];
+  const progress: SubjectGameProgress = {level:highest,
+    best:{...value.best,[session.level]:best},pausedSessions,updatedAt:now};
   return { progress, result };
 }
 
@@ -127,14 +148,25 @@ export function mergeSubjectGames(local: unknown, cloud: unknown, completed: Set
     const primary = left.updatedAt >= right.updatedAt ? left : right;
     const best = { ...right.best };
     for (const [level, score] of Object.entries(left.best)) best[level] = Math.max(best[level] ?? 0, score);
-    const open = [left.session, right.session].filter((s): s is SubjectGameSession => !!s && !completed.has(subjectRoundId(id, s.id)))
-      .sort((x, y) => y.updatedAt - x.updatedAt || y.startedAt - x.startedAt);
-    let session = open[0];
-    const other = open[1];
-    if (session && other && session.id === other.id && session.level === other.level && JSON.stringify(session.questions) === JSON.stringify(other.questions)) {
-      session = { ...other, ...session, answers: { ...other.answers, ...session.answers }, hints: [...new Set([...other.hints, ...session.hints])] };
+    // Merge active and parked sessions, without resurrecting completed attempts.
+    const candidates=[left.session,right.session,...Object.values(left.pausedSessions||{}),...Object.values(right.pausedSessions||{})]
+      .filter((entry):entry is SubjectGameSession=>!!entry&&!completed.has(subjectRoundId(id,entry.id)))
+      .sort((a,b)=>b.updatedAt-a.updatedAt||b.startedAt-a.startedAt);
+    const byLevel=new Map<string,SubjectGameSession>();
+    for(const draft of candidates){
+      const current=byLevel.get(draft.level);
+      if(!current){byLevel.set(draft.level,draft);continue;}
+      if(current.id===draft.id&&JSON.stringify(current.questions)===JSON.stringify(draft.questions)){
+        byLevel.set(draft.level,{...draft,...current,answers:{...draft.answers,...current.answers},hints:[...new Set([...draft.hints,...current.hints])]});
+      }
+      // Different attempts for the same level: newest wins. Different levels are preserved.
     }
-    output[id] = { ...primary, best, session };
+    const preferred=[primary.session,(primary===left?right:left).session].find(candidate=>candidate&&byLevel.get(candidate.level)?.id===candidate.id);
+    const session=preferred?byLevel.get(preferred.level):undefined;
+    const pausedSessions:Record<string,SubjectGameSession>={};
+    for(const [level,draft] of byLevel)if(draft.id!==session?.id)pausedSessions[level]=draft;
+    const highest=compareGameLevels(left.level,right.level)>=0?left.level:right.level;
+    output[id]={...primary,level:highest,best,session,pausedSessions};
   }
   return output;
 }
