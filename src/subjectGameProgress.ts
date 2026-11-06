@@ -76,7 +76,7 @@ export function readSubjectGame(value: unknown): SubjectGameProgress {
   const session=readSession(value.session);
   const pausedSessions: Record<string,SubjectGameSession>={};
   if(object(value.pausedSessions)) for(const [key,raw] of Object.entries(value.pausedSessions)){
-    if(!/^[1-9]\\d*$/.test(key))continue;
+    if(!/^[1-9]\d*$/.test(key))continue;
     const candidate=readSession(raw);
     if(!candidate||candidate.level!==key||candidate.id===session?.id)continue;
     pausedSessions[key]=candidate;
