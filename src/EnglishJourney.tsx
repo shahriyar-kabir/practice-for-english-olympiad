@@ -24,6 +24,7 @@ function CompletedLevelStars({ completed, game, onReplay }: {completed:number; g
   const safePage=Math.min(page,Math.max(0,totalPages-1));
   const first=safePage*LEVELS_PER_PAGE+1;
   const end=Math.min(completed,first+LEVELS_PER_PAGE-1);
+  const visiblePages=[...new Set([0,safePage-1,safePage,safePage+1,totalPages-1])].filter(p=>p>=0&&p<totalPages).sort((a,b)=>a-b);
   if(completed<=0)return <div className="ej-star-empty">Finish a level to earn your first gold star.</div>;
   return <div className="ej-star-gallery">
     <p className="ej-completed-title">Completed levels</p>
@@ -45,7 +46,8 @@ function CompletedLevelStars({ completed, game, onReplay }: {completed:number; g
     </div>
     {totalPages>1&&<nav className="ej-star-pagination" aria-label={`Completed ${game==='mcq'?'quiz':'puzzle'} level pages`}>
       <button type="button" onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={safePage===0} aria-label="Previous completed levels page">Previous</button>
-      <span aria-live="polite">Page {safePage+1} of {totalPages}</span>
+      <span className="ej-star-page-numbers" role="group" aria-label="Go to completed levels page">{visiblePages.map((p,index)=><span key={p}>{index>0&&p-visiblePages[index-1]>1&&<span className="ej-star-page-dots" aria-hidden="true">…</span>}<button type="button" aria-current={p===safePage?'page':undefined} aria-label={`Page ${p+1} of ${totalPages}`} onClick={()=>setPage(p)}>{p+1}</button></span>)}</span>
+      <span className="sr-only" aria-live="polite">Page {safePage+1} of {totalPages}</span>
       <button type="button" onClick={()=>setPage(p=>Math.min(totalPages-1,p+1))} disabled={safePage===totalPages-1} aria-label="Next completed levels page">Next</button>
     </nav>}
   </div>;
