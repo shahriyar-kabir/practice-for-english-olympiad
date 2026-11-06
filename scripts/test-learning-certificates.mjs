@@ -13,6 +13,14 @@ try {
   await db.query('insert into auth.users values ($1),($2)',[a,b]);
   const migration=await readFile(new URL('../supabase/migrations/20261104225407_learning_certificates.sql',import.meta.url),'utf8');
   await db.exec(migration);await db.exec(migration);
+  await db.exec("create table public.learner_profiles(avatar text constraint learner_profiles_avatar_check check(avatar in ('girl','boy','robot','panda','cat')))");
+  await db.query("insert into wizpiko_learning.certificates(user_id,subject,level,version,full_name,skill_count,question_count,pass_mark) values ($1,'maths','beginner',2,'Legacy Learner',6,120,80)",[b]);
+  const refresh=await readFile(new URL('../supabase/certificate_refresh.sql',import.meta.url),'utf8');
+  assert.equal(refresh,await readFile(new URL('../supabase/migrations/20261106090303_certificate_snapshots_and_avatar_choices.sql',import.meta.url),'utf8'));
+  await db.exec(refresh);
+  await db.exec(refresh);
+  const legacy=await claim(b,'Legacy Learner','maths','beginner');assert.equal(legacy.display_id,null);assert.equal(legacy.achievement_percentage,null);assert.equal(legacy.full_name,'Legacy Learner');
+  await db.query("delete from wizpiko_learning.certificates where user_id=$1",[b]);
   const rls=await db.query("select count(*)::int n from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='wizpiko_learning' and c.relkind='r' and c.relrowsecurity");
   assert.equal(rls.rows[0].n,3);
   for(const userRole of ['anon','authenticated']) {
@@ -36,6 +44,13 @@ try {
   const certificate=await claim(a,'  Alex   Morgan  ');
   assert.equal(certificate.full_name,'Alex Morgan');assert.equal(certificate.public_token,null);
   assert.equal(certificate.skill_count,6);assert.equal(certificate.question_count,120);assert.equal(certificate.pass_mark,80);
+  assert.match(certificate.display_id,/^WZ-ENG-STA-\d{4}-[A-F0-9]{8}$/);
+  assert.equal(certificate.correct_count,116);assert.equal(Number(certificate.achievement_percentage),96.67);
+  await save(a,'writing',20);
+  const repeated=await claim(a);assert.equal(repeated.display_id,certificate.display_id);assert.equal(Number(repeated.achievement_percentage),96.67);
+  await assert.rejects(()=>db.query('update wizpiko_learning.certificates set achievement_percentage=100 where id=$1',[certificate.id]),/issued_certificate_is_immutable/);
+  await db.exec("insert into public.learner_profiles values ('teen-girl'),('middle-man');");
+  await assert.rejects(()=>db.exec("insert into public.learner_profiles values ('invalid-avatar')"));
   assert.equal((await claim(a,'Different Name')).id,certificate.id);
   assert.equal((await claim(a,'Different Name')).full_name,'Alex Morgan');
   await assert.rejects(()=>claim(b),/level_not_qualified/);
@@ -51,13 +66,13 @@ try {
   assert.ok(shared.public_token);assert.notEqual(shared.public_token,shared.id);
   const publicRecord=await rpc('wizpiko_learning_public_certificate',[shared.public_token]);
   assert.equal(publicRecord.full_name,'Alex Morgan');
-  assert.deepEqual(Object.keys(publicRecord).sort(),['id','subject','level','version','full_name','issued_at','skill_count','question_count','pass_mark','public_token'].sort());
+  assert.deepEqual(Object.keys(publicRecord).sort(),['id','subject','level','version','full_name','issued_at','skill_count','question_count','pass_mark','public_token','display_id','correct_count','achievement_percentage'].sort());
   assert.equal((await rpc('wizpiko_learning_share_certificate',[a,certificate.id,true])).public_token,shared.public_token);
   const privateRecord=await rpc('wizpiko_learning_share_certificate',[a,certificate.id,false]);assert.equal(privateRecord.public_token,null);
   assert.equal(await rpc('wizpiko_learning_public_certificate',[shared.public_token]),null);
   const reShared=await rpc('wizpiko_learning_share_certificate',[a,certificate.id,true]);assert.notEqual(reShared.public_token,shared.public_token);
   console.log('PASS account ownership, private by default, public projection and revocable tokens');
-  assert.equal((await save(a,'writing',0)).correct,16);assert.equal((await save(a,'writing',20)).correct,20);
+  assert.equal((await save(a,'writing',0)).correct,20);assert.equal((await save(a,'writing',20)).correct,20);
   const claims=await Promise.all(Array.from({length:8},()=>claim(a)));assert.equal(new Set(claims.map(item=>item.id)).size,1);
   await db.query('delete from auth.users where id=$1',[a]);assert.equal(await rpc('wizpiko_learning_public_certificate',[reShared.public_token]),null);
   console.log('PASS best-score retention, unique issuance and deleted-account cleanup');

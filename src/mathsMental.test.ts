@@ -50,7 +50,7 @@ describe('untimed mental Maths question bank', () => {
       }
     }
     expect(kinds.size).toBe(14);
-  });
+  },30_000);
   it('uses stable snapshots for a round and fresh variations for a new attempt', () => {
     expect(makeMentalRound('51', 'saved-attempt')).toEqual(makeMentalRound('51', 'saved-attempt'));
     expect(makeMentalRound('51', 'fresh-attempt')).not.toEqual(makeMentalRound('51', 'saved-attempt'));

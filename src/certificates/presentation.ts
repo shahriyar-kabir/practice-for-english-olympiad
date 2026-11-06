@@ -10,7 +10,8 @@ export function certificatePresentation(certificate: Certificate): CertificateDe
     subject: learningPrograms[certificate.subject as keyof typeof learningPrograms]?.name || certificate.subject,
     level: levelLabels[certificate.level as keyof typeof levelLabels] || certificate.level,
     issuedDate: new Intl.DateTimeFormat('en-GB',{ day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Dhaka' }).format(new Date(certificate.issued_at)),
-    credential: 'Certificate ID: ' + certificate.id,
+    credential: 'Certificate ID: ' + (certificate.display_id||certificate.id),
+    achievement: certificate.achievement_percentage==null?null:Number(certificate.achievement_percentage),
     verification: certificate.public_token ? publicCertificateURL(certificate.public_token) : 'Saved privately in your Wizpiko profile',
   };
 }

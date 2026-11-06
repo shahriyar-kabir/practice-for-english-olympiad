@@ -1,11 +1,15 @@
 import type { AcademyLevel, AcademySkill } from './learningTypes';
 
+export const avatarIds = ['girl','boy','robot','panda','cat','teen-girl','teen-boy','young-woman','young-man','woman','man','middle-woman','middle-man'] as const;
 export type LearnerProfile = {
   display_name: string;
   birth_date: string | null;
-  avatar: 'girl' | 'boy' | 'robot' | 'panda' | 'cat';
+  avatar: typeof avatarIds[number];
   preferences: {
     sound?: boolean;
+    read_aloud?: boolean;
+    speech_voice?: string;
+    speech_rate?: number;
     animation?: boolean;
     learning_tips?: boolean;
     learning_level?: AcademyLevel;

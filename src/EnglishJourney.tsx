@@ -1,3 +1,5 @@
+import QuestionSpeaker from './QuestionSpeaker';
+import {playLearningSound} from './learningAudio';
 import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { ArrowLeft, ArrowRight, Check, ChevronRight, Lightbulb, LockKeyhole, Star, Trophy } from 'lucide-react';
@@ -164,12 +166,12 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCa
       <div className="ej-game-track"><div style={{ width: (total ? doneCount / total * 100 : 0) + '%' }} /><span>{doneCount} / {total} {mode === 'mcq' ? 'questions' : 'words'}</span></div>
       {mode === 'mcq' && current && active && <div className="ej-mcq-panel">
         <span className="ej-question-number">QUESTION {active.index - (group?.start || 0) + 1} / {total}</span>
-        <h2>{current.prompt}</h2>
+        <div className="wz-question-heading"><h2>{current.prompt}</h2><QuestionSpeaker text={current.prompt+' Choices: '+current.options.join('. ')}/></div>
         <div className="ej-answer-grid">{current.options.map((option, i) => {
           const answered = active.answers[active.index] !== undefined;
           const correct = option === current.correct;
           const chosen = active.answers[active.index] === option;
-          return <button key={i} className={'ej-answer ' + (answered && correct ? 'ej-answer-right ' : '') + (answered && chosen && !correct ? 'ej-answer-wrong' : '')} disabled={answered} onClick={() => setAnswer(option)}>
+          return <button key={i} className={'ej-answer ' + (answered && correct ? 'ej-answer-right ' : '') + (answered && chosen && !correct ? 'ej-answer-wrong' : '')} disabled={answered} onClick={() => {playLearningSound(option===current.correct?'correct':'retry');setAnswer(option);}}>
             <span>{String.fromCharCode(65 + i)}</span>{option}{answered && correct && <Check size={17}/>}
           </button>;
         })}</div>
@@ -217,7 +219,7 @@ function GeneratedGame({ crossword, solved, hints, selected, setSelected, onWord
   </div>;
   return <div className="ej-cross-layout">
     <div className="ej-cross-main">
-      <div className="ej-grid-panel"><div className="ej-selected-clue"><strong>{activeEntry.number} {activeEntry.direction}</strong> {activeEntry.clue}</div>
+      <div className="ej-grid-panel"><div className="ej-selected-clue"><strong>{activeEntry.number} {activeEntry.direction}</strong> {activeEntry.clue} <QuestionSpeaker text={activeEntry.clue}/></div>
         <div className="ej-crossword-scroll"><div className="ej-generated-grid" style={{ '--cols': crossword.cols, '--rows': crossword.rows } as CSSProperties}>
           {Array.from({ length: crossword.rows * crossword.cols }, (_, index) => {
             const row = Math.floor(index / crossword.cols), col = index % crossword.cols;

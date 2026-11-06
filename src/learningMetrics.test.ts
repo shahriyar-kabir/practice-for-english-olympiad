@@ -7,6 +7,7 @@ const now = new Date(2026, 10, 3, 12);
 const completion = (id: string, day = '2026-11-03'): LearningEvent => ({ id, title: 'A real completed crossword', kind: 'crossword', completedAt: new Date(day + 'T10:00:00').toISOString(), xp: 25, correct: 8, total: 10 });
 
 describe('Actual learning metrics and durable achievements', () => {
+  it('offers 75 unique achievements with clear unlock requirements',()=>{const badges=learningAchievements({records:{}},now);expect(badges).toHaveLength(75);expect(new Set(badges.map(b=>b.id)).size).toBe(75);expect(badges.every(b=>b.description.length>10)).toBe(true);});
   it('keeps earlier collection completions and earned word milestones after content replacement', () => {
     const journey = { records: {} };
     const history = { solvedTotal: 0, completedTotal: 0, retiredSolvedTotal: 110, retiredCompletedTotal: 10 };

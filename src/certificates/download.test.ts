@@ -8,9 +8,13 @@ describe('Downloadable certificate document',()=>{
     const xref=Number(text.match(/startxref\n(\d+)/)![1]);expect(text.slice(xref,xref+4)).toBe('xref');
     const entries=text.slice(xref).split('\n').slice(3,8);for(let index=0;index<5;index++){const offset=Number(entries[index].slice(0,10));expect(text.slice(offset,offset+7)).toBe(`${index+1} 0 obj`);}
   });
-  it('uses curved, evenly spaced seal text and omits the removed issuer block',()=>{
-    const shapes=certificateDesign({fullName:'Alex Morgan',subject:'English',level:'Starter',issuedDate:'On completion',credential:'Sample',verification:'Preview',preview:true});
-    expect(shapes.filter(shape=>shape.type==='text').some(shape=>shape.type==='text'&&shape.text==='ISSUED BY WIZPIKO')).toBe(false);
-    const arcs=shapes.filter(shape=>shape.type==='arcText');expect(arcs).toHaveLength(2);expect(arcs.every(shape=>shape.type==='arcText'&&shape.x>800&&shape.y===638&&shape.spacing>0)).toBe(true);
+  it('includes the verified percentage and uses Alex Brush in the approved layout',()=>{
+    const shapes=certificateDesign({fullName:'Alex Morgan',subject:'Mathematics',level:'Beginner',issuedDate:'6 November 2026',credential:'WZ-MAT-BEG-2026-AB12CD34',verification:'Private',achievement:95});
+    expect(shapes.some(s=>s.text==='Achieved 95%')).toBe(true);
+    expect(shapes.find(s=>s.text==='Alex Morgan')?.font).toBe('Wizpiko Alex Brush');
+    expect(shapes.some(s=>s.text==='Beginner - Mathematics')).toBe(true);
+    const legacy=certificateDesign({fullName:'Alex',subject:'English',level:'Starter',issuedDate:'6 November 2026',credential:'Original ID',verification:'Private'});
+    expect(legacy.some(s=>s.text.includes('%'))).toBe(false);
+    expect(legacy.some(s=>s.text==='Achievement confirmed')).toBe(true);
   });
 });

@@ -1,5 +1,8 @@
 export type Certificate = {
   id: string;
+  display_id?: string|null;
+  correct_count?: number|null;
+  achievement_percentage?: number|null;
   subject: string;
   level: string;
   version: number;

@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { Facebook } from 'lucide-react';
+import { Facebook, Instagram } from 'lucide-react';
 import { appHref } from './routes';
 import type { InfoPageId } from './content/siteCopy';
 
@@ -11,6 +11,6 @@ export default function SiteFooter({signedIn,onHome,onSubjects,onProgress,onInfo
   <div><strong>Platform</strong><a href={appHref(signedIn ? '/home' : '/')} onClick={event=>follow(event,onHome)}>Home</a><a href={appHref(signedIn ? '/home' : '/') + '#wiz-subjects'} onClick={event=>follow(event,onSubjects)}>Subjects</a>{signedIn&&<button type="button" onClick={onProgress}>My Progress</button>}</div>
   <div><strong>Support</strong><a href={appHref('/help-centre')} onClick={event=>follow(event,()=>onInfo('help'))}>Help Centre</a><a href={appHref('/privacy-safety')} onClick={event=>follow(event,()=>onInfo('privacy'))}>Privacy & Safety</a><a href={appHref('/account-guide')} onClick={event=>follow(event,()=>onInfo('account-guide'))}>Account Guide</a><a href={appHref('/contact-us')} onClick={event=>follow(event,onContact)}>Contact Us</a></div>
   <div><strong>Company</strong><a href={appHref('/about-us')} onClick={event=>follow(event,()=>onInfo('about'))}>About Us</a><a href={appHref('/mission')} onClick={event=>follow(event,()=>onInfo('mission'))}>Our Mission</a></div>
-  <div><strong>Follow Us</strong><div className="wz-social-icons"><a href="https://www.facebook.com/wizpiko2026" target="_blank" rel="noopener noreferrer" aria-label="Wizpiko on Facebook"><Facebook size={23}/></a></div><small>© {new Date().getFullYear()} Wizpiko.</small></div>
+  <div><strong>Follow Us</strong><div className="wz-social-icons"><a href="https://www.facebook.com/wizpiko2026" target="_blank" rel="noopener noreferrer" aria-label="Wizpiko on Facebook"><Facebook size={23}/></a><a href="https://www.instagram.com/wizpiko" target="_blank" rel="noopener noreferrer" aria-label="Wizpiko on Instagram"><Instagram size={23}/></a></div><small>© {new Date().getFullYear()} Wizpiko.</small></div>
  </div></footer>;
 }

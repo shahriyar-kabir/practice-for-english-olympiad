@@ -1,3 +1,4 @@
+import { avatarIds } from './learnerData';
 import { useEffect, useRef, useState } from 'react';
 import type { GameSession, JourneyProgress } from './journey';
 import { mergeSubjectGames } from './subjectGameProgress';
@@ -277,7 +278,7 @@ export async function profileGet(session: Session, userId: string): Promise<Lear
   const rows: unknown = await response.json();
   if (!Array.isArray(rows) || rows.length !== 1 || !rows[0] ||
       typeof rows[0].display_name !== 'string' ||
-      !['girl', 'boy', 'robot', 'panda', 'cat'].includes(rows[0].avatar)) {
+      !(avatarIds as readonly string[]).includes(rows[0].avatar)) {
     throw new Error('This account is missing a valid protected learner profile. Please contact support.');
   }
   return rows[0] as LearnerProfile;

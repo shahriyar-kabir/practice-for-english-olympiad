@@ -1,3 +1,5 @@
+import QuestionSpeaker from './QuestionSpeaker';
+import {configureLearningAudio,activateLearningAudio,playLearningSound,stopQuestion} from './learningAudio';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, DragEvent, ReactNode } from 'react';
 import { ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCheck, ChevronRight, CircleHelp, GripVertical, Leaf, Lightbulb, MousePointer2, RotateCcw, Sparkles, Star, Trophy, LockKeyhole, X } from 'lucide-react';
@@ -77,24 +79,7 @@ function Modal({ children, title, onClose }: { children: ReactNode; title: strin
   </dialog>;
 }
 
-function playChime(complete = false) {
-  try {
-    const audio = new AudioContext();
-    const notes = complete ? [523.25, 659.25, 783.99, 1046.5] : [659.25, 880];
-    notes.forEach((frequency, index) => {
-      const oscillator = audio.createOscillator();
-      const gain = audio.createGain();
-      oscillator.connect(gain); gain.connect(audio.destination);
-      oscillator.type = 'sine'; oscillator.frequency.value = frequency;
-      const start = audio.currentTime + index * 0.12;
-      gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(0.09, start + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.24);
-      oscillator.start(start); oscillator.stop(start + 0.25);
-    });
-    window.setTimeout(() => { void audio.close(); }, 1200);
-  } catch { /* Sound is optional when browser audio is unavailable. */ }
-}
+function playChime(complete=false){playLearningSound(complete?'complete':'correct');}
 
 const totalWords = puzzles.reduce((sum, puzzle) => sum + puzzle.entries.length, 0);
 
@@ -115,6 +100,12 @@ export default function App() {
   const [pendingDestination,setPendingDestination]=useState<Destination | null>(()=>readAppRoute().view === 'certificate' ? null : readIntent());
   const account = useWizpikoAccount({ legacy: progress, journey }, restored => { setProgress(restored.legacy); setJourney(restored.journey); });
 
+  useEffect(()=>{configureLearningAudio(account.auth.profile?.preferences||{});},[account.auth.profile?.preferences]);
+  useEffect(()=>{document.addEventListener('pointerdown',activateLearningAudio,true);document.addEventListener('keydown',activateLearningAudio,true);return()=>{document.removeEventListener('pointerdown',activateLearningAudio,true);document.removeEventListener('keydown',activateLearningAudio,true);stopQuestion();};},[]);
+  const previousCompletion=useRef<string|null>(null);
+  const previousBadges=useRef<Record<string,string>>({});
+  const previousLearningDays=useRef(0);
+  useEffect(()=>{const latest=journey.activityLog?.[journey.activityLog.length-1];if(!account.auth.loading&&previousCompletion.current&&latest&&latest.id!==previousCompletion.current&&Date.now()-Date.parse(latest.completedAt)<10000){const fresh=Object.keys(journey.earnedBadges||{}).some(id=>!previousBadges.current[id]);playLearningSound(fresh?'achievement':(journey.activityDates?.length||0)>previousLearningDays.current?'streak':latest.kind==='classic'?'correct':'complete');}previousCompletion.current=latest?.id||'ready';previousBadges.current=journey.earnedBadges||{};previousLearningDays.current=journey.activityDates?.length||0;},[journey,account.auth.loading]);
   const accountLayout = !!account.auth.user || (account.auth.loading && returningAccount);
 
   function changeURL(path: string, replace = false) {
@@ -222,7 +213,7 @@ export default function App() {
   const selected = puzzle.entries.find(entry => entry.id === selectedId) ?? puzzle.entries[0];
   const [notice, setNotice] = useState<Notice | null>(null);
   const [dialog, setDialog] = useState<Dialog>(null);
-  const sound = account.auth.profile?.preferences?.sound ?? false;
+  const sound = account.auth.profile?.preferences?.sound ?? true;
   const [dragWord, setDragWord] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [shake, setShake] = useState<string | null>(null);
@@ -382,7 +373,7 @@ export default function App() {
           <div className="puzzle-footer"><button className="text-button" onClick={() => setDialog('reset')}><RotateCcw size={14} /> Start over</button><button className="hint-button" onClick={giveHint} disabled={completed}><Lightbulb size={16} /> A little hint</button></div>
         </section>
 
-        <aside className="wiz-word-sidebar" aria-label="Word bank">          <div className="word-bank"><div className="word-bank-heading"><h3><span className="bank-icon"><GripVertical size={15} /></span> Your word bank</h3><span>{puzzle.wordBank.length - state.solved.length} to discover</span></div><p>Drag a word to the grid, or tap it to fill the selected clue.</p>{!completed && <div className="bank-active-clue"><strong>{selected.number} {selected.direction}:</strong> {selected.clue}</div>}<div className="word-tiles">
+        <aside className="wiz-word-sidebar" aria-label="Word bank">          <div className="word-bank"><div className="word-bank-heading"><h3><span className="bank-icon"><GripVertical size={15} /></span> Your word bank</h3><span>{puzzle.wordBank.length - state.solved.length} to discover</span></div><p>Drag a word to the grid, or tap it to fill the selected clue.</p>{!completed && <div className="bank-active-clue"><strong>{selected.number} {selected.direction}:</strong> {selected.clue} <QuestionSpeaker text={selected.clue}/></div>}<div className="word-tiles">
             {puzzle.wordBank.map(word => {
               const used = puzzle.entries.some(entry => entry.answer === word && state.solved.includes(entry.id));
               return <button key={word} draggable={!used} disabled={used} className={`word-tile ${used ? 'word-used' : ''} ${shake === word ? 'shake' : ''} ${dragWord === word ? 'is-dragging' : ''}`} onClick={() => placeWord(word)} onDragStart={event => { event.dataTransfer.setData('text/plain', word); event.dataTransfer.effectAllowed = 'copy'; setDragWord(word); }} onDragEnd={() => { setDragWord(null); setDragOver(false); }} aria-label={used ? `${word}, found` : `Place ${word}`}><span>{used ? <Check size={13} /> : <GripVertical size={12} />}</span>{word}</button>;

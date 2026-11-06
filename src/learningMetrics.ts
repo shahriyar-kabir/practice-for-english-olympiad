@@ -1,3 +1,4 @@
+import {learningPrograms,academyLevels,skillResultKey} from '../supabase/functions/_shared/curriculum/programs.ts';
 import type { JourneyProgress } from './journey';
 import type { LearningEvent, LessonResult } from './learningTypes';
 import { dayKey, learningStreak, validActivityDays } from './learnerData';
@@ -85,8 +86,8 @@ export function learningAchievements(journey: JourneyProgress, now = new Date(),
     { id: 'classic-crossword-explorer', title: 'Crossword explorer', description: 'Complete your first Wizpiko word puzzle.', icon: '🧭', done: summary.classicCompleted > 0 },
     { id: 'classic-word-champion', title: 'Word champion', description: 'Complete ten word puzzles.', icon: '👑', done: summary.classicCompleted >= 10 },
     { id: 'first-activity', title: 'First discovery', description: 'Complete your first learning activity.', icon: '✨', done: summary.activitiesCompleted > 0 || events.length > 0 },
-    { id: 'first-lesson', title: 'Lesson explorer', description: 'Finish your first English lesson.', icon: '📖', done: summary.lessonsCompleted > 0 },
-    { id: 'three-lessons', title: 'Building momentum', description: 'Complete three different English lessons.', icon: '🌱', done: summary.lessonsCompleted >= 3 },
+    { id: 'first-lesson', title: 'Lesson explorer', description: 'Finish your first learning skill.', icon: '📖', done: summary.lessonsCompleted > 0 },
+    { id: 'three-lessons', title: 'Building momentum', description: 'Complete three different learning skills.', icon: '🌱', done: summary.lessonsCompleted >= 3 },
     { id: 'first-game', title: 'Game explorer', description: 'Complete your first learning game.', icon: '🧩', done: summary.gamesCompleted > 0 || events.some(event => event.kind !== 'lesson') },
     { id: 'level-explorer', title: 'Level explorer', description: 'Reach a new challenge level.', icon: '🚀', done: summary.subjectLevelsPassed > 0 || Object.values(journey.records || {}).some(record => record?.unlocked > 1) },
     { id: 'streak-3', title: '3-day spark', description: 'Complete activities on three days in one learning streak.', icon: '🔥', done: summary.streak.longest >= 3 },
@@ -97,6 +98,20 @@ export function learningAchievements(journey: JourneyProgress, now = new Date(),
     { id: 'xp-500', title: '500 XP', description: 'Earn 500 XP from completed lessons and games.', icon: '🚀', done: summary.xp >= 500 },
     { id: 'xp-1000', title: '1,000 XP', description: 'Earn 1,000 XP from completed lessons and games.', icon: '💎', done: summary.xp >= 1000 },
   ];
+  const completed=completedLessonResults(journey,now);
+  const add=(id:string,title:string,description:string,icon:string,done:boolean)=>definitions.push({id,title,description,icon,done});
+  for(const n of [5,10,20,30,50,75,100,150,200,300,500,1000])add(`activities-${n}`,`${n} discoveries`,`Complete ${n} learning activities.`,'🎒',summary.activitiesCompleted>=n);
+  for(const n of [250,750,1500,2500,5000,7500,10000,15000,25000,50000])add(`xp-extra-${n}`,`${n.toLocaleString('en-GB')} XP explorer`,`Earn ${n.toLocaleString('en-GB')} XP through completed learning.`,'💫',summary.xp>=n);
+  for(const n of [2,5,10,20,40,60,100,200])add(`active-days-${n}`,`${n} days of discovery`,`Complete activities on ${n} different days.`,'📅',summary.activeDays>=n);
+  for(const n of [5,10,21,45,60,90,180,365])add(`streak-extra-${n}`,`${n}-day learning spark`,`Reach ${n} active days in one streak. Two missed days of grace apply.`,'🔥',summary.streak.longest>=n);
+  for(const subject of ['english','maths'] as const){
+    const programme=learningPrograms[subject];
+    const verified=academyLevels.flatMap(level=>programme.skills.map(skill=>completed[skillResultKey(subject,level,skill.id)])).filter(r=>r?.total===20);
+    for(const n of [3,6,12,24])add(`${subject}-skills-${n}`,`${programme.name}: ${n} skills`,`Complete ${n} different ${programme.name} skills with all 20 questions.` ,subject==='maths'?'🧮':'📚',verified.length>=n);
+    for(const level of academyLevels){const passed=programme.skills.every(skill=>{const r=completed[skillResultKey(subject,level,skill.id)];return r?.total===20&&r.correct>=16;});add(`${subject}-${level}-qualified`,`${programme.name} ${level[0].toUpperCase()+level.slice(1)} master`,`Meet the ${level} certificate requirement: at least 80% in every ${programme.name} skill.`,'🎓',passed);}
+  }
+  const perfect=Object.values(completed).filter(r=>r.total===20&&r.correct===20).length;
+  for(const n of [1,3,5,10,20,48])add(`perfect-skills-${n}`,`${n} perfect ${n===1?'skill':'skills'}`,`Score 20 out of 20 in ${n} different skills.`,'🎯',perfect>=n);
   return definitions.map(({ done, ...definition }) => ({
     ...definition,
     earned: done || Boolean(journey.earnedBadges?.[definition.id]),

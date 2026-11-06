@@ -1,4 +1,4 @@
-import { certificateDesign, CERTIFICATE_HEIGHT, CERTIFICATE_WIDTH } from './design';
+import { certificateBackground, certificateDesign, CERTIFICATE_HEIGHT, CERTIFICATE_WIDTH } from './design';
 import type { CertificateDesignData } from './design';
 
 export function jpegToCertificatePDF(jpeg: Uint8Array, width: number, height: number): Uint8Array {
@@ -27,40 +27,15 @@ export function jpegToCertificatePDF(jpeg: Uint8Array, width: number, height: nu
 }
 
 async function certificateCanvas(data: CertificateDesignData): Promise<HTMLCanvasElement> {
+  await Promise.all([document.fonts.load('68px "Wizpiko Alex Brush"',data.fullName),document.fonts.load('32px "Wizpiko Certificate Sans"'),document.fonts.load('700 32px "Wizpiko Certificate Sans"')]);
   await document.fonts.ready;
-  const canvas = document.createElement('canvas'), scale = 2;
-  canvas.width = CERTIFICATE_WIDTH * scale; canvas.height = CERTIFICATE_HEIGHT * scale;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Your browser could not prepare the download. Please try another browser.');
-  ctx.scale(scale, scale);
-  for (const shape of certificateDesign(data)) {
-    if (shape.type === 'text') {
-      ctx.fillStyle = shape.color; ctx.font = `${shape.weight || 400} ${shape.size}px ${shape.serif ? 'Fraunces, Georgia, serif' : 'Nunito, sans-serif'}`;
-      ctx.textAlign = shape.align || 'center'; ctx.fillText(shape.text, shape.x, shape.y);
-    } else if (shape.type === 'arcText') {
-      ctx.save(); ctx.fillStyle = shape.color; ctx.font = `${shape.weight} ${shape.size}px Nunito, sans-serif`; ctx.textAlign = 'center';
-      const letters = Array.from(shape.text), widths = letters.map(letter => ctx.measureText(letter).width + shape.spacing);
-      const total = widths.reduce((sum, width) => sum + width, 0); let used = 0;
-      letters.forEach((letter, index) => {
-        const distance = used + widths[index] / 2 - total / 2;
-        const angle = shape.side === 'top' ? -Math.PI / 2 + distance / shape.r : Math.PI / 2 - distance / shape.r;
-        ctx.save(); ctx.translate(shape.x + Math.cos(angle) * shape.r, shape.y + Math.sin(angle) * shape.r);
-        ctx.rotate(shape.side === 'top' ? angle + Math.PI / 2 : angle - Math.PI / 2); ctx.fillText(letter, 0, 0); ctx.restore();
-        used += widths[index];
-      });
-      ctx.restore();
-    } else {
-      ctx.beginPath();
-      if (shape.type === 'line') { ctx.moveTo(shape.x,shape.y); ctx.lineTo(shape.x2,shape.y2); ctx.strokeStyle = shape.color; ctx.lineWidth = shape.width; ctx.stroke(); continue; }
-      if (shape.type === 'rect') ctx.roundRect(shape.x,shape.y,shape.w,shape.h,shape.radius);
-      else if (shape.type === 'circle') ctx.arc(shape.x,shape.y,shape.r,0,Math.PI*2);
-      else { shape.points.forEach(([x,y], index) => index ? ctx.lineTo(x,y) : ctx.moveTo(x,y)); ctx.closePath(); }
-      ctx.fillStyle = shape.fill; ctx.fill();
-      if (shape.stroke) { ctx.strokeStyle = shape.stroke; ctx.lineWidth = shape.width || 1; ctx.stroke(); }
-    }
-  }
-  const logo = new Image(); logo.src = `${import.meta.env.BASE_URL}wizpiko-wordmark.webp`;
-  await logo.decode(); ctx.drawImage(logo, 442, 82, 240, 80);
+  const canvas=document.createElement('canvas'),scale=2;
+  canvas.width=CERTIFICATE_WIDTH*scale;canvas.height=CERTIFICATE_HEIGHT*scale;
+  const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Your browser could not prepare the certificate.');
+  const background=new Image();background.src=certificateBackground();await background.decode();
+  ctx.scale(scale,scale);ctx.drawImage(background,0,0,CERTIFICATE_WIDTH,CERTIFICATE_HEIGHT);
+  for(const shape of certificateDesign(data)){ctx.fillStyle=shape.color;ctx.font=`${shape.weight} ${shape.size}px "${shape.font}", Georgia, serif`;ctx.textAlign='center';ctx.fillText(shape.text,shape.x,shape.y);}
+
   return canvas;
 }
 export async function certificateBlob(data: CertificateDesignData, format: 'pdf' | 'png' = 'pdf'): Promise<Blob> {
