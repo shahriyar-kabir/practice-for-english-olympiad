@@ -48,7 +48,7 @@ type Props = {
 const skillEmoji = { sounds: '🔤', vocabulary: '🧩', grammar: '✍️', reading: '📖', listening: '🎧', writing: '📝' } as const;
 
 
-export function WizpikoPortal({ onPractice, onChooseSubject, onExploreSubjects, signedIn, nickname, avatar, onProgress, onStreak, onAchievements, xp, streak, solvedTotal, completedTotal, journey, preferences, onLesson, onResumeSkill, onClassic, onGames, archivedClassic }: Props) {
+export function WizpikoPortal({ onPractice, onChooseSubject, onExploreSubjects, signedIn, nickname, avatar, onProgress, onStreak, onAchievements, xp, streak, solvedTotal, completedTotal, journey, preferences, onLesson, onResumeSkill, onGames, archivedClassic }: Props) {
   const progress = journey || { records: {} };
   const summary = learningSummary(progress, new Date(), { solvedTotal, completedTotal, retiredSolvedTotal: archivedClassic?.solvedWords, retiredCompletedTotal: archivedClassic?.completedPuzzles });
   const results = subjectSkillResults(progress, 'english');
