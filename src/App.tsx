@@ -105,7 +105,7 @@ export default function App() {
   const previousCompletion=useRef<string|null>(null);
   const previousBadges=useRef<Record<string,string>>({});
   const previousLearningDays=useRef(0);
-  useEffect(()=>{const latest=journey.activityLog?.[journey.activityLog.length-1];if(!account.auth.loading&&previousCompletion.current&&latest&&latest.id!==previousCompletion.current&&Date.now()-Date.parse(latest.completedAt)<10000){const fresh=Object.keys(journey.earnedBadges||{}).some(id=>!previousBadges.current[id]);playLearningSound(fresh?'achievement':(journey.activityDates?.length||0)>previousLearningDays.current?'streak':latest.kind==='classic'?'correct':'complete');}previousCompletion.current=latest?.id||'ready';previousBadges.current=journey.earnedBadges||{};previousLearningDays.current=journey.activityDates?.length||0;},[journey,account.auth.loading]);
+  useEffect(()=>{const latest=journey.activityLog?.[journey.activityLog.length-1];if(!account.auth.loading&&previousCompletion.current&&latest&&latest.id!==previousCompletion.current&&Date.now()-Date.parse(latest.completedAt)<10000){const fresh=Object.keys(journey.earnedBadges||{}).some(id=>!previousBadges.current[id]);playLearningSound(latest.kind==='lesson'?'complete':fresh?'achievement':(journey.activityDates?.length||0)>previousLearningDays.current?'streak':latest.kind==='classic'?'correct':'complete');}previousCompletion.current=latest?.id||'ready';previousBadges.current=journey.earnedBadges||{};previousLearningDays.current=journey.activityDates?.length||0;},[journey,account.auth.loading]);
   const accountLayout = !!account.auth.user || (account.auth.loading && returningAccount);
 
   function changeURL(path: string, replace = false) {
