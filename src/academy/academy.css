@@ -10,3 +10,24 @@
 .ea-certificate-progress p { color: #63789b; font-size: 14px; line-height: 1.7; }
 .ea-save-error { padding: 16px; color: #9a5036; background: #fff5eb; border-radius: 12px; }
 @media(max-width: 700px) { .ea-certificate-progress { flex-wrap: wrap; padding: 20px; align-items: flex-start; } .ea-certificate-progress > div { flex-basis: calc(100% - 65px); } .ea-certificate-progress > button { width: 100%; } }
+
+/* Review correctness icons and score persistence during attempts. */
+.ea-review-answer-row{display:grid;grid-template-columns:minmax(0,1fr) 28px;align-items:center;gap:14px;margin-top:6px;}
+.ea-review-answer-row p{margin:0;min-width:0;overflow-wrap:anywhere;}
+.ea-review-answer-result{width:28px;height:28px;display:inline-grid;place-items:center;justify-self:end;}
+.ea-review-answer-result.is-correct{color:#237c49;}
+.ea-review-answer-result.is-incorrect{color:#bd3343;}
+.ea-skill-foot{align-items:flex-start;}
+.ea-skill-score{display:flex;flex-direction:column;align-items:flex-end;text-align:right;gap:5px;min-width:0;}
+.ea-skill-score>span{display:inline-flex;align-items:center;justify-content:flex-end;gap:5px;line-height:1.35;}
+.ea-skill-best{font-weight:900;color:#247d55;}.ea-skill-current{color:#315d99;}.ea-skill-resume{color:#6750b3;}
+/* Skill completion: preserve design, position actions slightly lower. */
+.ea-page .ea-panel.ea-completion{padding:clamp(24px,3.8vw,38px) clamp(20px,4vw,40px);}
+.ea-page .ea-completion .ea-completion-icon{width:76px;height:76px;margin:0 auto 14px;}
+.ea-page .ea-completion>.ea-eyebrow{display:block;margin:0 0 8px;line-height:1.35;}
+.ea-page .ea-completion h2{margin:0 0 18px;font-size:clamp(28px,3vw,36px);line-height:1.2;}
+.ea-page .ea-completion>p{max-width:680px;margin:0 auto;line-height:1.55;}
+.ea-page .ea-completion>p+p{margin-top:8px;}
+.ea-page .ea-completion>.ea-actions{margin-top:45px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;}
+.ea-page .ea-completion .ea-actions>button{min-height:46px;}
+@media(max-width:600px){.ea-page .ea-panel.ea-completion{padding:26px 18px;}.ea-page .ea-completion .ea-completion-icon{width:68px;height:68px;margin-bottom:12px;}.ea-page .ea-completion h2{margin-bottom:14px;}.ea-page .ea-completion>.ea-actions{margin-top:31px;flex-direction:column;gap:10px;}.ea-page .ea-completion .ea-actions>button{width:100%;max-width:310px;}}
