@@ -17,11 +17,12 @@ concurrency:
 
 jobs:
   ios:
-    runs-on: macos-15-intel
+    runs-on: macos-15
     timeout-minutes: 30
     env:
       VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
       VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      WIZPIKO_SIMULATOR_RUNTIME: iOS-18-6
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -46,10 +47,11 @@ jobs:
         run: |
           mkdir -p ios-build
           set -o pipefail
-          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath ios-build/DerivedData CODE_SIGNING_ALLOWED=NO build > ios-build/simulator-build.log 2>&1 || { tail -100 ios-build/simulator-build.log; exit 1; }
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath ios-build/DerivedData CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- build > ios-build/simulator-build.log 2>&1 || { tail -100 ios-build/simulator-build.log; exit 1; }
+          codesign --verify --deep --strict ios-build/DerivedData/Build/Products/Debug-iphonesimulator/App.app
           ditto -c -k --sequesterRsrc --keepParent ios-build/DerivedData/Build/Products/Debug-iphonesimulator/App.app ios-build/Wizpiko-Simulator.app.zip
       - name: Verify native startup and capture iPhone preview
-        timeout-minutes: 8
+        timeout-minutes: 12
         run: python3 scripts/ios/simulator-smoke.py
       - name: Create unsigned iPhone archive
         run: |

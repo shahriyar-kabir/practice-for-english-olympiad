@@ -127,6 +127,28 @@ public final class WizpikoDevicePlugin: CAPPlugin, CAPBridgedPlugin {
         call.resolve()
     }
 
+    #if DEBUG && targetEnvironment(simulator)
+    // Exercise the actual Keychain API without touching any learner session.
+    private func verifySimulatorSecureStorage() throws {
+        var testQuery = query
+        testQuery[kSecAttrAccount as String] = "startup-check-" + UUID().uuidString
+        let data = Data("Wizpiko secure storage check".utf8)
+        var attributes = testQuery
+        attributes[kSecValueData as String] = data
+        attributes[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        let added = SecItemAdd(attributes as CFDictionary, nil)
+        guard added == errSecSuccess else { throw NSError(domain: "WizpikoKeychainCheck", code: Int(added)) }
+        defer { SecItemDelete(testQuery as CFDictionary) }
+        var request = testQuery
+        request[kSecReturnData as String] = true
+        request[kSecMatchLimit as String] = kSecMatchLimitOne
+        var result: CFTypeRef?
+        let read = SecItemCopyMatching(request as CFDictionary, &result)
+        guard read == errSecSuccess else { throw NSError(domain: "WizpikoKeychainCheck", code: Int(read)) }
+        guard result as? Data == data else { throw NSError(domain: "WizpikoKeychainCheck", code: Int(errSecDecode)) }
+    }
+    #endif
+
     // A debug-only, account-free readiness marker lets the Mac build verify the
     // real WebKit/Keychain startup instead of accepting a screenshot of an error.
     @objc func recordStartup(_ call: CAPPluginCall) {
@@ -136,6 +158,17 @@ public final class WizpikoDevicePlugin: CAPPlugin, CAPBridgedPlugin {
         let phase = String((call.getString("phase") ?? "").prefix(64))
         let code = String((call.getString("code") ?? "").prefix(64))
         do {
+            #if targetEnvironment(simulator)
+            if state == "ready" {
+                do { try verifySimulatorSecureStorage() }
+                catch {
+                    let storageCode = "KEYCHAIN_CHECK_FAILED_" + String((error as NSError).code)
+                    try writeStartupMarker(state: "failed", phase: "secure-storage", code: storageCode)
+                    call.reject("The simulator secure storage check failed.", storageCode)
+                    return
+                }
+            }
+            #endif
             try writeStartupMarker(state: state, phase: phase, code: code)
         } catch { call.reject("Startup check unavailable"); return }
         #endif

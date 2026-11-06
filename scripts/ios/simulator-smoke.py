@@ -2,7 +2,6 @@
 import json
 import os
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import time
@@ -30,6 +29,16 @@ def command(phase, args, timeout=45, accept_failure=False):
 
 
 def diagnostics(device):
+    # Read markers directly even when CoreSimulator cannot answer another RPC.
+    data = Path.home() / 'Library/Developer/CoreSimulator/Devices' / device / 'data/Containers/Data/Application'
+    for marker in data.glob('*/Library/Application Support/Wizpiko/startup.json'):
+        shutil.copy2(marker, OUT / 'startup.json')
+        print(json.dumps({'startup': json.loads(marker.read_text())}), flush=True)
+        try:
+            command('app-screenshot', ['xcrun', 'simctl', 'io', device, 'screenshot', str(OUT / 'Wizpiko-iPhone-preview.png')], timeout=45)
+        except Exception as error:
+            print(str(error), flush=True)
+        break
     try:
         args = ['xcrun', 'simctl', 'spawn', device, 'log', 'show', '--last', '2m', '--style', 'compact', '--predicate', 'process == "App" OR eventMessage CONTAINS "com.wizpiko.app"']
         command('simulator-system', args, timeout=20, accept_failure=True)
@@ -38,17 +47,18 @@ def diagnostics(device):
 
 
 listing = json.loads(command('device-list', ['xcrun', 'simctl', 'list', 'devices', 'available', '-j']).stdout)
-candidates = [(tuple(map(int, re.findall(r'\d+', runtime))), runtime, device) for runtime, devices in listing['devices'].items() if '.iOS-' in runtime for device in devices if 'iPhone' in device['name']]
+requested_runtime = os.environ.get('WIZPIKO_SIMULATOR_RUNTIME', 'iOS-18-6')
+candidates = [(runtime, device) for runtime, devices in listing['devices'].items() if runtime.endswith('.' + requested_runtime) for device in devices if 'iPhone' in device['name']]
 if not candidates:
-    raise RuntimeError('No installed iPhone simulator runtime is available')
-_, runtime, selected = max(candidates, key=lambda row: row[0])
+    raise RuntimeError('The requested iPhone simulator runtime is unavailable: ' + requested_runtime)
+runtime, selected = candidates[0]
 device = selected['udid']
 print(json.dumps({'runtime': runtime, 'device': selected['name'], 'architecture': os.uname().machine}), flush=True)
 try:
-    command('device-boot', ['xcrun', 'simctl', 'boot', device], accept_failure=True)
-    command('device-ready', ['xcrun', 'simctl', 'bootstatus', device, '-b'], timeout=180)
-    command('app-install', ['xcrun', 'simctl', 'install', device, str(APP)], timeout=60)
-    command('app-launch', ['xcrun', 'simctl', 'launch', device, BUNDLE], timeout=45)
+    command('device-boot', ['xcrun', 'simctl', 'boot', device], timeout=150, accept_failure=True)
+    command('device-ready', ['xcrun', 'simctl', 'bootstatus', device, '-b'], timeout=240)
+    command('app-install', ['xcrun', 'simctl', 'install', device, str(APP)], timeout=120)
+    command('app-launch', ['xcrun', 'simctl', 'launch', device, BUNDLE], timeout=120)
     container = Path(command('app-container', ['xcrun', 'simctl', 'get_app_container', device, BUNDLE, 'data']).stdout.strip())
     marker = container / 'Library/Application Support/Wizpiko/startup.json'
     status = None
