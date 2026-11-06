@@ -1,3 +1,4 @@
+import type { AcademyLevel } from './learningTypes';
 import type { InfoPageId } from './content/siteCopy';
 import { isCurriculumSubject } from '../supabase/functions/_shared/curriculum/programs.ts';
 import type { CurriculumSubject } from '../supabase/functions/_shared/curriculum/programs.ts';
@@ -7,7 +8,7 @@ import type { GameSubjectId } from './gameSubjects';
 import { isSubjectId, subjectInfoPath } from './subjects';
 
 export type RouteView = 'home' | 'categories' | 'games' | 'subject-games' | 'classic' | 'hub' | 'coming' | 'info' | 'contact' | 'certificate' | 'not-found';
-export type AppRoute = { view: RouteView; infoPage?: InfoPageId; hubPage?: LearnerPage; subject?: string; gameSubject?: GameSubjectId; academySubject?: CurriculumSubject; certificateToken?: string };
+export type AppRoute = { view: RouteView; infoPage?: InfoPageId; hubPage?: LearnerPage; subject?: string; gameSubject?: GameSubjectId; academySubject?: CurriculumSubject; academyLevel?: AcademyLevel; certificateToken?: string };
 
 export const INFO_ROUTES: Record<InfoPageId, string> = {
   about: '/about-us',
@@ -68,8 +69,10 @@ export function readAppRoute(
   if (path.startsWith('/subjects/') && isSubjectId(path.slice(10))) return { view: 'coming', subject: path.slice(10) };
   if (path === '/contact-us') return { view: 'contact' };
   if (path === '/english-academy') return { view: 'categories', academySubject: 'english' };
+  if (/^\/english-academy\/(starter|beginner|intermediate|advanced)$/.test(path)) return {view:'categories',academySubject:'english',academyLevel:path.split('/')[2] as AcademyLevel};
   if (path.startsWith('/learn/') && isCurriculumSubject(path.slice(7))) return { view: 'categories', academySubject: path.slice(7) as CurriculumSubject };
   if (path === '/maths-academy') return { view: 'categories', academySubject: 'maths' };
+  if (/^\/maths-academy\/(starter|beginner|intermediate|advanced)$/.test(path)) return {view:'categories',academySubject:'maths',academyLevel:path.split('/')[2] as AcademyLevel};
   if (/^\/certificates\/[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(path)) return { view: 'certificate', certificateToken: path.slice(14) };
   if (path === '/games') return { view: 'games' };
   if (path.startsWith('/games/') && isGameSubject(path.slice(7))) return { view: 'subject-games', gameSubject: path.slice(7) as GameSubjectId };
@@ -82,7 +85,7 @@ export function routePath(route: AppRoute): string {
   if (route.view === 'info') return INFO_ROUTES[route.infoPage || 'about'];
   if (route.view === 'hub') return HUB_ROUTES[route.hubPage || 'profile'];
   if (route.view === 'contact') return '/contact-us';
-  if (route.view === 'categories') return academyPath(route.academySubject||'english');
+  if (route.view === 'categories') return academyPath(route.academySubject||'english')+(route.academyLevel?'/'+route.academyLevel:'');
   if (route.view === 'certificate') return '/?certificate=' + encodeURIComponent(route.certificateToken || '');
   if (route.view === 'games') return '/games';
   if (route.view === 'subject-games') return isGameSubject(route.gameSubject) ? '/games/' + route.gameSubject : '/games';

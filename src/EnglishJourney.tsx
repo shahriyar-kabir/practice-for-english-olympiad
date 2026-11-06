@@ -2,7 +2,7 @@ import QuestionSpeaker from './QuestionSpeaker';
 import {playLearningSound} from './learningAudio';
 import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { ArrowLeft, ArrowRight, Check, ChevronRight, Lightbulb, LockKeyhole, Star, Trophy } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Lightbulb, Star, Trophy } from 'lucide-react';
 import { categories, makeCrossword, makeQuestions } from './englishContent';
 import type { CategoryId, GeneratedCrossword } from './englishContent';
 import { recordLearningCompletion } from './learningMetrics';
@@ -74,7 +74,7 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCa
     const next: JourneyProgress = { ...journey, session: undefined, records: { ...journey.records, [recordKey(categoryId, mode)]: record } };
     onJourney(recordLearningCompletion(next, {
       id: mcq?.id || `game:${active.key}:${active.startedAt}`,
-      title: `${category?.name || 'English'} ${mode === 'mcq' ? 'Five-question set' : 'Crossword Quest'}`,
+      title: `${category?.name || 'English'} ${mode === 'mcq' ? 'Question game' : 'Crossword Quest'}`,
       kind: mode,
       completedAt: new Date().toISOString(),
       xp, correct: scoredCorrect, total: possible,
@@ -105,14 +105,16 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCa
     if (!active || !crossword) return;
     const entry = crossword.entries.find(e => e.id === selectedWord) || crossword.entries.find(e => !isActiveWord(e.word));
     if (!entry) return;
-    if (entry.word !== word || isActiveWord(entry.word)) return;
+    if(entry.word!==word){playLearningSound('retry');return;}
+    if(isActiveWord(entry.word))return;
+    playLearningSound('correct');
     updateSession({ solved: [...active.solved, entry.word] });
     const next = crossword.entries.find(e => e.word !== word && !isActiveWord(e.word));
     setSelectedWord(next?.id || '');
   }
   if (!categoryId) return <section className="ej-page wp-playground">
     <div className="ej-topbar"><button onClick={onHome}><ArrowLeft size={17} /> {homeLabel}</button><span>Wizpiko Playroom · English</span></div>
-    <header className="wp-welcome"><div><span className="wiz-kicker">A LITTLE PLAY. A LITTLE PROGRESS.</span><h1>Find your next <span>word discovery.</span></h1><p>Follow your curiosity through everyday English, tiny stories and useful conversations. Pick a path, then choose a word puzzle or a five-question set.</p><div className="wp-promises"><span>5 questions per set</span><span>Learn at your own pace</span><span>Every path is open</span></div></div><span className="wpg-welcome-art" aria-hidden="true">📚</span></header>
+    <header className="wp-welcome"><div><span className="wiz-kicker">A LITTLE PLAY. A LITTLE PROGRESS.</span><h1>Find your next <span>word discovery.</span></h1><p>Follow your curiosity through everyday English, tiny stories and useful conversations. Pick a path, then choose a word puzzle or a five-question set.</p><div className="wp-promises"><span>5 questions per round</span><span>Learn at your own pace</span><span>Every path is open</span></div></div><span className="wpg-welcome-art" aria-hidden="true">📚</span></header>
     <div className="wp-playroom-layout"><section className="wp-path-section"><h2>What sounds interesting today?</h2><p>Choose by your interests and confidence. You can change paths whenever you like.</p><div className="wp-path-grid">{categories.map(cat => {
       const rec = journey.records[recordKey(cat.id, 'mcq')] || defaults();
       return <button className="wp-path-card" type="button" key={cat.id} style={{ '--path-color': cat.color } as CSSProperties} onClick={() => { setCategoryId(cat.id); setMode(null); setLevel(null); window.scrollTo(0, 0); }}>
@@ -135,25 +137,22 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCa
         <div className="ej-mode-icon">{game === 'crossword' ? '🧩' : '🧠'}</div>
         <h2>{game === 'crossword' ? 'Word puzzle' : 'Choose & learn'}</h2>
         <p>{game === 'crossword' ? 'Find intersecting words using clues and the word bank.' : 'Explore five questions at a time, with feedback and useful explanations.'}</p>
-        <div className="ej-mode-stats"><span>{game === 'crossword' ? 'Untimed practice' : '5 questions per set'}</span><span><Trophy size={16} /> {rec.xp} XP</span></div>
+        <div className="ej-mode-stats"><span>{game === 'crossword' ? 'Word puzzle practice' : '5 questions per round'}</span><span><Trophy size={16} /> {rec.xp} XP</span></div>
         <p className="ej-unlocked">Level {rec.unlocked} unlocked · Best {rec.bestScore}%</p>
-        <div className="ej-level-buttons">
-          {Array.from({ length: Math.min(rec.unlocked + 1, 6) }, (_, i) => i + 1).map(lvl =>
-            <button key={lvl} disabled={lvl > rec.unlocked} className={lvl === rec.unlocked ? 'ej-level-current' : ''} onClick={() => start(game, lvl)}>
-              {lvl > rec.unlocked ? <LockKeyhole size={15} /> : <Star size={15} />} Level {lvl}
-            </button>)}
-        </div>
+        {rec.completed>0&&<><p className="ej-completed-title">Completed levels</p><div className="ej-level-buttons ej-completed-stars" aria-label="Completed levels — select a star to replay">
+          {Array.from({length:Math.min(24,rec.completed)},(_,i)=>rec.completed>24?rec.completed-23+i:i+1).map(lvl=><button type="button" key={lvl} onClick={()=>start(game,lvl)} aria-label={`Replay completed level ${lvl}`} title={`Replay level ${lvl}`}><span className="ej-numbered-gold-star" aria-hidden="true"><Star size={50} strokeWidth={1.5}/><strong>{lvl}</strong></span></button>)}
+        </div>{rec.completed>24&&<p className="ej-star-note">Showing the latest 24 completed levels out of {rec.completed}.</p>}</>}
         <button className="wiz-btn-primary ej-start" onClick={() => start(game, rec.unlocked)}>Play level {rec.unlocked} <ArrowRight size={18}/></button>
-        {categoryId === 'beginners' && game === 'crossword' && <button className="ej-classic" onClick={onLegacy}>Explore ten Wizpiko word puzzles <ChevronRight size={16}/></button>}
+
       </div>;
-    })}</div>
+    })}{categoryId==='beginners'&&<button type="button" className="ej-collection-card" onClick={onLegacy} aria-label="Explore Wizpiko's ten themed word puzzles"><span className="ej-collection-art" aria-hidden="true">🧩</span><span className="ej-collection-copy"><small>THEMED PUZZLE COLLECTION</small><strong>Wizpiko Word Puzzles</strong><span>Explore 10 crossword adventures with clues, word banks and saved progress.</span></span><span className="ej-collection-action">Explore puzzles <ArrowRight size={18}/></span></button>}</div>
     <p className="ej-smallprint">Your signed-in account keeps your practice, XP and unlocked levels connected across devices.</p>
   </section>;
 
   const current = questions[active?.index || 0];
   const complete = mode === 'crossword' ? !!crossword && active?.solved.length === crossword.entries.length : !!group?.complete;
   return <section className="ej-page">
-    <div className="ej-topbar"><button onClick={() => { setMode(null); setLevel(null); setFinished(null); }}><ArrowLeft size={17} /> Back to {category?.name}</button><span>{category?.name} / {mode === 'mcq' ? 'Five-question set' : 'Word puzzle'} / Level {level}</span></div>
+    <div className="ej-topbar"><button onClick={() => { setMode(null); setLevel(null); setFinished(null); }}><ArrowLeft size={17} /> Back to {category?.name}</button><span>{category?.name} / {mode === 'mcq' ? 'Question game' : 'Word puzzle'} / Level {level}</span></div>
     {finished ? <div className="ej-result">
       <div className="ej-result-emoji">{finished.passed ? '🏆' : '🌟'}</div>
       <span className="wiz-kicker">{finished.passed ? 'LEVEL UNLOCKED!' : 'GREAT PRACTICE'}</span>
@@ -161,9 +160,9 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCa
       <p>You scored <strong>{finished.score}%</strong> and earned <strong>{finished.xp} XP</strong>. {finished.passed ? 'Your next level is now unlocked.' : 'Practise again and reach 70% to unlock the next level.'}</p>
       <div className="ej-result-actions"><button className="wiz-btn-primary" onClick={playAnother}>{finished.passed ? 'Next level' : 'Try this level again'} <ArrowRight size={17}/></button><button className="wiz-btn-secondary" onClick={() => { setMode(null); setLevel(null); setFinished(null); }}>Choose a game</button></div>
     </div> : <>
-      <div className="ej-play-top"><div><span className="wiz-kicker">LEVEL {level} • {mode === 'mcq' ? 'FIVE-QUESTION SET' : 'WORD PUZZLE'}</span><h1>{mode === 'mcq' ? 'A little practice. A new discovery.' : 'Crack the word code!'}</h1></div><span className="ej-smallprint">Take your time</span></div>
+      <div className="ej-play-top"><div><span className="wiz-kicker">LEVEL {level} • {mode === 'mcq' ? 'QUESTION GAME' : 'WORD PUZZLE'}</span><h1>{mode === 'mcq' ? 'A little practice. A new discovery.' : 'Crack the word code!'}</h1></div><span className="ej-smallprint">Take your time</span></div>
       {practiceNotice && <p className="ej-smallprint" role="status">{practiceNotice}</p>}
-      <div className="ej-game-track"><div style={{ width: (total ? doneCount / total * 100 : 0) + '%' }} /><span>{doneCount} / {total} {mode === 'mcq' ? 'questions' : 'words'}</span></div>
+      <div className="ej-progress-wrap"><div className="ej-progress-label"><span>{doneCount} / {total} {mode==='mcq'?'questions':'words'}</span></div><div className="ej-game-track" role="progressbar" aria-label={mode==='mcq'?'Questions completed':'Words found'} aria-valuenow={doneCount} aria-valuemin={0} aria-valuemax={total||1}><div style={{width:(total?doneCount/total*100:0)+'%'}}/></div></div>
       {mode === 'mcq' && current && active && <div className="ej-mcq-panel">
         <span className="ej-question-number">QUESTION {active.index - (group?.start || 0) + 1} / {total}</span>
         <div className="wz-question-heading"><h2>{current.prompt}</h2><QuestionSpeaker text={current.prompt+' Choices: '+current.options.join('. ')}/></div>
@@ -219,7 +218,7 @@ function GeneratedGame({ crossword, solved, hints, selected, setSelected, onWord
   </div>;
   return <div className="ej-cross-layout">
     <div className="ej-cross-main">
-      <div className="ej-grid-panel"><div className="ej-selected-clue"><strong>{activeEntry.number} {activeEntry.direction}</strong> {activeEntry.clue} <QuestionSpeaker text={activeEntry.clue}/></div>
+      <div className="ej-grid-panel"><div className="ej-selected-clue"><strong>{activeEntry.number} {activeEntry.direction}</strong><span className="ej-clue-text">{activeEntry.clue}</span><QuestionSpeaker text={activeEntry.clue}/></div>
         <div className="ej-crossword-scroll"><div className="ej-generated-grid" style={{ '--cols': crossword.cols, '--rows': crossword.rows } as CSSProperties}>
           {Array.from({ length: crossword.rows * crossword.cols }, (_, index) => {
             const row = Math.floor(index / crossword.cols), col = index % crossword.cols;

@@ -15,3 +15,8 @@
 .wd-audio-settings > .wd-muted { margin: 0; }
 @media (max-width: 650px) { .wd-audio-settings { padding: 18px; } }
 .wd-avatar-picker{flex-wrap:wrap!important}.wp-hero-streak{display:flex!important;align-items:center;gap:10px;margin-top:20px;padding:12px 18px!important;background:#fff5dceb!important;border:1px solid #ffe5a8!important;border-radius:18px!important;color:#9c5013!important;font:inherit!important;text-align:left}.wp-hero-streak span{display:flex;flex-direction:column}.wp-hero-streak strong{font-size:17px}.wp-hero-streak small{font-size:12px;margin-top:3px}.wp-hero-streak.is-paused{background:#f4f0ffeb!important;color:#7555a2!important;border-color:#dfd4fa!important}.wp-avatar-age .wp-avatar-frame>img{width:400%!important;height:200%!important}.wp-signed-in .wp-welcome-art.wp-robot-selected .wp-hero-person{left:25%;width:min(85%,450px)}@media(max-width:650px){.wp-hero-streak{margin-top:14px;padding:9px 12px!important}.wp-hero-streak strong{font-size:14px}.wp-signed-in .wp-welcome-art.wp-robot-selected .wp-hero-person{left:0;width:100%}}
+/* Right-align Listen alongside question prompts, with mobile wrap. */
+.wz-question-heading{align-items:center;justify-content:space-between;min-width:0;}
+.wz-question-heading>:is(h2,h3){flex:1 1 auto;min-width:0;margin-block:0;}
+.wz-question-heading>.wz-question-audio{flex:0 0 auto;margin-left:auto;align-self:center;max-width:100%;}
+@media(max-width:560px){.wz-question-heading{flex-wrap:wrap;gap:10px 12px;}.wz-question-heading>:is(h2,h3){flex:1 1 100%;}.wz-question-heading>.wz-question-audio{margin-left:auto;}}

@@ -209,3 +209,8 @@
   .wp-signed-in .wp-welcome-art .wp-hero-robot { width: 220px; height: 220px; left: 40%; }
   .wp-signed-in .wp-welcome-art.wp-robot-selected .wp-hero-person { left: -8%; }
 }
+/* Consistent signed-in home shortcut alignment. */
+.wp-signed-in .wp-benefit-strip > button,
+.wp-signed-in .wp-benefit-strip > button:first-child,
+.wp-signed-in .wp-benefit-strip > button:last-child{justify-content:center;align-items:center;text-align:left;padding-left:18px;padding-right:18px;gap:14px;}
+@media(max-width:620px){.wp-signed-in .wp-benefit-strip > button{justify-content:flex-start;padding-left:10px;padding-right:10px;}}

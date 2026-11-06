@@ -1,0 +1,79 @@
+/* Wizpiko Word Puzzles — route-scoped theme refresh. Logic and progress stay unchanged. */
+.wp-word-puzzle-page{--wpp-ink:#152e63;--wpp-blue:#096af1;--wpp-violet:#7053c9;--wpp-muted:#657da4;--wpp-line:#dce7fb;--wpp-shadow:0 12px 34px #1b4e9c0b;}
+.wp-word-puzzle-page :is(button,a):focus-visible{outline:3px solid #146ce8;outline-offset:3px;}
+.wp-word-puzzle-page .wiz-back-line{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:22px 0 12px;color:var(--wpp-muted);}
+.wp-word-puzzle-page .wiz-back-line button{display:inline-flex;align-items:center;gap:7px;color:#155bc6;font-weight:900;min-height:40px;}
+.wp-word-puzzle-page .wiz-classic-heading{min-height:190px;border:1px solid #dce8fc;border-radius:28px;padding:30px clamp(23px,4vw,52px);margin:0 0 22px;background:radial-gradient(circle at 84% 4%,#d8f0ff 0,transparent 40%),linear-gradient(110deg,#ecf5ff,#f3efff 65%,#fff1f8);box-shadow:var(--wpp-shadow);}
+.wp-word-puzzle-page .wiz-classic-heading h1{color:var(--wpp-ink);font-size:clamp(28px,3.1vw,43px);line-height:1.15;margin:13px 0 11px;font-family:Nunito,sans-serif;font-weight:900;}
+.wp-word-puzzle-page .wiz-classic-heading h1 span{color:#7952ce;}
+.wp-word-puzzle-page .wiz-classic-heading .wiz-kicker{display:inline-flex;align-items:center;border:1px solid #deddfb;background:#ffffffb5;color:#6855b3;padding:6px 12px;border-radius:99px;font-size:11px;font-weight:900;letter-spacing:.75px;}
+.wp-word-puzzle-page .wiz-classic-heading p{max-width:650px;color:#586f99;font-size:clamp(13px,1vw,16px);line-height:1.6;}
+.wp-word-puzzle-page .wiz-classic-heading img{width:clamp(100px,13vw,165px);height:clamp(100px,13vw,165px);object-fit:contain;filter:drop-shadow(0 10px 14px #365cbe1c);}
+.wp-word-puzzle-page .wz-history-note{border-radius:14px;padding:12px 16px;background:#f4f0ff;border:1px solid #e3dafc;color:#584c90;line-height:1.55;}
+.wp-word-puzzle-page .workspace{display:grid;grid-template-columns:215px minmax(0,1fr) 252px;gap:18px;align-items:start;}
+.wp-word-puzzle-page .adventures{background:#fff;border:1px solid var(--wpp-line);border-radius:22px;padding:15px 12px;box-shadow:var(--wpp-shadow);}
+.wp-word-puzzle-page .adventures>.section-label{color:#554da3;font-size:11px;letter-spacing:1.1px;height:auto;align-items:center;padding:5px 8px 14px;}
+.wp-word-puzzle-page .adventures>.section-label span{color:#4567aa;background:#eaf2ff;border-radius:99px;font-size:11px;padding:3px 8px;margin:0;}
+.wp-word-puzzle-page .adventure-list{gap:7px;}
+.wp-word-puzzle-page .adventure{min-height:64px;padding:10px 11px;border:1px solid #e2eafb;border-radius:14px;background:#f8fbff;gap:11px;}
+.wp-word-puzzle-page .adventure:hover{background:#f2edff;border-color:#c3b4f7;transform:none;}
+.wp-word-puzzle-page .adventure.selected{background:#efe9ff;border-color:#a88df2;box-shadow:0 0 0 1px #bda5fd;}
+.wp-word-puzzle-page .adventure-emoji{width:40px;height:40px;background:#e9f2ff;border-radius:12px;font-size:24px;}
+.wp-word-puzzle-page .adventure-label small{font-size:10px;color:#7b85b0;letter-spacing:.4px;margin-bottom:3px;}
+.wp-word-puzzle-page .adventure-label>span{color:#28446e;font-size:13px;font-weight:900;}
+.wp-word-puzzle-page .adventure.selected .adventure-label>span{color:#5d47ae;}
+.wp-word-puzzle-page .adventure.finished{border-color:#afe2c8;background:#ecfaf1;}
+.wp-word-puzzle-page .adventure.finished .adventure-check{color:#138754;background:#d4f6e5;}
+.wp-word-puzzle-page .adventures .help-link{min-height:45px;font-size:13px;color:#1b63cf;font-weight:900;}
+.wp-word-puzzle-page .sidebar-note{display:none;}
+.wp-word-puzzle-page .puzzle-card{min-width:0;border:1px solid var(--wpp-line);border-radius:23px;background:#fff;box-shadow:var(--wpp-shadow);}
+.wp-word-puzzle-page .puzzle-header{padding:22px 22px 13px;align-items:center;}
+.wp-word-puzzle-page .puzzle-kicker{font-size:11px;color:#7453b9;letter-spacing:.8px;}
+.wp-word-puzzle-page .puzzle-header h2{font-family:Nunito,sans-serif;color:var(--wpp-ink);font-weight:900;font-size:clamp(21px,2vw,27px);line-height:1.25;}
+.wp-word-puzzle-page .level-badge{font-size:11px;font-weight:900;border-radius:99px;padding:8px 11px;background:#fff4cd;color:#9b6e17;white-space:nowrap;}
+.wp-word-puzzle-page .puzzle-progress{padding:0 22px 18px;gap:11px;}
+.wp-word-puzzle-page .progress-track{height:12px;background:#e8effb;border-radius:99px;overflow:hidden;}
+.wp-word-puzzle-page .progress-track>span{background:linear-gradient(90deg,#176eea,#9960e8);transition:width .35s ease;}
+.wp-word-puzzle-page .puzzle-progress>span{font-size:12px;color:#516d9a;font-weight:900;}
+.wp-word-puzzle-page .puzzle-progress strong{color:#214c96;}
+.wp-word-puzzle-page .selected-clue{margin:0 16px;border:1px solid #e1d6ff;background:#f2edff;border-radius:14px;padding:15px;gap:12px;}
+.wp-word-puzzle-page .selected-clue-number{width:36px;height:36px;flex:none;border-radius:11px;background:#dcd0ff;color:#6749b9;font-size:15px;}
+.wp-word-puzzle-page .selected-clue-direction{font-size:11px;color:#7655b3;letter-spacing:.7px;margin-bottom:5px;}
+.wp-word-puzzle-page .selected-clue p{color:#56449e;font-size:14px;line-height:1.5;font-weight:800;}
+.wp-word-puzzle-page .letter-count{color:#7663ac;font-size:11px;}
+.wp-word-puzzle-page .selected-clue.all-found{background:#e7f9ef;border-color:#aee3c5;}
+.wp-word-puzzle-page .board-stage{margin:16px 16px 0;padding:27px 14px 17px;background:#eef6ff;border-radius:16px;min-height:260px;}
+.wp-word-puzzle-page .crossword-grid{width:min(100%,calc(var(--cols)*38px));gap:4px;}
+.wp-word-puzzle-page .crossword-cell{background:#fff;border:1px solid #b6cafa;border-radius:6px;box-shadow:0 2px 0 #dae6f9;}
+.wp-word-puzzle-page .crossword-cell:hover{border-color:#7f9ff1;background:#f8faff;}
+.wp-word-puzzle-page .crossword-cell.cell-active{background:#f0e4ff;border-color:#8f62da;box-shadow:0 2px 0 #d6c2f5;}
+.wp-word-puzzle-page .crossword-cell.cell-solved{background:#def9eb;border-color:#78cfa6;color:#197452;box-shadow:0 2px 0 #afdfc8;}
+.wp-word-puzzle-page .cell-number{color:#5e77ad;font-size:9px;}
+.wp-word-puzzle-page .cell-letter{font-size:18px;color:inherit;}
+.wp-word-puzzle-page .board-instruction{font-size:12px;color:#506d9b;margin:17px 0 0;}
+.wp-word-puzzle-page .wiz-all-clues{background:#f8fbff;border:1px solid #dfe8f9;border-radius:17px;padding:20px;margin:19px 16px;}
+.wp-word-puzzle-page .wiz-clue-heading h3{font-size:21px;color:var(--wpp-ink);font-weight:900;}
+.wp-word-puzzle-page .wiz-clue-heading p{font-size:13px;line-height:1.6;color:#687d9d;}
+.wp-word-puzzle-page .wiz-clue-set h4{font-size:15px;color:#6e4bc5;}
+.wp-word-puzzle-page .wiz-all-clue{border-radius:12px;padding:12px 10px;min-height:55px;}
+.wp-word-puzzle-page .wiz-all-clue span{font-size:13px;line-height:1.5;}
+.wp-word-puzzle-page .wiz-all-clue:hover,.wp-word-puzzle-page .wiz-all-clue-active{background:#f1eaff;border-color:#aa8bed;}
+.wp-word-puzzle-page .wiz-all-clue-solved{background:#e9fbf0;border-color:#9bd9b5;}
+.wp-word-puzzle-page .puzzle-footer{padding:15px 19px;gap:12px;}
+.wp-word-puzzle-page .puzzle-footer button{min-height:43px;font-size:13px;font-weight:900;}
+.wp-word-puzzle-page .hint-button{border-radius:12px;padding:9px 12px;background:#f2ebff;color:#7455bd;border-color:#ddd1f6;}
+.wp-word-puzzle-page .wiz-word-sidebar{position:sticky;top:90px;gap:14px;}
+.wp-word-puzzle-page .wiz-word-sidebar .word-bank{border:1px solid var(--wpp-line);border-radius:22px;padding:20px 17px;box-shadow:var(--wpp-shadow);}
+.wp-word-puzzle-page .wiz-word-sidebar .word-bank h3{font-size:19px;color:var(--wpp-ink);}
+.wp-word-puzzle-page .word-bank-heading>span{font-size:12px;color:#61779b;}
+.wp-word-puzzle-page .wiz-word-sidebar .word-bank>p{font-size:13px;line-height:1.6;color:#607695;}
+.wp-word-puzzle-page .wiz-word-sidebar .word-tiles{gap:9px;}
+.wp-word-puzzle-page .wiz-word-sidebar .word-tile{background:#edf4ff;color:#2859a8;border:1px solid #c8dafa;border-radius:11px;min-height:45px;padding:9px 12px;font-size:13px;box-shadow:0 2px 0 #c6d9ef;}
+.wp-word-puzzle-page .wiz-word-sidebar .word-tile:disabled{opacity:.68;cursor:default;}
+.wp-word-puzzle-page .wiz-word-tip{border-radius:16px;padding:16px;font-size:13px;line-height:1.55;}
+.wp-word-puzzle-page .saved-note{font-size:12px;color:#5874a2;}
+@media(max-width:1170px){.wp-word-puzzle-page .workspace{grid-template-columns:190px minmax(0,1fr) 222px;gap:13px;}.wp-word-puzzle-page .crossword-grid{width:min(100%,calc(var(--cols)*33px));}}
+@media(max-width:980px){.wp-word-puzzle-page .workspace{grid-template-columns:minmax(0,1fr) 230px;}.wp-word-puzzle-page .adventures{grid-column:1/-1;}.wp-word-puzzle-page .adventure-list{display:flex;flex-direction:row;overflow-x:auto;scroll-snap-type:x proximity;}.wp-word-puzzle-page .adventure{flex:0 0 170px;scroll-snap-align:start;}.wp-word-puzzle-page .wiz-word-sidebar{grid-column:2;}.wp-word-puzzle-page .crossword-grid{width:min(100%,calc(var(--cols)*38px));}}
+@media(max-width:720px){.wp-word-puzzle-page .workspace{display:flex;flex-direction:column;gap:15px;}.wp-word-puzzle-page .adventures,.wp-word-puzzle-page .puzzle-card,.wp-word-puzzle-page .wiz-word-sidebar{width:100%;position:static;}.wp-word-puzzle-page .wiz-classic-heading{padding:23px;}.wp-word-puzzle-page .wiz-classic-heading img{width:95px;height:95px;}.wp-word-puzzle-page .wiz-word-sidebar{order:2;}.wp-word-puzzle-page .adventures{padding:11px;}.wp-word-puzzle-page .crossword-grid{width:min(100%,calc(var(--cols)*36px));}.wp-word-puzzle-page .wiz-clue-columns{grid-template-columns:1fr;}}
+@media(max-width:480px){.wp-word-puzzle-page .wiz-classic-heading img{display:none;}.wp-word-puzzle-page .wiz-back-line span{display:none;}.wp-word-puzzle-page .puzzle-header{padding:18px 15px 11px;}.wp-word-puzzle-page .puzzle-progress{padding-inline:15px;}.wp-word-puzzle-page .selected-clue{margin-inline:12px;flex-wrap:wrap;}.wp-word-puzzle-page .board-stage{margin-inline:12px;min-height:215px;padding-inline:10px;}.wp-word-puzzle-page .crossword-grid{gap:2px;}.wp-word-puzzle-page .wiz-all-clues{margin-inline:12px;padding:13px;}.wp-word-puzzle-page .puzzle-footer{flex-wrap:wrap;padding:13px 14px;}}
+@media(prefers-reduced-motion:reduce){.wp-word-puzzle-page .adventure,.wp-word-puzzle-page .crossword-cell,.wp-word-puzzle-page .word-tile,.wp-word-puzzle-page .progress-track>span{transition:none;}}

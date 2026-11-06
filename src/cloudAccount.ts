@@ -491,7 +491,7 @@ export function useWizpikoAccount(snapshot: Snapshot, onRestore: (value: Snapsho
     const empty = leaveOwnedProgress(latest.current);
     latest.current = empty;
     restoreRef.current(empty);
-    setAuth({ user: null, profile: null, loading: false, configured, status: 'Signed out. Sign in when you are ready to continue.' });
+    setAuth({ user: null, profile: null, loading: false, configured, status: 'Don’t have an account? Click Sign Up to create one. Already registered? Sign In to continue learning.' });
   }
   return {
     auth,

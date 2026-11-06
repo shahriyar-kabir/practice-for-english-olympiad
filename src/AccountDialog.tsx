@@ -73,7 +73,7 @@ export function AccountDialog({ onClose, configured, email, profile, recovery, s
     finally { setPending(false); }
   }
   const heading = successScreen ? (mode === 'confirmation' ? 'Check your email' : 'Reset your password') :
-    email && !recovery ? 'My Wizpiko account' : mode === 'register' ? 'Create your account' : mode === 'forgot' ? 'Forgot your password?' : mode === 'reset' ? 'Choose a new password' : 'Welcome back!';
+    email && !recovery ? 'My Wizpiko account' : mode === 'register' ? 'Create your account' : mode === 'forgot' ? 'Forgot your password?' : mode === 'reset' ? 'Choose a new password' : 'Welcome to Wizpiko!';
 
   return <dialog ref={dialog} className={`wa-dialog${successScreen ? ' wa-dialog-success' : ''}`} aria-labelledby="wa-dialog-title" onCancel={event => { event.preventDefault(); onClose(); }} onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
     <section className="wa-dialog-panel">
@@ -90,7 +90,7 @@ export function AccountDialog({ onClose, configured, email, profile, recovery, s
           {mode === 'confirmation' && resendSignupConfirmation && <button type="button" className="wa-text-action" disabled={pending} onClick={() => { void resend(); }}>{pending ? 'Sending…' : 'Resend confirmation email'}</button>}
         </div> : <>
           <h2 id="wa-dialog-title">{heading}</h2>
-          <p className="wa-description">{email && !recovery ? 'Your learning space is connected to your account.' : mode === 'register' ? 'Start wherever you feel comfortable. Every curious mind is welcome.' : mode === 'forgot' ? 'Enter your account email to request a password-reset link.' : mode === 'reset' ? 'Choose a strong password with at least 8 characters.' : 'Sign in to continue your lessons, games and discoveries.'}</p>
+          <p className="wa-description">{email && !recovery ? 'Your learning space is connected to your account.' : mode === 'register' ? 'Start wherever you feel comfortable. Every curious mind is welcome.' : mode === 'forgot' ? 'Enter your account email to request a password-reset link.' : mode === 'reset' ? 'Choose a strong password with at least 8 characters.' : 'Sign in to continue learning and track your progress.'}</p>
           {email && !recovery ? <>
             <div className="wa-signed"><CheckCircle2 size={22}/><div><strong>{profile?.display_name || email}</strong><small>{email}</small></div></div>
             <button type="button" className="wiz-btn-secondary wa-full" disabled={pending} onClick={() => { void signOut().then(onClose); }}>Sign out <ArrowRight size={17}/></button>
@@ -113,7 +113,7 @@ export function AccountDialog({ onClose, configured, email, profile, recovery, s
             {errorCode === 'account_not_found' && <button type="button" className="wa-signup-action" onClick={() => changeMode('register')}>Create your Wizpiko account <ArrowRight size={17}/></button>}
             {errorCode === 'email_not_confirmed' && resendSignupConfirmation && <button type="button" className="wa-text-action" disabled={pending} onClick={() => { void resend(); }}>Resend confirmation email</button>}
             <button type="submit" disabled={pending} className="wiz-btn-primary wa-full"><LockKeyhole size={18}/>{pending ? 'Please wait…' : mode === 'register' ? 'Create Account' : mode === 'forgot' ? 'Send Reset Email' : mode === 'reset' ? 'Update Password' : 'Sign In'} <ArrowRight size={17}/></button>
-            {mode === 'login' ? <p className="wa-helper">Don’t have an account? <button type="button" onClick={() => changeMode('register')}>Sign Up</button></p> : <p className="wa-helper">{mode === 'register' ? 'Already have an account? ' : ''}<button type="button" onClick={() => changeMode('login')}>Back to Sign In</button></p>}
+            {mode === 'login' ? <p className="wa-helper">New to Wizpiko? <button type="button" onClick={() => changeMode('register')}>Sign Up</button> to create your free account.</p> : <p className="wa-helper">{mode === 'register' ? 'Already have an account? ' : ''}<button type="button" onClick={() => changeMode('login')}>Back to Sign In</button></p>}
           </form> : <div className="wa-not-ready"><LockKeyhole/><strong>Sign-in is temporarily unavailable.</strong><p>Please try again a little later.</p></div>}
           <p className="wa-privacy">Sign in to keep your lessons, progress and achievements connected to your Wizpiko account.</p>
         </>}
