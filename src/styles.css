@@ -714,3 +714,13 @@ body { background:#f8fbff; }
 .wa-helper{color:#657b9a;font-size:13px;margin:17px 0 2px}
 .wa-helper button{color:#1f62db;font-weight:900;text-decoration:underline;text-underline-offset:3px}
 .wa-mode-switch button:focus-visible,.wa-password-wrap button:focus-visible,.wa-helper button:focus-visible{outline:3px solid #8d95e9;outline-offset:2px}
+
+/* Game progress text remains readable over any percentage of fill. */
+.ej-progress-wrap{margin:19px 0 25px;}
+.ej-progress-wrap .ej-progress-label{display:flex;justify-content:flex-end;align-items:center;min-height:27px;margin-bottom:7px;}
+.ej-progress-wrap .ej-progress-label>span{display:inline-flex;align-items:center;background:#fff;color:#203f78;border:1px solid #dce6fa;border-radius:99px;padding:4px 11px;font-size:12px;line-height:1.35;font-weight:900;font-variant-numeric:tabular-nums;}
+.ej-progress-wrap .ej-game-track{margin:0;height:15px;}
+.ej-mcq-panel .wz-question-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;min-width:0;margin:20px 0 25px;}
+.ej-mcq-panel .wz-question-heading>h2{flex:1 1 auto;min-width:0;margin:0;}
+.ej-mcq-panel .wz-question-heading>.wz-question-audio{flex:0 0 auto;align-self:center;margin-left:auto;max-width:100%;}
+@media(max-width:600px){.ej-mcq-panel .wz-question-heading{flex-wrap:wrap;gap:12px;}.ej-mcq-panel .wz-question-heading>h2{flex:1 1 100%;}.ej-mcq-panel .wz-question-heading>.wz-question-audio{margin-left:auto;}}
