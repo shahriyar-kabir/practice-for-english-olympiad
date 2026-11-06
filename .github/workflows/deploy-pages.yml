@@ -60,13 +60,13 @@ jobs:
             exit 1
           fi
           echo "Supabase build configuration available (values hidden)."
+      - name: Install prerender browser
+        run: npx playwright install --with-deps chromium
       - name: Build website
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
-      - name: Provide client-side deep-link fallback for GitHub Pages
-        run: cp dist/index.html dist/404.html
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload website

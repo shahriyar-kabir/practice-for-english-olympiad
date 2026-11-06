@@ -33,7 +33,7 @@
   margin-top: 19px;
 }
 
-.wz-info-navigation button {
+.wz-info-navigation :is(button, a) {
   min-height: 44px;
   padding: 10px 16px;
   border: 1px solid #d4e2f6;
@@ -45,12 +45,12 @@
   line-height: 1.5;
 }
 
-.wz-info-navigation button:hover {
+.wz-info-navigation :is(button, a):hover {
   border-color: #88b5f3;
   background: #eef6ff;
 }
 
-.wz-info-navigation button[aria-current="page"] {
+.wz-info-navigation :is(button, a)[aria-current="page"] {
   border-color: #0866f5;
   background: #0866f5;
   color: #fff;
@@ -444,7 +444,7 @@
 @media (max-width: 650px) {
   .wz-info-page { margin-top: 24px; margin-bottom: 48px; }
   .wz-info-navigation { gap: 8px; }
-  .wz-info-navigation button { padding: 9px 13px; font-size: 13px; }
+  .wz-info-navigation :is(button, a) { padding: 9px 13px; font-size: 13px; }
   .wz-info-hero { margin-top: 27px; margin-bottom: 25px; border-radius: 23px; }
   .wz-info-hero h1 { margin-top: 12px; font-size: 34px; letter-spacing: -.5px; }
   .wz-info-intro { font-size: 16px; line-height: 1.9; }
@@ -466,3 +466,5 @@
   .wz-info-faq-list summary svg { transition: none; }
   .wz-contact-loading { animation: none; }
 }
+
+.wz-info-navigation a { text-decoration: none; }

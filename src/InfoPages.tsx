@@ -1,3 +1,4 @@
+import { INFO_ROUTES, appHref } from './routes';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react';
 import { infoNavigation, infoPages, infoUiCopy, supportFaqs } from './content/siteCopy';
@@ -43,7 +44,7 @@ export default function InfoPages({ page, onNavigate, onHome, onContact, onSignI
   return <section className="wz-info-page" aria-labelledby="wz-info-title">
     <button className="wz-info-back" type="button" onClick={onHome}><ArrowLeft size={18} aria-hidden="true" />{infoUiCopy.backHome}</button>
     <nav className="wz-info-navigation" aria-label={infoUiCopy.navigationLabel}>
-      {infoNavigation.map(item => <button key={item.id} type="button" aria-current={activePage === item.id ? 'page' : undefined} onClick={() => followLink(item.id)}>{item.label}</button>)}
+      {infoNavigation.map(item => <a href={appHref(INFO_ROUTES[item.id])} key={item.id} aria-current={activePage === item.id ? 'page' : undefined} onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();followLink(item.id);}}}>{item.label}</a>)}
     </nav>
     <header className="wz-info-hero">
       <p className="wz-info-eyebrow">{copy.eyebrow}</p>

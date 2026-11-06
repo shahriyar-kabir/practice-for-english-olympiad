@@ -1,0 +1,66 @@
+{
+  "/": {
+    "title": "Wizpiko \u2014 Think. Play. Shine.",
+    "description": "Make learning fun with Wizpiko! Explore interactive English and Maths lessons, quizzes, games, puzzles and progress tracking for curious learners."
+  },
+  "/about-us": {
+    "title": "About Us | Wizpiko",
+    "description": "Discover Wizpiko, a playful learning space with English and Mathematics practice for curious learners from KG through adulthood."
+  },
+  "/help-centre": {
+    "title": "Help Centre | Wizpiko",
+    "description": "Find answers about Wizpiko accounts, learning activities, progress and support."
+  },
+  "/account-guide": {
+    "title": "Account Guide | Wizpiko",
+    "description": "Learn how to create a Wizpiko account, confirm your email, start activities and manage your learning progress."
+  },
+  "/privacy-safety": {
+    "title": "Privacy & Safety | Wizpiko",
+    "description": "Understand how Wizpiko uses account, learning and contact information, including private progress and optional certificate sharing."
+  },
+  "/mission": {
+    "title": "Our Mission | Wizpiko",
+    "description": "Explore Wizpiko\u2019s mission to make practice approachable, meaningful and enjoyable at every age."
+  },
+  "/contact-us": {
+    "title": "Contact Us | Wizpiko",
+    "description": "Send the Wizpiko team a question, suggestion or request for help. No Wizpiko account is required."
+  },
+  "/games": {
+    "title": "English & Maths Games | Wizpiko",
+    "description": "Explore English word adventures and Mental Maths Trail. Sign in to play and save your progress."
+  },
+  "/subjects/english": {
+    "title": "English | Wizpiko",
+    "description": "Explore English practice on Wizpiko. Sign in to start lessons and save your progress."
+  },
+  "/subjects/maths": {
+    "title": "Mathematics | Wizpiko",
+    "description": "Explore Mathematics practice on Wizpiko. Sign in to start lessons and save your progress."
+  },
+  "/subjects/physics": {
+    "title": "Physics | Wizpiko",
+    "description": "Preview Physics on Wizpiko. This subject is in development; learning activities are not available yet."
+  },
+  "/subjects/science": {
+    "title": "Science | Wizpiko",
+    "description": "Preview Science on Wizpiko. This subject is in development; learning activities are not available yet."
+  },
+  "/subjects/chemistry": {
+    "title": "Chemistry | Wizpiko",
+    "description": "Preview Chemistry on Wizpiko. This subject is in development; learning activities are not available yet."
+  },
+  "/subjects/informatics": {
+    "title": "Informatics | Wizpiko",
+    "description": "Preview Informatics on Wizpiko. This subject is in development; learning activities are not available yet."
+  },
+  "/subjects/ai": {
+    "title": "Artificial Intelligence | Wizpiko",
+    "description": "Preview Artificial Intelligence on Wizpiko. This subject is in development; learning activities are not available yet."
+  },
+  "/subjects/more": {
+    "title": "More Subjects | Wizpiko",
+    "description": "Preview More Subjects on Wizpiko. This subject is in development; learning activities are not available yet."
+  }
+}
