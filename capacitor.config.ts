@@ -13,7 +13,8 @@ const config: CapacitorConfig = {
     // widening the website's CORS origins or loading remote application code.
     CapacitorHttp: { enabled: true },
     Keyboard: { resize: 'native' },
-    StatusBar: { style: 'DARK' },
+    // LIGHT names the background style and uses dark, readable status icons.
+    StatusBar: { style: 'LIGHT' },
   },
 };
 export default config;

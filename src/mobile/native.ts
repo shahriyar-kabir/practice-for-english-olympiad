@@ -50,7 +50,7 @@ export async function prepareNativeApp() {
   phase = 'keyboard';
   await Keyboard.addListener('keyboardWillShow', () => document.documentElement.classList.add('wi-keyboard-open'));
   await Keyboard.addListener('keyboardWillHide', () => document.documentElement.classList.remove('wi-keyboard-open'));
-  await StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
+  await StatusBar.setStyle({ style: Style.Light }).catch(() => {});
   document.addEventListener('click', event => {
     if (!(event.target instanceof Element)) return;
     const link = event.target.closest<HTMLAnchorElement>('a[href]');
