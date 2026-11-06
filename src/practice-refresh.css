@@ -148,3 +148,11 @@
   .wp-playground .ej-mode-grid .ej-completed-stars button:hover,
   .ej-result .ej-result-actions>button:hover{transform:none;}
 }
+
+/* Numbered page navigation remains compact within narrow cards. */
+.wp-playground .ej-mode-grid .ej-star-page-numbers{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.wp-playground .ej-mode-grid .ej-star-page-numbers>span{display:inline-flex;align-items:center;gap:4px;}
+.wp-playground .ej-mode-grid .ej-star-page-numbers button{min-height:30px;min-width:30px;padding:5px 7px;border-radius:9px;}
+.wp-playground .ej-mode-grid .ej-star-page-numbers button[aria-current="page"]{background:#e9dfff;color:#633ea8;border-color:#bba2ed;}
+.wp-playground .ej-mode-grid .ej-star-page-dots{color:#8090a8;font-size:12px;}
+.wp-playground .ej-mode-grid .sr-only{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;}
