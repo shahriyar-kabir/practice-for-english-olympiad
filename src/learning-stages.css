@@ -65,3 +65,14 @@
   .wz-stage-note { font-size: 12px; }
 }
 @media(prefers-reduced-motion: reduce) { .wz-stage-card { transition: none; } }
+/* Shared learning-stage layout on signed-in and guest homepage. */
+.wz-stage-layout{grid-template-columns:minmax(0,1fr);gap:17px;}
+.wz-stage-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+.wz-stage-card{min-height:98px;padding:17px 16px;}
+.wz-stage-subjects{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);column-gap:22px;row-gap:9px;align-items:center;}
+.wz-stage-ready{grid-column:2;grid-row:1/span 3;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;}
+.wz-stage-explore{justify-self:start;}
+.wz-stage-subjects .wz-stage-coming{margin-top:0;}
+@media(max-width:1050px) and (min-width:761px){.wz-stage-card{flex-direction:row;min-height:116px;}}
+@media(max-width:760px){.wz-stage-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.wz-stage-subjects{grid-template-columns:1fr;}.wz-stage-ready{grid-column:1;grid-row:auto;margin:6px 0 4px;}}
+@media(max-width:620px){.wz-stage-card{flex-direction:column;min-height:128px;padding:15px 12px;}.wz-stage-ready{grid-template-columns:1fr;}.wz-stage-explore{justify-self:stretch;}}
