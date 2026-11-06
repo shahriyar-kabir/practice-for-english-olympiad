@@ -1,12 +1,102 @@
 [build]
-  command = "npm run build"
+  command = "npx playwright install chromium && npm run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "24"
 
-# Keep clean client-side URLs working on direct visits and refreshes.
+[[redirects]]
+  from = "/home"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/my-profile"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/my-certificates"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/my-progress"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/my-achievements"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/streak"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/learning-preferences"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/help-support"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/english-academy"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/maths-academy"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/learn/english"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/learn/maths"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/games/english"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/games/maths"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/word-puzzles"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/coming-soon"
+  to = "/app.html"
+  status = 200
+
+[[redirects]]
+  from = "/certificates/*"
+  to = "/app.html"
+  status = 200
+
+# Existing public prerendered files take precedence; unknown paths keep a real 404.
 [[redirects]]
   from = "/*"
-  to = "/index.html"
-  status = 200
+  to = "/404.html"
+  status = 404
+
+[[headers]]
+  for = "/certificates/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

@@ -1,3 +1,4 @@
+import { updateSeo } from './seo';
 import QuestionSpeaker from './QuestionSpeaker';
 import {configureLearningAudio,activateLearningAudio,playLearningSound,stopQuestion} from './learningAudio';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
@@ -84,6 +85,7 @@ function playChime(complete=false){playLearningSound(complete?'complete':'correc
 const totalWords = puzzles.reduce((sum, puzzle) => sum + puzzle.entries.length, 0);
 
 export default function App() {
+  useEffect(() => { updateSeo(); }, []);
   const [progress, setProgress] = useState<Progress>(readProgress);
   const [journey, setJourney] = useState<JourneyProgress>(readJourney);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -110,6 +112,7 @@ export default function App() {
 
   function changeURL(path: string, replace = false) {
     const next = appHref(path);
+    updateSeo(next);
     if (window.location.pathname + window.location.search !== next) {
       if (replace) window.history.replaceState(null, '', next);
       else window.history.pushState(null, '', next);
@@ -191,6 +194,7 @@ export default function App() {
   useEffect(()=>{
     const restore=()=>{
       const route=readAppRoute();
+      updateSeo();
       setView(route.view);
       if(route.infoPage)setInfoPage(route.infoPage);
       if(route.hubPage)setHubPage(route.hubPage);

@@ -1,3 +1,4 @@
+import { appHref } from './routes';
 import { ArrowRight, BookOpen, ChartNoAxesColumnIncreasing, Check, Flame, Gamepad2, Gift, Lightbulb, Lock, Play, Star, Trophy } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
 import { LearningStages } from './LearningStages';
@@ -75,8 +76,8 @@ export function WizpikoPortal({ onPractice, onChooseSubject, onExploreSubjects, 
     <div className="wz-subject-grid">{subjects.map(({ id, name, description, icon: Icon, color, status }) => {
       const content = <><Icon className="wz-subject-svg" size={35} strokeWidth={2} aria-hidden="true"/><strong>{name}</strong><span className="wz-subject-description">{description}</span><span className={`wz-subject-status ${status === 'available' ? 'wz-play' : 'wz-coming-soon'}`}>{status === 'available' ? <><Check size={13}/> Available</> : 'Coming Soon'}</span></>;
       return status === 'available'
-        ? <button type="button" className={`wz-subject-card wz-${color}`} key={id} onClick={() => onChooseSubject(id)} aria-label={`${name}: Open lessons`}>{content}</button>
-        : <div className={`wz-subject-card wz-${color} wz-planned`} key={id}>{content}</div>;
+        ? <a href={appHref(id==='english'?'/english-academy':'/maths-academy')} className={`wz-subject-card wz-${color}`} key={id} onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();onChooseSubject(id);}}} aria-label={`${name}: Open lessons`}>{content}</a>
+        : <div className={`wz-subject-card wz-${color} wz-planned`} key={id}>{content}<a href={appHref('/subjects/'+id)}>Preview {name}</a></div>;
     })}</div>
   </section>;
 

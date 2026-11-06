@@ -54,12 +54,12 @@ export default function SiteHeader({signedIn,loading,profile,isHome,gamesActive=
   const nickname=profile?.display_name||'Learner';
   const age=ageFromBirthdate(profile?.birth_date||'');
   return <header className={`site-header wz-site-header${signedIn||reserveSignedIn?' wz-signed-header':''}`}><div className="header-inner wz-header-inner">
-    <button className="wz-header-logo" type="button" onClick={()=>navigate(onHome)} aria-label="Wizpiko home"><img src={import.meta.env.BASE_URL + 'wizpiko-wordmark.webp'} width="720" height="240" decoding="async" alt="Wizpiko — Think. Play. Shine."/></button>
+    <a href={appHref(signedIn?'/home':'/')} className="wz-header-logo" onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(onHome);}}} aria-label="Wizpiko home"><img src={import.meta.env.BASE_URL + 'wizpiko-wordmark.webp'} width="720" height="240" decoding="async" alt="Wizpiko — Think. Play. Shine."/></a>
     <button className="wz-mobile-menu" type="button" onClick={()=>setMobileOpen(!mobileOpen)} aria-label={mobileOpen?'Close navigation':'Open navigation'} aria-expanded={mobileOpen} aria-controls="wz-main-nav">{mobileOpen?<X size={23}/>:<Menu size={23}/>}</button>
     <nav id="wz-main-nav" className={`wz-header-nav${mobileOpen?' is-open':''}`} aria-label="Main navigation">
-      <button className={isHome?'active':''} type="button" onClick={()=>navigate(onHome)}>Home</button>
-      <button type="button" onClick={()=>navigate(onSubjects)}>Subjects <ChevronDown className="wz-subject-chevron" size={15} aria-hidden="true"/></button>
-      <button className={gamesActive?'active':''} type="button" onClick={()=>navigate(onGames)}>Games</button>
+      <a className={isHome?'active':''} href={appHref(signedIn?'/home':'/')} onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(onHome);}}}>Home</a>
+      <a href={appHref('/')+'#wiz-subjects'} onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(onSubjects);}}}>Subjects <ChevronDown className="wz-subject-chevron" size={15} aria-hidden="true"/></a>
+      <a className={gamesActive?'active':''} href={appHref('/games')} onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(onGames);}}}>Games</a>
       {(signedIn||loading)&&<button type="button" disabled={loading} className={loading?'wz-loading-nav':''} aria-hidden={loading||undefined} onClick={()=>navigate(()=>onHub('progress'))}>My Learning</button>}
       <a href={appHref('/about-us')} onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(()=>onInfo('about'));}}}>About Us</a>
       <a href={appHref('/contact-us')} onClick={event=>{if(!event.ctrlKey&&!event.metaKey&&!event.shiftKey){event.preventDefault();navigate(onContact);}}}>Contact Us</a>
