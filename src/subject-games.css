@@ -191,3 +191,29 @@
 .mm-page .sg-kicker{font-size:10px;line-height:1.7}
 }
 
+
+
+/* Release #23: learner-controlled Maths entry, in-round exit, and saved levels. */
+.mm-resume-chooser{display:grid;gap:15px;padding:24px clamp(20px,3vw,32px);margin-bottom:24px;border:1px solid #bce8dd;background:linear-gradient(110deg,#e4faf1,#ecf6ff 65%,#f7f0ff);border-radius:24px;}
+.mm-resume-chooser h1{font-size:clamp(23px,3vw,30px);color:#1d4468;margin:8px 0 9px;font-weight:900;}
+.mm-resume-chooser p{font-size:13px;color:#547490;line-height:1.65;max-width:720px;margin:0;}
+.mm-resume-actions{display:flex;align-items:stretch;gap:12px;flex-wrap:wrap;}
+.mm-resume-actions button{min-height:48px;box-shadow:0 3px 0 #154e6a15;}
+.mm-paused-list{display:grid;gap:9px;border-top:1px solid #c9e5df;padding-top:14px;}
+.mm-paused-list>strong{font-size:12px;color:#365f72;}
+.mm-paused-list>div{display:flex;gap:8px;flex-wrap:wrap;}
+.mm-paused-list button{min-height:39px;display:inline-flex;align-items:center;gap:8px;border:1px solid #c9dff5;border-radius:12px;background:white;color:#285e91;padding:9px 11px;font-size:12px;font-weight:800;}
+.mm-paused-list button:hover{border-color:#70b4d9;background:#f5fcff;}
+.mm-inround-nav{max-width:760px;margin:0 auto 21px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.mm-inround-nav button{min-height:43px;padding:8px 15px;}
+.mm-inround-nav span{font-size:12px;color:#537997;}
+.mm-level-chooser{margin-top:16px;padding:19px;border-radius:18px;border:1px solid #dce9f7;background:#f8fbff;display:grid;gap:9px;}
+.mm-level-chooser>label{font-size:13px;font-weight:900;color:#27517c;}
+.mm-level-chooser>div{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.mm-level-chooser input{box-sizing:border-box;max-width:190px;width:100%;min-height:48px;border:1px solid #c9daf0;background:white;border-radius:12px;padding:10px 14px;font:800 16px Nunito,sans-serif;color:#204672;}
+.mm-level-chooser button{min-height:48px;}
+.mm-level-chooser button:disabled{opacity:.5;cursor:default;}
+.mm-level-chooser p{font-size:12px;color:#697f9e;line-height:1.5;margin:0;}
+.mm-page .mm-starting-points{scroll-margin-top:105px;}
+.mm-page .mm-resume-chooser button:focus-visible,.mm-page .mm-inround-nav button:focus-visible,.mm-page .mm-level-chooser :is(input,button):focus-visible{outline:3px solid #0966d9;outline-offset:3px;}
+@media(max-width:580px){.mm-resume-chooser{padding:20px 17px;}.mm-resume-actions{flex-direction:column;}.mm-resume-actions button{width:100%;}.mm-inround-nav{align-items:stretch;}.mm-inround-nav span{width:100%;}.mm-level-chooser input{max-width:none;flex:1;}.mm-level-chooser button{width:100%;}}

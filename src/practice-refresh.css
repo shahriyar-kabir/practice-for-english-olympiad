@@ -29,3 +29,130 @@
 .ej-selected-clue>.ej-clue-text{flex:1 1 auto;min-width:0;}
 .ej-selected-clue>.wz-question-audio{flex:0 0 auto;margin-left:auto;align-self:center;}
 @media(max-width:620px){.ej-selected-clue{flex-wrap:wrap;}.ej-selected-clue>.ej-clue-text{flex:1 1 calc(100% - 100px);}.ej-selected-clue>.wz-question-audio{margin-left:auto;}}
+
+
+/* Release #21: equal elevation and dimensions on paired completion buttons. */
+.ej-result .ej-result-actions{display:flex;justify-content:center;align-items:stretch;gap:14px;margin-top:29px;}
+.ej-result .ej-result-actions>.wiz-btn-primary,
+.ej-result .ej-result-actions>.wiz-btn-secondary{
+  box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;
+  min-width:205px;min-height:55px;padding:13px 22px;border-radius:16px;
+  border:1px solid #d4def2;font-size:14px;font-weight:900;line-height:1.35;
+  box-shadow:0 3px 0 #243f7330;transition:background .15s,transform .15s,box-shadow .15s;
+}
+.ej-result .ej-result-actions>.wiz-btn-primary{color:white;border-color:#1366ed;background:#1263ec;}
+.ej-result .ej-result-actions>.wiz-btn-secondary{color:#2353a3;background:#fff;}
+.ej-result .ej-result-actions>button:hover{box-shadow:0 2px 0 #243f7330;transform:translateY(1px);}
+.ej-result .ej-result-actions>button:focus-visible{outline:3px solid #0b67ec;outline-offset:4px;}
+
+/* Release #22: a single aligned 3-card grid on Beginner path; other paths retain 2 cards. */
+.wp-playground .ej-mode-grid.ej-three-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch;}
+.wp-playground .ej-mode-grid> .ej-mode-card,
+.wp-playground .ej-mode-grid> .ej-collection-card{
+  box-sizing:border-box;min-width:0;min-height:490px;padding:22px;
+  display:flex;flex-direction:column;align-items:stretch;gap:0;
+  background:#fff;border:1px solid #dce7fa;border-radius:23px;
+  box-shadow:0 8px 28px #24437a0a;
+}
+.wp-playground .ej-mode-grid>.ej-collection-card{grid-column:auto;text-align:left;}
+.wp-playground .ej-mode-grid>.ej-mode-card .ej-mode-icon,
+.wp-playground .ej-mode-grid>.ej-collection-card .ej-collection-art{
+  box-sizing:border-box;flex:0 0 62px;width:62px;height:62px;
+  display:grid;place-items:center;margin:0;
+  border-radius:18px;background:#f1ebff;font-size:34px;
+  box-shadow:none;
+}
+.wp-playground .ej-mode-grid>.ej-collection-card .ej-collection-art{background:#e9f4ff;}
+.wp-playground .ej-mode-grid>.ej-mode-card h2,
+.wp-playground .ej-mode-grid>.ej-collection-card .ej-collection-copy strong{
+  display:block;font-size:clamp(19px,1.8vw,25px);font-weight:900;
+  line-height:1.3;color:#223e75;margin:15px 0 11px;
+}
+.wp-playground .ej-mode-grid>.ej-mode-card>p:not(.ej-unlocked){
+  font-size:12px;line-height:1.6;color:#647b9e;min-height:42px;margin:0;
+}
+.wp-playground .ej-mode-grid>.ej-collection-card .ej-collection-copy{
+  display:flex;flex-direction:column;flex:none;gap:0;min-width:0;
+}
+.wp-playground .ej-mode-grid>.ej-collection-card .ej-collection-copy small{
+  order:0;color:#7451bb;font-size:10px;font-weight:900;letter-spacing:.7px;margin-top:15px;
+}
+.wp-playground .ej-mode-grid>.ej-collection-card .ej-collection-copy strong{order:1;margin:5px 0 11px;}
+.wp-playground .ej-mode-grid>.ej-collection-card .ej-collection-copy>span{
+  order:2;color:#647b9e;font-size:12px;line-height:1.6;min-height:42px;
+}
+.wp-playground .ej-mode-grid .ej-mode-stats{display:flex;align-items:center;gap:11px;margin:15px 0 9px;font-size:11px;}
+.wp-playground .ej-mode-grid .ej-unlocked{font-size:12px;line-height:1.5;margin:8px 0 0;color:#7758bc;font-weight:900;}
+.wp-playground .ej-mode-grid .ej-star-gallery{flex:1 1 auto;min-height:184px;display:flex;align-items:flex-start;flex-direction:column;gap:6px;}
+.wp-playground .ej-mode-grid .ej-star-empty{flex:1 1 auto;min-height:184px;font-size:12px;line-height:1.6;color:#7587a7;padding-top:23px;}
+.wp-playground .ej-mode-grid .ej-completed-title{margin:14px 0 2px;color:#637da4;font-size:11px;line-height:1.4;}
+/* Compact content-sized 5 x 4 arrangement: max 20 stars per page. */
+.wp-playground .ej-mode-grid .ej-level-buttons.ej-completed-stars{
+  display:grid;grid-template-columns:repeat(5,38px);grid-auto-rows:38px;
+  gap:5px;width:max-content;max-width:100%;overflow:visible;
+  margin:0;padding:0;flex-wrap:unset;justify-content:start;align-content:start;
+}
+.wp-playground .ej-mode-grid .ej-completed-stars button{
+  box-sizing:border-box;width:38px;height:38px;min-width:38px;min-height:38px;
+  padding:0;margin:0;border:0;border-radius:7px;
+  display:grid;place-items:center;background:transparent;box-shadow:none;
+  transition:transform .12s ease;
+}
+.wp-playground .ej-mode-grid .ej-completed-stars button:hover{transform:translateY(-2px);background:#fff9e2;}
+.wp-playground .ej-mode-grid .ej-completed-stars button:focus-visible{outline:3px solid #1263ec;outline-offset:2px;}
+.wp-playground .ej-mode-grid .ej-numbered-gold-star{width:38px;height:38px;position:relative;display:grid;place-items:center;}
+.wp-playground .ej-mode-grid .ej-numbered-gold-star svg{grid-area:1/1;width:38px;height:38px;display:block;filter:drop-shadow(0 1px 1px #8c560e55);}
+.wp-playground .ej-mode-grid .ej-numbered-gold-star strong{
+  grid-area:1/1;z-index:1;position:relative;
+  font-size:11px;font-weight:900;line-height:1;color:#6c4604;
+  text-shadow:0 1px #fff7c2;pointer-events:none;
+}
+.wp-playground .ej-mode-grid .ej-star-pagination{
+  display:flex;align-items:center;flex-wrap:wrap;justify-content:flex-start;
+  gap:8px;margin-top:8px;font-size:11px;color:#5b7398;
+}
+.wp-playground .ej-mode-grid .ej-star-pagination button{
+  border:1px solid #c8d8f4;background:#f1f6ff;color:#245cb2;border-radius:10px;
+  min-height:33px;padding:6px 10px;font-size:11px;font-weight:900;
+}
+.wp-playground .ej-mode-grid .ej-star-pagination button:disabled{opacity:.45;cursor:default;}
+.wp-playground .ej-mode-grid .ej-collection-detail{padding-top:24px;gap:8px;color:#60789c;font-size:12px;line-height:1.5;}
+.wp-playground .ej-mode-grid .ej-collection-detail span{display:block;}
+.wp-playground .ej-mode-grid .ej-collection-detail span::before{content:'✓';color:#20a77c;font-weight:900;margin-right:8px;}
+.wp-playground .ej-mode-grid .ej-mode-card>.ej-start,
+.wp-playground .ej-mode-grid .ej-collection-card>.ej-collection-action{
+  box-sizing:border-box;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  width:100%;min-height:48px;margin-top:auto;padding:12px 14px;
+  background:#1263ec;border:1px solid #1263ec;border-radius:15px;
+  color:white;font-size:13px;font-weight:900;line-height:1.4;
+  box-shadow:0 3px 0 #0f4ba8bb;text-align:center;
+}
+.wp-playground .ej-mode-grid .ej-collection-card>.ej-collection-action{gap:9px;white-space:normal;}
+.wp-playground .ej-mode-grid .ej-mode-card>.ej-start:hover,
+.wp-playground .ej-mode-grid .ej-collection-card>.ej-collection-action:hover{background:#0750c9;}
+@media(max-width:1170px){
+  .wp-playground .ej-mode-grid.ej-three-cards{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:680px){
+  .wp-playground .ej-mode-grid,.wp-playground .ej-mode-grid.ej-three-cards{grid-template-columns:minmax(0,1fr);}
+  .wp-playground .ej-mode-grid>.ej-mode-card,.wp-playground .ej-mode-grid>.ej-collection-card{min-height:440px;padding:20px;}
+  .ej-result .ej-result-actions{align-items:stretch;flex-direction:column;max-width:340px;margin-inline:auto;}
+  .ej-result .ej-result-actions>button{width:100%;}
+}
+@media(max-width:320px){
+  .wp-playground .ej-mode-grid .ej-level-buttons.ej-completed-stars{grid-template-columns:repeat(4,38px);}
+}
+@media(prefers-reduced-motion:reduce){
+  .wp-playground .ej-mode-grid .ej-completed-stars button,
+  .ej-result .ej-result-actions>button{transition:none;}
+  .wp-playground .ej-mode-grid .ej-completed-stars button:hover,
+  .ej-result .ej-result-actions>button:hover{transform:none;}
+}
+
+/* Numbered page navigation remains compact within narrow cards. */
+.wp-playground .ej-mode-grid .ej-star-page-numbers{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.wp-playground .ej-mode-grid .ej-star-page-numbers>span{display:inline-flex;align-items:center;gap:4px;}
+.wp-playground .ej-mode-grid .ej-star-page-numbers button{min-height:30px;min-width:30px;padding:5px 7px;border-radius:9px;}
+.wp-playground .ej-mode-grid .ej-star-page-numbers button[aria-current="page"]{background:#e9dfff;color:#633ea8;border-color:#bba2ed;}
+.wp-playground .ej-mode-grid .ej-star-page-dots{color:#8090a8;font-size:12px;}
+.wp-playground .ej-mode-grid .sr-only{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;}

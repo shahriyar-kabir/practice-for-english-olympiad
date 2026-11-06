@@ -116,3 +116,72 @@ describe('Maths and future subject game progress', () => {
     expect(merged.physics.session?.id).toBe('same-id');
   });
 });
+
+
+describe('Switching Maths levels without losing work',()=>{
+  it('parks an active Level 17 round after the first question and restores its exact answers and hints',()=>{
+    const saved=startSubjectRound(undefined,'17',makeMentalRound('17','first'),1000,'first');
+    const q=saved.session!.questions[0];
+    const first=answerSubjectRound(saved,q.answer,2000);
+    first.session!.hints=[0];
+    const switched=startSubjectRound(first,'1',makeMentalRound('1','other'),3000,'other');
+    expect(switched.session?.level).toBe('1');
+    expect(switched.level).toBe('17'); // Never regress the highest selected/unlocked level
+    expect(switched.pausedSessions?.['17']?.answers[0]).toBe(q.answer);
+    const restored=startSubjectRound(readSubjectGame(JSON.parse(JSON.stringify(switched))),'17',makeMentalRound('17','unused'),4000,'unused');
+    expect(restored.session?.id).toBe('first');
+    expect(restored.session?.questions).toEqual(first.session?.questions);
+    expect(restored.session?.answers).toEqual(first.session?.answers);
+    expect(restored.session?.hints).toEqual([0]);
+    expect(restored.pausedSessions?.['1']?.id).toBe('other');
+    expect(restored.level).toBe('17');
+  });
+  it('preserves four checked answers when switching and then restoring the saved level',()=>{
+    let progress=startSubjectRound(undefined,'17',makeMentalRound('17','four'),1000,'four');
+    for(let index=0;index<4;index++){
+      progress=answerSubjectRound(progress,progress.session!.questions[index].answer,1001+index);
+      progress=advanceSubjectRound(progress,1005+index);
+    }
+    expect(Object.keys(progress.session!.answers)).toHaveLength(4);
+    const switched=startSubjectRound(progress,'16',makeMentalRound('16','different'),3000,'different');
+    const restored=startSubjectRound(switched,'17',makeMentalRound('17','unused'),4000,'unused');
+    expect(Object.keys(restored.session!.answers)).toHaveLength(4);
+    expect(restored.session!.index).toBe(4);
+  });
+  it('keeps paused sessions and best results after completing a lower level',()=>{
+    let saved=startSubjectRound(undefined,'17',makeMentalRound('17','advanced'),1000,'advanced');
+    saved=answerSubjectRound(saved,saved.session!.questions[0].answer,1200);
+    const low=startSubjectRound(saved,'1',makeMentalRound('1','low'),1300,'low');
+    let current=low;
+    for(let i=0;i<5;i++){
+      current=answerSubjectRound(current,current.session!.questions[i].answer,1400+i);
+      if(i<4)current=advanceSubjectRound(current,1500+i);
+    }
+    const completed=finishSubjectRound(current,1600)!.progress;
+    expect(completed.level).toBe('17');
+    expect(completed.best['1']).toBe(5);
+    expect(completed.pausedSessions?.['17']?.answers[0]).toBe(saved.session!.questions[0].answer);
+    const resumed=startSubjectRound(completed,'17',makeMentalRound('17','unused'),1700,'unused');
+    expect(resumed.session?.id).toBe('advanced');
+  });
+  it('merges active and paused sessions across devices and filters completed rounds',()=>{
+    const initial=startSubjectRound(undefined,'17',makeMentalRound('17','held'),1000,'held');
+    const answered=answerSubjectRound(initial,initial.session!.questions[0].answer,1100);
+    const switched=startSubjectRound(answered,'1',makeMentalRound('1','new'),1200,'new');
+    const synced=mergeSubjectGames({maths:switched},{maths:answered},new Set()).maths;
+    expect(synced.session?.level).toBe('1');
+    expect(synced.pausedSessions?.['17']?.id).toBe('held');
+    expect(synced.pausedSessions?.['17']?.answers[0]).toBe(answered.session?.answers[0]);
+    const done=mergeSubjectGames({maths:switched},{maths:answered},new Set([subjectRoundId('maths','held')])).maths;
+    expect(done.pausedSessions?.['17']).toBeUndefined();
+  });
+  it('ignores invalid paused sessions while retaining valid saved levels',()=>{
+    const a=startSubjectRound(undefined,'16',makeMentalRound('16','a'),1000,'a');
+    const b=startSubjectRound(a,'17',makeMentalRound('17','b'),2000,'b');
+    const raw=JSON.parse(JSON.stringify(b));
+    raw.pausedSessions.invalid=raw.pausedSessions['16'];
+    raw.pausedSessions['99']={...raw.pausedSessions['16'],level:'16'};
+    const parsed=readSubjectGame(raw);
+    expect(Object.keys(parsed.pausedSessions||{})).toEqual(['16']);
+  });
+});
