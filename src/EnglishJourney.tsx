@@ -105,7 +105,9 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCa
     if (!active || !crossword) return;
     const entry = crossword.entries.find(e => e.id === selectedWord) || crossword.entries.find(e => !isActiveWord(e.word));
     if (!entry) return;
-    if (entry.word !== word || isActiveWord(entry.word)) return;
+    if(entry.word!==word){playLearningSound('retry');return;}
+    if(isActiveWord(entry.word))return;
+    playLearningSound('correct');
     updateSession({ solved: [...active.solved, entry.word] });
     const next = crossword.entries.find(e => e.word !== word && !isActiveWord(e.word));
     setSelectedWord(next?.id || '');
@@ -216,7 +218,7 @@ function GeneratedGame({ crossword, solved, hints, selected, setSelected, onWord
   </div>;
   return <div className="ej-cross-layout">
     <div className="ej-cross-main">
-      <div className="ej-grid-panel"><div className="ej-selected-clue"><strong>{activeEntry.number} {activeEntry.direction}</strong> {activeEntry.clue} <QuestionSpeaker text={activeEntry.clue}/></div>
+      <div className="ej-grid-panel"><div className="ej-selected-clue"><strong>{activeEntry.number} {activeEntry.direction}</strong><span className="ej-clue-text">{activeEntry.clue}</span><QuestionSpeaker text={activeEntry.clue}/></div>
         <div className="ej-crossword-scroll"><div className="ej-generated-grid" style={{ '--cols': crossword.cols, '--rows': crossword.rows } as CSSProperties}>
           {Array.from({ length: crossword.rows * crossword.cols }, (_, index) => {
             const row = Math.floor(index / crossword.cols), col = index % crossword.cols;
