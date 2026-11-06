@@ -2,7 +2,7 @@ import QuestionSpeaker from './QuestionSpeaker';
 import {playLearningSound} from './learningAudio';
 import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { ArrowLeft, ArrowRight, Check, Lightbulb, Star, Trophy } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Lightbulb, Trophy } from 'lucide-react';
 import { categories, makeCrossword, makeQuestions } from './englishContent';
 import type { CategoryId, GeneratedCrossword } from './englishContent';
 import { recordLearningCompletion } from './learningMetrics';
@@ -15,6 +15,42 @@ import type { GameMode, LevelRecord, GameSession, JourneyProgress } from './jour
 const recordKey = (id: CategoryId, mode: GameMode) => id + ':' + mode;
 const defaults = (): LevelRecord => ({ unlocked: 1, completed: 0, bestScore: 0, xp: 0 });
 const pathArt: Record<CategoryId, string> = { beginners: '🌱', kids: '🧭', 'small-starts': '📖', juniors: '💬', 'high-flyers': '🔎', trailblazers: '🛠️', seniors: '✍️' };
+
+const LEVELS_PER_PAGE = 20;
+/** Pagination is local UI state only; the saved level record is never edited here. */
+function CompletedLevelStars({ completed, game, onReplay }: {completed:number; game:GameMode; onReplay:(level:number)=>void}) {
+  const [page,setPage] = useState(0);
+  const totalPages=Math.ceil(completed/LEVELS_PER_PAGE);
+  const safePage=Math.min(page,Math.max(0,totalPages-1));
+  const first=safePage*LEVELS_PER_PAGE+1;
+  const end=Math.min(completed,first+LEVELS_PER_PAGE-1);
+  if(completed<=0)return <div className="ej-star-empty">Finish a level to earn your first gold star.</div>;
+  return <div className="ej-star-gallery">
+    <p className="ej-completed-title">Completed levels</p>
+    <div className="ej-level-buttons ej-completed-stars" role="group" aria-label={`Completed ${game==='mcq'?'quiz':'word puzzle'} levels ${first} to ${end}`}>
+      {Array.from({length:end-first+1},(_,i)=>first+i).map(lvl=>{
+        const id=`ej-star-${game}-${lvl}`;
+        return <button type="button" key={lvl} onClick={()=>onReplay(lvl)} aria-label={`Replay completed level ${lvl}`} title={`Replay level ${lvl}`}>
+          <span className="ej-numbered-gold-star" aria-hidden="true">
+            <svg viewBox="0 0 50 50" focusable="false">
+              <defs><linearGradient id={id} x1="0" y1="0" x2=".75" y2="1"><stop offset="0" stopColor="#fff4ac"/><stop offset=".4" stopColor="#ffd554"/><stop offset="1" stopColor="#d78e0b"/></linearGradient></defs>
+              <path d="M25 4 31.7 17.7 46.8 19.9 35.9 30.5 38.5 45.5 25 38.4 11.5 45.5 14.1 30.5 3.2 19.9 18.3 17.7Z" fill="#ad6b00" opacity=".36" transform="translate(0 2)"/>
+              <path d="M25 4 31.7 17.7 46.8 19.9 35.9 30.5 38.5 45.5 25 38.4 11.5 45.5 14.1 30.5 3.2 19.9 18.3 17.7Z" fill={`url(#${id})`} stroke="#b87a05" strokeWidth="1.8" strokeLinejoin="round"/>
+              <path d="M25 7 30 19.8 43 21.6 33.6 30.6" fill="none" stroke="#fff5c1" strokeWidth="2" strokeLinecap="round" opacity=".9"/>
+            </svg>
+            <strong>{lvl}</strong>
+          </span>
+        </button>;
+      })}
+    </div>
+    {totalPages>1&&<nav className="ej-star-pagination" aria-label={`Completed ${game==='mcq'?'quiz':'puzzle'} level pages`}>
+      <button type="button" onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={safePage===0} aria-label="Previous completed levels page">Previous</button>
+      <span aria-live="polite">Page {safePage+1} of {totalPages}</span>
+      <button type="button" onClick={()=>setPage(p=>Math.min(totalPages-1,p+1))} disabled={safePage===totalPages-1} aria-label="Next completed levels page">Next</button>
+    </nav>}
+  </div>;
+}
+
 type Props = {
   onHome: () => void;
   onLegacy: () => void;
@@ -131,7 +167,7 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCa
       <h1>{category?.name} <span>is ready to explore.</span></h1>
       <p>Choose a five-question set or build a crossword one clue at a time. Complete a set with at least 70% to open the next step.</p>
     </div>
-    <div className="ej-mode-grid">{(['crossword', 'mcq'] as GameMode[]).map(game => {
+    <div className={`ej-mode-grid${categoryId==='beginners'?' ej-three-cards':''}`}>{(['crossword', 'mcq'] as GameMode[]).map(game => {
       const rec = journey.records[recordKey(categoryId, game)] || defaults();
       return <div className="ej-mode-card" key={game}>
         <div className="ej-mode-icon">{game === 'crossword' ? '🧩' : '🧠'}</div>
@@ -139,13 +175,16 @@ export function EnglishJourney({ onHome, onLegacy, journey, onJourney, initialCa
         <p>{game === 'crossword' ? 'Find intersecting words using clues and the word bank.' : 'Explore five questions at a time, with feedback and useful explanations.'}</p>
         <div className="ej-mode-stats"><span>{game === 'crossword' ? 'Word puzzle practice' : '5 questions per round'}</span><span><Trophy size={16} /> {rec.xp} XP</span></div>
         <p className="ej-unlocked">Level {rec.unlocked} unlocked · Best {rec.bestScore}%</p>
-        {rec.completed>0&&<><p className="ej-completed-title">Completed levels</p><div className="ej-level-buttons ej-completed-stars" aria-label="Completed levels — select a star to replay">
-          {Array.from({length:Math.min(24,rec.completed)},(_,i)=>rec.completed>24?rec.completed-23+i:i+1).map(lvl=><button type="button" key={lvl} onClick={()=>start(game,lvl)} aria-label={`Replay completed level ${lvl}`} title={`Replay level ${lvl}`}><span className="ej-numbered-gold-star" aria-hidden="true"><Star size={50} strokeWidth={1.5}/><strong>{lvl}</strong></span></button>)}
-        </div>{rec.completed>24&&<p className="ej-star-note">Showing the latest 24 completed levels out of {rec.completed}.</p>}</>}
+        <CompletedLevelStars completed={rec.completed} game={game} onReplay={lvl=>start(game,lvl)}/>
         <button className="wiz-btn-primary ej-start" onClick={() => start(game, rec.unlocked)}>Play level {rec.unlocked} <ArrowRight size={18}/></button>
 
       </div>;
-    })}{categoryId==='beginners'&&<button type="button" className="ej-collection-card" onClick={onLegacy} aria-label="Explore Wizpiko's ten themed word puzzles"><span className="ej-collection-art" aria-hidden="true">🧩</span><span className="ej-collection-copy"><small>THEMED PUZZLE COLLECTION</small><strong>Wizpiko Word Puzzles</strong><span>Explore 10 crossword adventures with clues, word banks and saved progress.</span></span><span className="ej-collection-action">Explore puzzles <ArrowRight size={18}/></span></button>}</div>
+    })}{categoryId==='beginners'&&<div className="ej-collection-card">
+      <span className="ej-collection-art" aria-hidden="true">🧩</span>
+      <div className="ej-collection-copy"><small>THEMED PUZZLE COLLECTION</small><strong>Wizpiko Word Puzzles</strong><span>Explore 10 crossword adventures with clues, word banks and saved progress.</span></div>
+      <div className="ej-star-gallery ej-collection-detail"><span>10 themed adventures</span><span>Clues, word banks and saved progress</span></div>
+      <button type="button" className="ej-collection-action" onClick={onLegacy}>Explore puzzles <ArrowRight size={18}/></button>
+    </div>}</div>
     <p className="ej-smallprint">Your signed-in account keeps your practice, XP and unlocked levels connected across devices.</p>
   </section>;
 
