@@ -93,7 +93,7 @@ public final class WizpikoDevicePlugin: CAPPlugin, CAPBridgedPlugin {
         guard status == errSecSuccess, let data = result as? Data,
               let value = String(data: data, encoding: .utf8) else {
             NSLog("Wizpiko secure session read failed (%d)", status)
-            call.reject("Secure sign-in storage is unavailable.", "KEYCHAIN_READ_FAILED"); return
+            call.reject("Secure sign-in storage is unavailable.", "KEYCHAIN_READ_FAILED_" + String(status)); return
         }
         call.resolve(["value": value])
     }
