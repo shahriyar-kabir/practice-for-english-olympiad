@@ -23,3 +23,9 @@
 @media(max-width:550px){.ej-collection-card{flex-wrap:wrap;align-items:flex-start;}.ej-collection-copy{flex:1 1 calc(100% - 90px);}.ej-collection-action{width:100%;margin-top:4px;}}
 @media(max-width:620px){.ej-level-buttons.ej-completed-stars button{flex-basis:48px;min-width:48px;width:48px;}.ej-numbered-gold-star{width:48px;height:48px;}.ej-numbered-gold-star svg{width:46px;height:46px;}}
 @media(prefers-reduced-motion:reduce){.ej-collection-card{transition:none;}.ej-collection-card:hover{transform:none;}}
+
+/* Crossword active clue Listen control remains at far right. */
+.ej-selected-clue{display:flex;align-items:center;gap:12px;min-width:0;}
+.ej-selected-clue>.ej-clue-text{flex:1 1 auto;min-width:0;}
+.ej-selected-clue>.wz-question-audio{flex:0 0 auto;margin-left:auto;align-self:center;}
+@media(max-width:620px){.ej-selected-clue{flex-wrap:wrap;}.ej-selected-clue>.ej-clue-text{flex:1 1 calc(100% - 100px);}.ej-selected-clue>.wz-question-audio{margin-left:auto;}}
