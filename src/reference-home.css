@@ -1,6 +1,6 @@
 /* Signed-in homepage composition, shared with the account navigation. */
 .page-wrap.wp-home-shell { max-width: none; padding: 0; }
-.wp-signed-in { --welcome-height: clamp(318px, 21.65vw, 448px); }
+.wp-signed-in { --welcome-height: clamp(390px, 26vw, 500px); }
 .wp-signed-in .wp-welcome-hero {
   display: block; position: relative; height: var(--welcome-height); min-height: 0;
   margin: 0; border: 0; border-radius: 0; overflow: hidden;
@@ -182,8 +182,8 @@
   .wz-reminder-panel { right: -75px; width: 280px; }
   .wz-signed-header .wz-avatar-menu { width: min(304px, calc(100vw - 24px)); max-height: calc(100svh - 92px); overflow-y: auto; right: 0; }
   .wp-signed-in { --welcome-height: 275px; }
-  .wp-signed-in .wp-welcome-hero { height: 535px; background-position: 43% center; }
-  .wp-signed-in .wp-welcome-copy { height: 270px; width: 100%; align-items: center; text-align: center; padding: 24px 22px 4px; }
+  .wp-signed-in .wp-welcome-hero { height: 620px; background-position: 43% center; }
+  .wp-signed-in .wp-welcome-copy { height: 350px; width: 100%; align-items: center; text-align: center; padding: 24px 22px 4px; }
   .wp-signed-in .wp-welcome-copy h1 { font-size: 28px; }
   .wp-signed-in .wp-welcome-copy h1 > .wp-hero-name { font-size: min(15.4vw, 68px, var(--name-fit-mobile)); margin-inline: auto; letter-spacing: -1.7px; }
   .wp-signed-in .wp-welcome-copy > p { max-width: 100%; font-size: 15px; margin: 9px 0 19px; }
