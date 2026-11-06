@@ -2,7 +2,7 @@
 
 The iOS app is built from the same reviewed learning engine as wizpiko.com, with its own bundled entry, mobile home, safe areas and bottom navigation. This branch does not deploy the website.
 
-Current status: the owner explicitly approved uploading this app source to the existing public GitHub repository for a Mac cloud build. Local validation passes: 475 automated tests, mobile browser checks, TypeScript builds and native packaging checks. Xcode compilation runs in the iOS Actions workflow, which also checks that the simulator reaches its learning interface. Simulator builds are signed ad hoc for Keychain testing; the device archive stays unsigned. This is not yet a signed or installable iPhone app. The `app-account` backend function is staged, not deployed, and must be enabled before distribution.
+Current status: Xcode 26.2 compilation and real native startup passed in the [Mac cloud build](https://github.com/shahriyar-kabir/practice-for-english-olympiad/actions/runs/42156909932). The iOS 18.6 simulator reached the learning interface and passed a temporary Keychain save/read check. All 475 automated tests, 58 mobile browser checks, TypeScript builds and packaging checks pass. The simulator build is signed ad hoc; the device archive remains unsigned and cannot be installed on an iPhone until distribution signing is configured. The `app-account` backend function is staged, not deployed, and must be enabled before distribution.
 
 ## Included
 
