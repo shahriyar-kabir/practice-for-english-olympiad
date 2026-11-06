@@ -93,7 +93,7 @@ export default function App() {
   const [gameSubject,setGameSubject] = useState<GameSubjectId>(() => readAppRoute().gameSubject || 'english');
   const [academySubject,setAcademySubject] = useState<CurriculumSubject>(()=>readAppRoute().academySubject || 'english');
   const [certificateToken,setCertificateToken] = useState(()=>readAppRoute().certificateToken || '');
-  const [academyLevel,setAcademyLevel] = useState<AcademyLevel>('starter');
+  const [academyLevel,setAcademyLevel] = useState<AcademyLevel | undefined>(()=>readAppRoute().academyLevel);
   const [academyLesson,setAcademyLesson] = useState<string | undefined>();
   const [hubPage,setHubPage]=useState<LearnerPage>(() => readAppRoute().hubPage || 'profile');
   const [comingSubject,setComingSubject]=useState(() => readAppRoute().subject || '');
@@ -121,12 +121,12 @@ export default function App() {
   function goSubjects() {goHome();window.requestAnimationFrame(()=>document.getElementById('wiz-subjects')?.scrollIntoView({behavior:'smooth',block:'start'}));}
   function applyDestination(destination:Destination) {
     setDialog(null);
-    if(destination.kind==='academy'){setAcademySubject(destination.subject);setAcademyLevel(destination.level||'starter');setAcademyLesson(destination.lessonId);setView('categories');changeURL(academyPath(destination.subject));}
+    if(destination.kind==='academy'){setAcademySubject(destination.subject);setAcademyLevel(destination.level);setAcademyLesson(destination.lessonId);setView('categories');changeURL(academyPath(destination.subject)+(destination.level?'/'+destination.level:''));}
     else if(destination.kind==='english'){
-      setAcademySubject('english');setAcademyLevel(destination.level||account.auth.profile?.preferences?.learning_level||'starter');
-      setAcademyLesson(destination.lessonId);setView('categories');changeURL('/english-academy');
+      setAcademySubject('english');setAcademyLevel(destination.level);
+      setAcademyLesson(destination.lessonId);setView('categories');changeURL('/english-academy'+(destination.level?'/'+destination.level:''));
     }
-    else if(destination.kind==='maths'){setAcademySubject('maths');setAcademyLevel(destination.level||'starter');setAcademyLesson(undefined);setView('categories');changeURL('/maths-academy');}
+    else if(destination.kind==='maths'){setAcademySubject('maths');setAcademyLevel(destination.level);setAcademyLesson(undefined);setView('categories');changeURL('/maths-academy'+(destination.level?'/'+destination.level:''));}
     else if(destination.kind==='subject-games'){setGameSubject(destination.subject);setView('subject-games');changeURL('/games/'+destination.subject);}
     else if(destination.kind==='hub'){setHubPage(destination.page);setView('hub');changeURL(HUB_ROUTES[destination.page]);}
     else if(destination.kind==='coming'){
@@ -155,6 +155,16 @@ export default function App() {
     else goComing(id);
   }
   function goCourse(subject:CurriculumSubject, level:AcademyLevel){requestDestination({kind:'academy',subject,level});}
+  function goResumeSkill(subject:CurriculumSubject, level:AcademyLevel, skill:string){
+    const lessonId=subject==='english'?level+'-'+skill:subject+'-'+level+'-'+skill;
+    requestDestination({kind:'academy',subject,level,lessonId});
+  }
+  function selectAcademyLevel(level?:AcademyLevel){
+    setAcademyLevel(level);
+    setAcademyLesson(undefined);
+    changeURL(academyPath(academySubject)+(level?'/'+level:''));
+    window.scrollTo(0,0);
+  }
 
   function search(query:string) {
     if(/contact|suggestion/i.test(query))openContact();
@@ -188,7 +198,7 @@ export default function App() {
       if(route.certificateToken)setCertificateToken(route.certificateToken);
       if(route.academySubject)setAcademySubject(route.academySubject);
       if(route.subject!==undefined)setComingSubject(route.subject);
-      if(route.view==='categories'){setAcademyLevel('starter');setAcademyLesson(undefined);}
+      if(route.view==='categories'){setAcademyLevel(route.academyLevel);setAcademyLesson(undefined);}
       window.scrollTo(0,0);
     };
     // Existing shared links with ?page= remain valid and become their clean URL.
@@ -316,9 +326,9 @@ export default function App() {
 
   return <>
     <SiteHeader signedIn={!!account.auth.user} loading={account.auth.loading} reserveSignedIn={account.auth.loading && returningAccount} profile={account.auth.profile} isHome={view==='home'} gamesActive={view==='games'||view==='subject-games'} streak={learningStats.streak.current} completedToday={learningStats.streak.todayCompleted} onHome={goHome} onSubjects={goSubjects} onGames={goPracticeGames} onInfo={openInfo} onContact={openContact} onSignIn={()=>setAccountOpen(true)} onHub={goHub} onSignOut={()=>setDialog('signout')} onSearch={search}/>
-    <main className={`page-wrap${view==='home'&&accountLayout?' wp-home-shell':''}`}>
+    <main className={`page-wrap${view==='home'&&accountLayout?' wp-home-shell':''}${view==='classic'?' wp-word-puzzle-page':''}`}>
       <Suspense fallback={<PageLoading/>}>
-      {account.auth.loading&&view!=='info'&&view!=='contact'&&view!=='certificate'?<PageLoading session/>:view==='info'?<InfoPages page={infoPage} onNavigate={openInfo} onHome={goHome} onContact={openContact} onSignIn={()=>setAccountOpen(true)}/>:view==='contact'?<ContactPage onHome={goHome} onPrivacy={()=>openInfo('privacy')}/>:view!=='home'&&view!=='games'&&view!=='coming'&&view!=='certificate'&&view!=='not-found'&&!account.auth.user?<section className="wz-login-gate"><LockKeyhole size={35}/><h1>Your learning space is waiting</h1><p>Sign in to open lessons, activities and your saved progress.</p><button className="wz-action-button" onClick={()=>setAccountOpen(true)}>Sign In</button><button className="wz-secondary-link" onClick={goHome}>Back to Home</button></section>:view==='home'?<WizpikoPortal onPractice={goPractice} onChooseSubject={goSubject} onExploreSubjects={goSubjects} signedIn={!!account.auth.user} nickname={account.auth.profile?.display_name} avatar={account.auth.profile?.avatar} learnerAge={ageFromBirthdate(account.auth.profile?.birth_date||'')} onProgress={()=>goHub('progress')} onStreak={()=>goHub('streak')} onAchievements={()=>goHub('achievements')} xp={academyXP} streak={learningStats.streak.current} solvedTotal={solvedTotal} completedTotal={completedTotal} journey={journey} preferences={account.auth.profile?.preferences} onLesson={goLesson} onClassic={goClassic} onGames={goPracticeGames} archivedClassic={archivedClassic}/>:view==='hub'&&account.auth.user?<LearnerHub key={account.auth.user.id} page={hubPage} profile={account.auth.profile} email={account.auth.user.email||''} journey={journey} solvedTotal={solvedTotal} completedTotal={completedTotal} totalWords={totalWords} onPage={goHub} onHome={goHome} onPractice={goPractice} onSignOut={()=>setDialog('signout')} onSaveProfile={account.updateProfile} onContact={openContact} onLesson={goLesson} onClassic={goClassic} onMathsGames={goMathsGames} onCourse={goCourse} archivedClassic={archivedClassic}/>:view==='coming'?<SubjectInfo subject={comingSubject} onSubjects={goSubjects} onHome={goHome} onContact={openContact} onOpen={goSubject}/>:view==='not-found'?<section className="wz-coming-page"><h1>Page not found</h1><p>That page does not exist. Return to Wizpiko to continue learning.</p><button className="wz-action-button" onClick={goHome}>Back to Home <ArrowRight size={17}/></button></section>:view==='categories'?<LearningAcademy key={`${account.auth.user?.id}:${academySubject}:${academyLesson||academyLevel}`} subject={academySubject} initialLevel={academyLevel} initialLessonId={academyLesson} journey={journey} onJourney={setJourney} onHome={goSubjects} onGames={goPracticeGames} onCertificates={()=>goHub('certificates')}/>:view==='certificate'?<PublicCertificatePage token={certificateToken} onHome={goHome}/>:view==='games'?<GamesHub journey={journey} signedIn={!!account.auth.user} onChoose={goSubjectGames} onHome={goHome}/>:view==='subject-games'?<SubjectGames key={gameSubject} subject={gameSubject} onHome={goPracticeGames} onLegacy={goClassic} journey={journey} onJourney={setJourney}/>
+      {account.auth.loading&&view!=='info'&&view!=='contact'&&view!=='certificate'?<PageLoading session/>:view==='info'?<InfoPages page={infoPage} onNavigate={openInfo} onHome={goHome} onContact={openContact} onSignIn={()=>setAccountOpen(true)}/>:view==='contact'?<ContactPage onHome={goHome} onPrivacy={()=>openInfo('privacy')}/>:view!=='home'&&view!=='games'&&view!=='coming'&&view!=='certificate'&&view!=='not-found'&&!account.auth.user?<section className="wz-login-gate"><LockKeyhole size={35}/><h1>Your learning space is waiting</h1><p>Sign in to open lessons, activities and your saved progress.</p><button className="wz-action-button" onClick={()=>setAccountOpen(true)}>Sign In</button><button className="wz-secondary-link" onClick={goHome}>Back to Home</button></section>:view==='home'?<WizpikoPortal onPractice={goPractice} onChooseSubject={goSubject} onExploreSubjects={goSubjects} signedIn={!!account.auth.user} nickname={account.auth.profile?.display_name} avatar={account.auth.profile?.avatar} learnerAge={ageFromBirthdate(account.auth.profile?.birth_date||'')} onProgress={()=>goHub('progress')} onStreak={()=>goHub('streak')} onAchievements={()=>goHub('achievements')} xp={academyXP} streak={learningStats.streak.current} solvedTotal={solvedTotal} completedTotal={completedTotal} journey={journey} preferences={account.auth.profile?.preferences} onLesson={goLesson} onResumeSkill={goResumeSkill} onClassic={goClassic} onGames={goPracticeGames} archivedClassic={archivedClassic}/>:view==='hub'&&account.auth.user?<LearnerHub key={account.auth.user.id} page={hubPage} profile={account.auth.profile} email={account.auth.user.email||''} journey={journey} solvedTotal={solvedTotal} completedTotal={completedTotal} totalWords={totalWords} onPage={goHub} onHome={goHome} onPractice={goPractice} onSignOut={()=>setDialog('signout')} onSaveProfile={account.updateProfile} onContact={openContact} onLesson={goLesson} onClassic={goClassic} onMathsGames={goMathsGames} onCourse={goCourse} archivedClassic={archivedClassic}/>:view==='coming'?<SubjectInfo subject={comingSubject} onSubjects={goSubjects} onHome={goHome} onContact={openContact} onOpen={goSubject}/>:view==='not-found'?<section className="wz-coming-page"><h1>Page not found</h1><p>That page does not exist. Return to Wizpiko to continue learning.</p><button className="wz-action-button" onClick={goHome}>Back to Home <ArrowRight size={17}/></button></section>:view==='categories'?<LearningAcademy key={`${account.auth.user?.id}:${academySubject}:${academyLesson||academyLevel||'levels'}`} subject={academySubject} initialLevel={academyLevel} initialLessonId={academyLesson} journey={journey} onJourney={setJourney} onHome={goSubjects} onGames={goPracticeGames} onCertificates={()=>goHub('certificates')} onSelectLevel={selectAcademyLevel}/>:view==='certificate'?<PublicCertificatePage token={certificateToken} onHome={goHome}/>:view==='games'?<GamesHub journey={journey} signedIn={!!account.auth.user} onChoose={goSubjectGames} onHome={goHome}/>:view==='subject-games'?<SubjectGames key={gameSubject} subject={gameSubject} onHome={goPracticeGames} onLegacy={goClassic} journey={journey} onJourney={setJourney}/>
 :<><div className="wiz-back-line"><button onClick={goPractice}><ArrowLeft size={17}/> Back to English learning</button><span>English Practice • Wizpiko Word Puzzles</span></div><section className="wiz-classic-heading" aria-labelledby="page-heading"><div><span className="wiz-kicker">ENGLISH PRACTICE • NEW WORD DISCOVERIES</span><h1 id="page-heading">Word adventures with <span>Wizpiko!</span></h1><p>Choose a clue, tap a word, and earn your stars. Explore ten newly written Wizpiko puzzles at your own pace.</p></div><img src={import.meta.env.BASE_URL + 'wizpiko-icon.webp'} alt="" /></section>
 
       {(archivedClassic.solvedWords > 0 || archivedClassic.completedPuzzles > 0) && <p className="wz-history-note">Your earlier collection is saved: {archivedClassic.solvedWords} words discovered and {archivedClassic.completedPuzzles} puzzles completed. These new puzzles start fresh.</p>}
