@@ -28,7 +28,7 @@ export const subjectCopy: Record<SubjectId, SubjectCopy> = {
     introduction: 'Science starts with noticing, asking and looking for evidence. It helps us explore living things, the Earth, space and the materials we meet every day.',
     topics: [['Living things', 'Plants, animals, habitats and the human body.'], ['Earth & space', 'Weather, rocks, our planet and the sky above it.'], ['Materials & change', 'Observe properties and investigate what changes.'], ['Thinking like a scientist', 'Ask a question, compare observations and explain your evidence.']],
     takeaway: 'A useful investigation changes one thing at a time. That helps us tell what might have caused a difference.',
-    activities: 'We are planning picture-based questions, nature investigations and guided discoveries. Science lessons and games will open once they are ready.',
+    activities: 'Science Academy now offers four levels, illustrated lessons, matching challenges and 20 questions in each skill. The Science Discovery Trail game offers five-question rounds with clear explanations.',
   },
   chemistry: {
     heading: 'Explore what the world is made of.',

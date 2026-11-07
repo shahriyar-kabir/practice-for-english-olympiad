@@ -5,7 +5,7 @@ export const subjects = [
   { id: 'english', name: 'English Practice', shortName: 'English', description: 'Read, play, practise and build language skills.', icon: BookOpen, color: 'english', status: 'available' },
   { id: 'maths', name: 'Mathematics', shortName: 'Maths', description: 'Numbers, patterns and problem-solving adventures.', icon: Calculator, color: 'math', status: 'available' },
   { id: 'physics', name: 'Physics', shortName: 'Physics', description: 'Explore motion, energy and the way things work.', icon: Atom, color: 'physics', status: 'planned' },
-  { id: 'science', name: 'Science', shortName: 'Science', description: 'Discover the world through questions and curiosity.', icon: FlaskConical, color: 'science', status: 'planned' },
+  { id: 'science', name: 'Science', shortName: 'Science', description: 'Discover the world through questions and curiosity.', icon: FlaskConical, color: 'science', status: 'available' },
   { id: 'chemistry', name: 'Chemistry', shortName: 'Chemistry', description: 'Discover elements, reactions and everyday materials.', icon: FlaskConical, color: 'chemistry', status: 'planned' },
   { id: 'informatics', name: 'Informatics', shortName: 'Informatics', description: 'Build logical thinking and coding confidence.', icon: Code2, color: 'informatics', status: 'planned' },
   { id: 'ai', name: 'Artificial Intelligence', shortName: 'AI', description: 'Explore creative ideas and future technology.', icon: BrainCircuit, color: 'ai', status: 'planned' },
