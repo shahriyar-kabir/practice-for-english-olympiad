@@ -11,7 +11,7 @@ export function completeSubjectGame(journey: JourneyProgress, subject: string, a
   const { result } = finished;
   return recordLearningCompletion({ ...journey, subjectGames: { ...journey.subjectGames, [subject]: finished.progress } }, {
     id: subjectRoundId(subject, attempt), subject, level: result.level,
-    title: `${subject === 'maths' ? 'Maths · Mental Maths Trail' : subject} · Level ${result.level}`,
+    title: `${subject === 'maths' ? 'Maths · Mental Maths Trail' : subject === 'science' ? 'Science · Discovery Trail' : subject} · Level ${result.level}`,
     kind: 'mcq', xp: result.xp, correct: result.correct, total: result.total, completedAt: now.toISOString(),
   }, now);
 }
