@@ -27,7 +27,7 @@ describe('English, Maths and Science twenty-question curricula',()=>{
     }
     expect(ids.size).toBe(1440);
   });
-  it('checks Science's illustrated matching bank and server answer keys',()=>{
+  it("checks Science's illustrated matching bank and server answer keys",()=>{
     for(const lesson of lessons.filter(item=>item.subject==='science')){
       const matches=lesson.tasks.filter(task=>task.type==='match');
       expect(matches).toHaveLength(4);
