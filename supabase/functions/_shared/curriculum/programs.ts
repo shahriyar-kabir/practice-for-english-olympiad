@@ -7,6 +7,8 @@ export const CERTIFICATE_PASS_MARK = 80;
 export type CurriculumSubject = keyof typeof learningPrograms;
 export type SkillMeta = { id: string; title: string; label: string; description: string };
 export type CurriculumLesson = LessonBody & { id: string; subject: CurriculumSubject; level: AcademyLevel; skill: string; title: string; description: string; version: number };
+const scienceLabels = { living:'Living World', matter:'Matter & Materials', forces:'Forces & Energy', earth:'Earth & Space', inquiry:'Scientific Investigation', everyday:'Science in Everyday Life' };
+const scienceDescriptions: Record<AcademyLevel,string> = {starter:'Notice plants, materials, motion and the world around you.',beginner:'Explore ecosystems, matter, energy and careful investigations.',intermediate:'Connect cells, reactions, physics and Earth systems.',advanced:'Use scientific models, evidence and reasoning across disciplines.'};
 const mathsLabels = { numbers: 'Numbers & operations', fractions: 'Fractions, ratios & rates', algebra: 'Patterns & algebra', geometry: 'Shape, measure & space', data: 'Data & probability', reasoning: 'Reasoning & applications' };
 const mathsDescriptions: Record<AcademyLevel, string> = {
   starter: 'Counting, sharing, shapes and your first patterns. Begin at any age.',
@@ -16,6 +18,7 @@ const mathsDescriptions: Record<AcademyLevel, string> = {
 };
 export const learningPrograms = {
   english: { name: 'English', title: 'English Academy', description: 'Words, stories and useful communication.', levelDescriptions, skills: Object.entries(skillLabels).map(([id, label]) => ({ id, label })), load: async (level:AcademyLevel, skill:string):Promise<LessonBody> => (await englishLoaders[level]()).default[skill] },
+  science: { name:'Science',title:'Science Academy',description:'Discover living things, materials, forces and our planet.',levelDescriptions:scienceDescriptions,skills:Object.entries(scienceLabels).map(([id,label])=>({id,label})),load:async (level:AcademyLevel,skill:string):Promise<LessonBody>=>{const science=await import('./science.ts');return science.makeScienceLesson(level,skill as import('./science.ts').ScienceSkill);} },
   maths: { name: 'Mathematics', title: 'Maths Academy', description: 'Patterns, practical problems and mathematical ideas.', levelDescriptions: mathsDescriptions, skills: Object.entries(mathsLabels).map(([id, label]) => ({ id, label })), load: async (level:AcademyLevel, skill:string):Promise<LessonBody> => { const maths=await import('./maths.ts'); return maths.makeMathsLesson(level,skill as import('./maths.ts').MathsSkill); } },
 };
 export { academyLevels, levelLabels };
@@ -45,6 +48,13 @@ export function normalisePracticeAnswer(value: string, caseSensitive = false) {
 export function taskCorrect(task: AcademyTask, value: unknown): boolean {
   if (typeof value !== 'string' || !value.trim()) return false;
   if (task.type === 'choice') return value === task.answer;
+  if (task.type === 'match') {
+    try {
+      const selected=JSON.parse(value);
+      return Array.isArray(selected)&&selected.length===task.pairs.length&&
+        selected.every((item,index)=>typeof item==='string'&&item===task.pairs[index].right);
+    } catch { return false; }
+  }
   const answers = task.type === 'fill' ? task.answers : [task.answer];
   const sensitive = task.type === 'order' || task.type === 'fill' && Boolean(task.caseSensitive);
   if (task.id.startsWith('maths-') && task.type === 'fill') return answers.some(answer => mathsAnswerEqual(answer,value));
