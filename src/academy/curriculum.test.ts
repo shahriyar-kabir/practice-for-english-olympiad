@@ -7,7 +7,7 @@ import { mergeJourney } from '../cloudAccount';
 import { learningSummary } from '../learningMetrics';
 import type { JourneyProgress } from '../journey';
 
-const subjects = ['english','maths'] as const;
+const subjects = ['english','maths','science'] as const;
 const lessons = (await Promise.all(subjects.flatMap(subject=>academyLevels.flatMap(level=>learningPrograms[subject].skills.map(skill=>loadCurriculumLesson(subject,level,skill.id))))));
 const math = lessons.filter(lesson=>lesson.subject==='maths');
 const golden:Record<string,string[][]>={
@@ -16,16 +16,27 @@ const golden:Record<string,string[][]>={
   intermediate:[['8','6','6','16','12'],['3/4','230','60','14','192'],['5','8','2','5','29'],['10','4','24','160','10'],['2/3','3/5','6','7','1/4'],['48','400','4','600','20']],
   advanced:[['3','3','4','2','6'],['4','4','3','8','4'],['4','5','2','110','8'],['12','13','2','12','4'],['1/4','2','1/2','8/3','3'],['36','2','16','120','The sample reported improvement; causation is not established.']],
 };
-describe('English and Maths twenty-question curricula',()=>{
-  it('provides 960 questions in 48 skills, with a teaching and practice path in every level',()=>{
-    expect(lessons).toHaveLength(48);
+describe('English, Maths and Science twenty-question curricula',()=>{
+  it('provides 1440 questions in 72 skills, with a teaching and practice path in every level',()=>{
+    expect(lessons).toHaveLength(72);
     const ids=new Set<string>();
     for(const lesson of lessons){
       expect(lesson.tasks).toHaveLength(20);expect(lesson.teaching.length).toBeGreaterThanOrEqual(2);expect(lesson.examples.length).toBeGreaterThanOrEqual(2);
       expect(new Set(lesson.tasks.map(task=>task.prompt)).size,lesson.id).toBe(20);
-      for(const task of lesson.tasks){expect(ids.has(task.id),task.id).toBe(false);ids.add(task.id);const answers=task.type==='fill'?task.answers:[task.answer];for(const answer of answers)expect(taskCorrect(task,answer),task.id).toBe(true);if(task.type==='choice'){expect(task.choices.length).toBeGreaterThanOrEqual(3);expect(new Set(task.choices).size).toBe(task.choices.length);expect(task.choices.filter(answer=>taskCorrect(task,answer))).toHaveLength(1);}}
+      for(const task of lesson.tasks){expect(ids.has(task.id),task.id).toBe(false);ids.add(task.id);const answers=task.type==='fill'?task.answers:[task.answer];for(const answer of answers)expect(taskCorrect(task,answer),task.id).toBe(true);if(task.type==='match'){expect(task.pairs).toHaveLength(3);expect(task.options).toHaveLength(3);expect(new Set(task.options).size).toBe(3);expect(task.visual).toBeTruthy();}if(task.type==='choice'){expect(task.choices.length).toBeGreaterThanOrEqual(3);expect(new Set(task.choices).size).toBe(task.choices.length);expect(task.choices.filter(answer=>taskCorrect(task,answer))).toHaveLength(1);}}
     }
-    expect(ids.size).toBe(960);
+    expect(ids.size).toBe(1440);
+  });
+  it('checks Science's illustrated matching bank and server answer keys',()=>{
+    for(const lesson of lessons.filter(item=>item.subject==='science')){
+      const matches=lesson.tasks.filter(task=>task.type==='match');
+      expect(matches).toHaveLength(4);
+      expect(lesson.tasks.filter(task=>Boolean(task.visual))).toHaveLength(20);
+      for(const task of matches)if(task.type==='match'){
+        expect(taskCorrect(task,task.answer)).toBe(true);
+        expect(taskCorrect(task,'["incorrect"]')).toBe(false);
+      }
+    }
   });
   it('checks each of the 120 Maths template starting cases against independently calculated answers',()=>{
     for(const level of academyLevels)for(const [at,skill] of learningPrograms.maths.skills.entries()){
@@ -38,7 +49,7 @@ describe('English and Maths twenty-question curricula',()=>{
     for(const [a,b] of [['8/3','2.6666666667'],['1/2','1/0'],['1','Infinity'],['0.3','0.30001'],['5x','5x²']])expect(mathsAnswerEqual(a,b)).toBe(false);
   });
   it('does not accept a claimed subject or prototype as a published programme',async()=>{
-    for(const id of ['science','constructor','__proto__','toString'])expect(isCurriculumSubject(id)).toBe(false);
+    expect(isCurriculumSubject('science')).toBe(true);for(const id of ['constructor','__proto__','toString'])expect(isCurriculumSubject(id)).toBe(false);
     await expect(loadCurriculumLesson('english','starter','not-a-skill')).rejects.toThrow('not available');
   });
 });
