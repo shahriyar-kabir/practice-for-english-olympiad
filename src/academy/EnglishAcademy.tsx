@@ -50,6 +50,8 @@ function PracticeTask({ task, answer, onAnswer, disabled }: { task: AcademyTask;
     <input className="ea-answer-input" autoComplete="off" autoCapitalize="none" spellCheck={false} value={answer} disabled={disabled} placeholder={task.placeholder || 'Type your answer'} onChange={event => onAnswer(event.target.value)} aria-describedby={`${task.id}-hint`} />
     <small id={`${task.id}-hint`}>{task.caseSensitive ? 'Use the correct capital letter. Letter case is checked.' : 'Take your time. Extra spaces and letter case do not affect the answer.'}</small>
   </label>;
+  // This legacy English screen has no Science matching tasks.
+  if (task.type === 'match') return null;
   function updateTokens(next: number[]) {
     setSelectedTokens(next);
     if (task.type === 'order') onAnswer(next.map(index => task.tokens[index]).join(' '));
