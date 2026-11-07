@@ -63,7 +63,7 @@ describe('Wizpiko page URLs', () => {
     }
   });
   it('does not expose unfinished subject branches', () => {
-    expect(readAppRoute('/games/science', '', '/')).toEqual({ view: 'not-found' });
+    expect(readAppRoute('/games/science', '', '/')).toEqual({ view: 'subject-games',gameSubject:'science' });
     expect(readAppRoute('/games/maths/extra', '', '/')).toEqual({ view: 'not-found' });
   });
 
