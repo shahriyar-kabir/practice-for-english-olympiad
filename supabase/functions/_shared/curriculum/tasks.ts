@@ -8,11 +8,14 @@ type TaskBase = {
   explanation: string;
   /** Exact supporting words in the lesson's passage or listening transcript. */
   evidence?: string;
+  /** Optional accessible illustrated scene, rendered without external images. */
+  visual?: string;
 };
 export type ChoiceTask = TaskBase & { type: 'choice'; choices: string[]; answer: string };
 export type FillTask = TaskBase & { type: 'fill'; answers: string[]; placeholder?: string; caseSensitive?: boolean };
 export type OrderTask = TaskBase & { type: 'order'; tokens: string[]; answer: string };
-export type AcademyTask = ChoiceTask | FillTask | OrderTask;
+export type MatchTask = TaskBase & { type:'match'; pairs:{left:string;right:string}[]; options:string[]; answer:string };
+export type AcademyTask = ChoiceTask | FillTask | OrderTask | MatchTask;
 export type AcademyLesson = LessonMeta & {
   objective: string;
   teaching: string[];
