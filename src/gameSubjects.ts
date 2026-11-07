@@ -18,6 +18,10 @@ export const gameSubjects = [
     description: 'Think it through, choose an answer and follow a trail with no final level.',
     tags: ['Mental calculation', 'Five-question quizzes'],
     load: () => import('./MathsMentalGame') as Promise<{ default: ComponentType<SubjectGameScreenProps> }> },
+  { id: 'science', title: 'Science', game: 'Science Discovery Trail', symbol: '🔬',
+    description: 'Explore the natural world with picture clues and bite-sized science questions.',
+    tags: ['Science discoveries', 'Five-question quizzes'],
+    load: () => import('./ScienceDiscoveryGame') as Promise<{ default: ComponentType<SubjectGameScreenProps> }> },
 ] as const;
 export type GameSubjectId = typeof gameSubjects[number]['id'];
 export function isGameSubject(value: unknown): value is GameSubjectId {
