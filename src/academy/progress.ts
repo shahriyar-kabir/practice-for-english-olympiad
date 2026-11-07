@@ -14,14 +14,15 @@ export function normalizeAnswer(value: string, caseSensitive = false): string {
 }
 
 export function acceptedAnswers(task: AcademyTask): string[] {
-  return task.type === 'fill' ? task.answers : [task.answer];
+  return task.type === 'fill' ? task.answers : task.type === 'match' ? [task.pairs.map(pair=>pair.left+' → '+pair.right).join(' · ')] : [task.answer];
 }
 
 export function isTaskCorrect(task: AcademyTask, answer: string | undefined): boolean {
   if (typeof answer !== 'string' || !answer.trim()) return false;
   // A choice must match one of the displayed choices exactly. Case is part of some choices.
   if (task.type === 'choice') return answer === task.answer;
-  const caseSensitive = task.type === 'order' || Boolean(task.caseSensitive);
+  if (task.type === 'match') { try { const selected=JSON.parse(answer);return Array.isArray(selected)&&selected.length===task.pairs.length&&selected.every((value,index)=>value===task.pairs[index].right); } catch { return false; } }
+  const caseSensitive = task.type === 'order' || (task.type === 'fill' && Boolean(task.caseSensitive));
   return acceptedAnswers(task).some(accepted => normalizeAnswer(accepted, caseSensitive) === normalizeAnswer(answer, caseSensitive));
 }
 
