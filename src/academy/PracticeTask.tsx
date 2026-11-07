@@ -27,7 +27,8 @@ export function PracticeTask({ task, answer, onAnswer, disabled }: { task: Acade
   if(task.type==='match') {
    let selections:string[]=[];
    try { const parsed=JSON.parse(answer);if(Array.isArray(parsed))selections=parsed.filter(value=>typeof value==='string'); }catch{ /* no selection yet */ }
-   function pair(index:number, value:string) {const next=task.pairs.map((_,at)=>at===index?value:(selections[at]||''));playLearningSound('select');onAnswer(JSON.stringify(next));}
+   const pairs=task.pairs;
+   function pair(index:number, value:string) {const next=pairs.map((_,at)=>at===index?value:(selections[at]||''));playLearningSound('select');onAnswer(JSON.stringify(next));}
    return <fieldset className="sci-match" disabled={disabled}><legend>Match each idea to its clue</legend><p className="ea-small">Choose a clue for each idea. Complete all three pairs, then check your answers. All pairs can be selected by keyboard or touch.</p><div className="sci-match-list">{task.pairs.map((entry,index)=><label key={entry.left} className="sci-match-row"><span className="sci-match-term"><span aria-hidden="true">✦</span>{entry.left}</span><span className="sci-match-arrow" aria-hidden="true">↔</span><select aria-label={`Clue for ${entry.left}`} value={selections[index]||''} onChange={event=>pair(index,event.target.value)}><option value="">Choose a matching clue…</option>{task.options.map(option=><option key={option} value={option} disabled={selections.some((selected,at)=>at!==index&&selected===option)}>{option}</option>)}</select></label>)}</div></fieldset>;
   }
   function choose(next: number[]) {playLearningSound('select');setSelected(next);if(task.type==='order')onAnswer(next.map(index=>task.tokens[index]).join(' '));}
